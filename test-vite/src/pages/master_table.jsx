@@ -479,114 +479,116 @@ export const Contact_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="rounded-2xl shadow  max-h-[70vh] w-full overflow-auto">
-        <Table className="w-full border-collapse min-w-[1200px]">
-          <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm bg-gray-200/95 dark:bg-slate-900">
-            <TableRow>
-              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
+      <div className="relative w-full max-h-[85vh] overflow-auto rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+        <Table className=" min-w-full border-collapse text-[10px] leading-tight">
+          <TableHeader className="sticky z-10 top-0 bg-gray-200/95 dark:bg-slate-900 text-[10px] leading-tight">
+            <TableRow className="text-slate-800 dark:text-slate-100">
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border">No</TableHead>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {getSortIcon("ContactID")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Company")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Company")}>
                 Company {getSortIcon("Company")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Salutation")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Salutation")}>
                 Salutation {getSortIcon("Salutation")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("FirstName")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("FirstName")}>
                 First Name {getSortIcon("FirstName")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("LastName")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("LastName")}>
                 Last Name {getSortIcon("LastName")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Email")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
                 Preferred Language {getSortIcon("PreferredLanguage")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Phone")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Phone")}>
                 Phone {getSortIcon("Phone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Mobile")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Mobile")}>
                 Mobile {getSortIcon("Mobile")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
                 Work Phone {getSortIcon("WorkPhone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
                 Work Extension {getSortIcon("WorkExtension")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
                 Other Phone {getSortIcon("OtherPhone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
                 Other Extension {getSortIcon("OtherExtension")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Fax")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Fax")}>
                 Fax {getSortIcon("Fax")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("City")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("StateProvince")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Country")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
                 PIC Name {getSortIcon("PIC_Name")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
                 PIC Email {getSortIcon("PIC_Email")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
                 PIC Phone {getSortIcon("PIC_Phone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center ">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="text-xs sm:text-sm">
+          <TableBody className="overflow-auto max-h-[65vh]">
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
                 <TableRow key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  <TableCell className="p-3 border">{contact.ContactID}</TableCell>
-                  <TableCell className="p-3 border">{contact.Company}</TableCell>
-                  <TableCell className="p-3 border">{contact.Salutation}</TableCell>
-                  <TableCell className="p-3 border">{contact.FirstName}</TableCell>
-                  <TableCell className="p-3 border">{contact.LastName}</TableCell>
-                  <TableCell className="p-3 border">{contact.Email}</TableCell>
-                  <TableCell className="p-3 border">{contact.PreferredLanguage}</TableCell>
-                  <TableCell className="p-3 border">{contact.Phone}</TableCell>
-                  <TableCell className="p-3 border">{contact.Mobile}</TableCell>
-                  <TableCell className="p-3 border">{contact.WorkPhone}</TableCell>
-                  <TableCell className="p-3 border">{contact.WorkExtension}</TableCell>
-                  <TableCell className="p-3 border">{contact.OtherPhone}</TableCell>
-                  <TableCell className="p-3 border">{contact.OtherExtension}</TableCell>
-                  <TableCell className="p-3 border">{contact.Fax}</TableCell>
-                  <TableCell className="p-3 border">{contact.AddressLine1}</TableCell>
-                  <TableCell className="p-3 border">{contact.AddressLine2}</TableCell>
-                  <TableCell className="p-3 border">{contact.City}</TableCell>
-                  <TableCell className="p-3 border">{contact.StateProvince}</TableCell>
-                  <TableCell className="p-3 border">{contact.Country}</TableCell>
-                  <TableCell className="p-3 border">{contact.ZipPostalCode}</TableCell>
-                  <TableCell className="p-3 border">{contact.PIC_Name}</TableCell>
-                  <TableCell className="p-3 border">{contact.PIC_Email}</TableCell>
-                  <TableCell className="p-3 border">{contact.PIC_Phone}</TableCell>
-                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ContactID}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Company}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Salutation}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.FirstName}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.LastName}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Email}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PreferredLanguage}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Phone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Mobile}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.WorkPhone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.WorkExtension}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.OtherPhone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.OtherExtension}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Fax}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.AddressLine1}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.AddressLine2}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.City}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.StateProvince}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Country}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ZipPostalCode}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Name}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Email}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Phone}</TableCell>
+                  <TableCell className="p-1 border">
+                    <div className="flex justify-center gap-1 scale">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -955,7 +957,7 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[75vh] overflow-auto 
+      <div className="relative w-full max-h-[75vh] overflow-auto overscroll-contain
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
         <Table className="min-w-full border-collapse text-xs sm:text-sm">
@@ -1009,7 +1011,7 @@ export const Company_table = () => {
               <TableHead className="p-3 text-sm font-semibold text-center border border-slate-200 dark:border-slate-700 whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className=" overflow-auto max-h-[65vh]">
+          <TableBody className=" max-h-[65vh]">
             {currentData.length > 0 ? (
               currentData.map((c, i) => (
                 <TableRow key={c.SiteAccountID}
@@ -1546,14 +1548,14 @@ const EnumToLabel = {
 }
 
   return (
-    <div className="grid p-6 grid-cols-1 w-full rounded-2xl
+    <div id="view-all-case" className="grid p-6 grid-cols-1 w-full rounded-2xl
                     bg-slate-50 text-slate-800
                     dark:bg-slate-900/60 dark:text-slate-100">  
       <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
 
       {/* Search */}
       <input
-        type="text"
+        type="text" id='search-case'
         placeholder="Search..."
         className="w-full sm:w-1/3 p-2 mb-4 text-sm border rounded-lg
                    bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
@@ -1564,7 +1566,7 @@ const EnumToLabel = {
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-6 mb-4 items-end">
+      <div className="flex flex-wrap gap-6 mb-4 items-end" id='filter-case'>
         {/* HW */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by HW</label>
@@ -1687,7 +1689,7 @@ const EnumToLabel = {
         </div>
 
          {/* Toggle status */}
-      <div className="flex flex-col">
+      <div className="flex flex-col" id='case-status-toggle'>
         <label htmlFor="status" className="mb-2 text-sm font-medium">Toggle Status Of Case :</label>
         <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
           <SelectTrigger id="status" className="w-48 p-2 text-sm border rounded-lg
@@ -1708,8 +1710,8 @@ const EnumToLabel = {
         </Select>
       </div>
   {/* Reset */}
-        <div className="flex  gap-2">
-          <Button
+        <div className="flex  gap-2" id='case-actionbuttons'>
+          <Button id='case-reset-filters'
             onClick={resetFilters}
             className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-400"}
           >
@@ -1729,7 +1731,7 @@ const EnumToLabel = {
       <div className="overflow-x-auto max-h-[500px] overflow-y-auto
                       rounded-2xl border border-slate-200 shadow-md
                       bg-white/95 dark:bg-slate-900/90 dark:border-slate-700">
-        <Table className="min-w-full border-collapse text-xs sm:text-sm">
+        <Table className="min-w-full border-collapse text-xs sm:text-sm" id='case-table'>
           <TableHeader className="sticky top-0 bg-gray-200/95 dark:bg-slate-800/95">
             <TableRow className="text-sm text-gray-700 uppercase bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID")}>
@@ -1836,7 +1838,7 @@ const EnumToLabel = {
         )}
       </div>
       {/* Bottom controls */}
-      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between" id='case-pagination'>
         {/* Rows per page */}
         <div className="flex items-center gap-2 text-sm">
           <span className="text-sm">Rows per page:</span>

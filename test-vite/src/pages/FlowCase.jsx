@@ -282,9 +282,9 @@ export const FlowCaseData = (user) => {
 
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 6;
+  const [pageSize, setPageSize] = useState(5);
   // if the window width size more than 2400px set page size to 12
-  const totalPages = Math.ceil(filteredCases.length / PAGE_SIZE);
+  const totalPages = Math.ceil(filteredCases.length / pageSize);
   const MAX_PAGES_SHOWN = 3;
   const getPaginationPages = () => {
     if (totalPages <= MAX_PAGES_SHOWN) {
@@ -300,9 +300,13 @@ export const FlowCaseData = (user) => {
   };
   const paginationPages = getPaginationPages();
   const currentPageData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredCases.slice(start, start + PAGE_SIZE);
-  }, [filteredCases, currentPage]);
+    const start = (currentPage - 1) * pageSize;
+    return filteredCases.slice(start, start + pageSize);
+  }, [filteredCases, currentPage, pageSize]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -480,6 +484,18 @@ export const FlowCaseData = (user) => {
                   </div>
 		
                 </PaginationContent>
+                <div className="flex items-center ml-4 gap-2">
+                  <span className="text-sm">Page Size:</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="border rounded-md p-1 dark:bg-slate-800"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </Pagination>
               {error ? <h1 className="text-center text-destructive dark:text-red-500">Something went wrong</h1> : ""}
             </div>

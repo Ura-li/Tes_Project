@@ -83,16 +83,16 @@ export const ErfCase = () => {
       setCurrentPage(page)
     }
   }
-
+  const [activeTab, setActiveTab] = useState("Main");
   return (
     <div className='bg-slate-200 p-5 h-full dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%'>
-      <Tabs defaultValue="Main">
+      <Tabs defaultValue="Main" onValueChange={(value) => {window.location.hash = value.toLowerCase()}}>
         <TabsList className={"dark:bg-gray-700"}>
           <TabsTrigger value="Main" className={"dark:data-[state=active]:bg-gray-500"}>Main</TabsTrigger>
           <TabsTrigger value="Pending" className={"dark:data-[state=active]:bg-gray-500"}>Pending</TabsTrigger>
         </TabsList>
         <TabsContent value="Main" >
-          <Card className={"dark:bg-gray-700 dark:border-2 dark:border-b-slate-500 dark:border-t-slate-600 dark:border-l-slate-600 dark:border-r-slate-500 dark:border-r-6"}>
+          <Card id="erf-main-upload" className={"dark:bg-gray-700 dark:border-2 dark:border-b-slate-500 dark:border-t-slate-600 dark:border-l-slate-600 dark:border-r-slate-500 dark:border-r-6"}>
             <CardHeader>
               <h2 className="text-lg font-semibold">Upload Multiple ERF Files</h2>
             </CardHeader>
@@ -118,7 +118,7 @@ export const ErfCase = () => {
               <h2 className="text-lg font-semibold">Closed Cases</h2>
             </CardHeader>
             <CardContent>
-              <Table className="min-w-full border-collapse text-xs sm:text-sm">
+              <Table id="erf-pending-table" className="min-w-full border-collapse text-xs sm:text-sm">
                 <TableHeader className="sticky top-0 bg-gray-200/95 dark:bg-slate-800/95">
                   <TableRow className="text-sm text-gray-700 uppercase bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
                     <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Case ID</TableHead>

@@ -345,7 +345,7 @@ export async function POST(request) {
             createdLogs.push(workOrderLog);
 
             return { WOID, MOIDs: createdMOIDs, actionLogs: createdLogs };
-        }, { timeout: 20000 })
+        }, { timeout: 50000 })
 
         const latestCaseInfo = await prisma.caseinformation.findUnique({
             where: { CaseID },

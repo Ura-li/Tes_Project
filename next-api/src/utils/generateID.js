@@ -17,6 +17,7 @@ export async function generateID(prefix, modelName, idField, client = prisma, se
     },
     select: {
       [idField]: true,
+      [searchableId]: true,
     },
   });
 

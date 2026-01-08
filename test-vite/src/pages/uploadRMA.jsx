@@ -37,14 +37,14 @@ export const UploadRma = () => {
     
     return (
         <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
-        <div className="p-2 mt-2">
-            <Card className={"bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 dark:border-2 dark:border-gray-600"}>
+        <div className="p-2 mt-2" id='rma-guide'>
+            <Card id='rma-page' className={"bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 dark:border-2 dark:border-gray-600"}>
                 <CardHeader>
                     <CardTitle>Update RMA status by export/import SO/RMA no.</CardTitle>
                 <hr className="border-green-500 "/>
                 </CardHeader>
-                <CardContent className={"grid grid-cols-2 gap-2 "}>
-                    <CaseField label={"Company"} star>
+                <CardContent className={"grid grid-cols-2 gap-2 "}> 
+                    <CaseField label={"Company"} star labelId={"rma-company-label"} fieldId={"rma-company"}>
                         <SearchCommandBlock
                             options={resource?.teams}
                             value={selectedTeam}
@@ -57,14 +57,14 @@ export const UploadRma = () => {
                             className={"dark:bg-transparent dark:border-gray-500 dark:border-2"}
                         />
                     </CaseField>
-                    <CaseField label={"RMA Date"} star>
+                    <CaseField id='rma-date' label={"RMA Date"} star labelId={"rma-date-label"} fieldId={"rma-date"}>
                         <DatePicker
                             value={dateRMA}
                             onChange={setDateRMA}
                             className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                         />
                     </CaseField>
-                    <CaseField label={"RMA Status"} star>
+                    <CaseField label={"RMA Status"} star labelId={"rma-status-label"} fieldId={"rma-status"}>
                         <SearchCommandBlock
                             options={RMA_STATUS_OPTIONS}
                             value={selectedRMAStatus}

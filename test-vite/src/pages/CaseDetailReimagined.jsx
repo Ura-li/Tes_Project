@@ -964,7 +964,7 @@ function fieldMO(caseDetails) {
         
         <div className="w-full overflow-x-auto no-scrollbar">
           
-          <div className="flex items-center min-w-max">
+          <div className="flex items-center min-w-max" id="case-buttons">
             
             {visibleButtons.map((btn, index) => (
               <Button
@@ -1520,7 +1520,7 @@ useEffect(() => {
   ];
 
   let totalquoLineItemPrice = 0;
-
+  
   return (
     <>
       {(caseDetails.CaseStatus === "Close" || caseDetails.CaseStatus === "Cancel") && (
@@ -1531,7 +1531,7 @@ useEffect(() => {
       )}
 
       <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
-        <Tabs defaultValue="case_info">
+        <Tabs defaultValue="case_info" onValueChange={(value) => {window.location.hash = value.toLowerCase()}}>
           <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               {/* LEFT SIDE - Case Info */}
