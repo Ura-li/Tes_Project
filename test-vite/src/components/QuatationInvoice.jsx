@@ -19,16 +19,7 @@ Font.register({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 32,
-    gap: 3,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    maxWidth: '600px',
-    margin: 'auto',
-    flexDirection: 'column',
+    padding: 20,
   },
   sectionHeader: {
     fontSize: 11,
@@ -69,7 +60,6 @@ const styles = StyleSheet.create({
   rightSection: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   rightSection2: {
     flex: 1,
@@ -142,8 +132,6 @@ table: {
   partsColQty: { flex: 0.8 },
   partsColUnitPrice: { flex: 1.2 },
   partsColTotalPrice: { flex: 1.2 },
-
-  // flex sums (0.7+1.5+1.6+3+0.8 = 7.6, all cols = 10)
   partsColSpan5: { flex: 8 },  // No + Vendor + HP + Part Name + QTY
   partsColSpan6: { flex: 9.3 },  // above + Unit Price
 
@@ -177,7 +165,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={120} style={styles.sectionContainer}>
+  <View wrap={false} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -249,7 +237,6 @@ export const QuotationInvoice = ({
               :
             </Text>
             <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
-              {/* {initialData?.quotationNo ?? null}\ */}
               {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo ?? "N/A"}
             </Text>
 
@@ -281,6 +268,12 @@ export const QuotationInvoice = ({
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
+
+             <Text style={{width: '30%', fontSize: 8}}>Note</Text>
+              <Text style={{width: '2%', fontSize: 8}}>:</Text>
+              <Text style={{width: '68%', fontSize: 8, textAlign: 'justify'}}>
+                {caseDetails?.CaseProductNote ?? "N/A"}
+              </Text>
           </View>
 
           <View style={styles.rightSection}>
@@ -292,15 +285,6 @@ export const QuotationInvoice = ({
               </View>
           </View>
         </View>
-           <View style={{display: 'flex', flexDirection: "row",}}>
-                  <View style={styles.leftSection}>
-                    <Text style={{width: '15%', fontSize: 8}}>Note</Text>
-                    <Text style={{width: '1%', fontSize: 8}}>:</Text>
-                    <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
-                      {caseDetails?.CaseProductNote ?? "N/A"}
-                    </Text>
-                  </View>
-                </View>
       </Section>
 
       <Section title="Customer">
@@ -634,7 +618,7 @@ export const QuotationInvoice = ({
       </View>
 
 
-      <View style={{ display: "flex", flexDirection: "row", columnGap: 2, marginBottom: 30}} >
+      <View style={{ display: "flex", flexDirection: "row", columnGap: 2}} >
         <View style={styles.leftSection} >
           <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
             Note
@@ -644,47 +628,49 @@ export const QuotationInvoice = ({
           </Text>
         </View>
       </View>
-        <Section title="Terms and Conditions" >
-          <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
-            <View style={styles.leftSection}>
-              <Text style={styles.label}>Validity</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                7 (seven) calender days
-              </Text>
-              <Text style={styles.label}>Delivery Time</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                2 (two) weeks from date of PO confirmation & subject to spare part availibility
-              </Text>
-              <Text style={styles.label}>Payment</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType ? 
-                caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType : 
-                "Cash / Debit / Qris / Credit Card / Transfer"  
-              }
-              </Text>
-              <Text style={styles.label}>Warranty</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                1 (one) month for the same part
-              </Text>
-              <Text style={styles.label}>Cancellation Fee</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                Rp. 121.000,
-              </Text>
-              <Text style={styles.label}>Others</Text>
-              <Text style={styles.colon}>:</Text>
-              <List items={[
-                "Defective part(s) should be returned to HP",
-                "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
-                "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
-              ]}/>
-            </View>
+        
+      <Section title="Terms and Conditions" >
+        <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
+          <View style={styles.leftSection}>
+            <Text style={styles.label}>Validity</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              7 (seven) calender days
+            </Text>
+            <Text style={styles.label}>Delivery Time</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              2 (two) weeks from date of PO confirmation & subject to spare part availibility
+            </Text>
+            <Text style={styles.label}>Payment</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+            {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType ? 
+              caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType : 
+              "Cash / Debit / Qris / Credit Card / Transfer"  
+            }
+            </Text>
+            <Text style={styles.label}>Warranty</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              1 (one) month for the same part
+            </Text>
+            <Text style={styles.label}>Cancellation Fee</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              Rp. 121.000,
+            </Text>
+            <Text style={styles.label}>Others</Text>
+            <Text style={styles.colon}>:</Text>
+            <List items={[
+              "Defective part(s) should be returned to HP",
+              "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
+              "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
+            ]}/>
           </View>
-        </Section>
+        </View>
+      </Section>
+        
         <View
           style={{
             flexDirection: "row",

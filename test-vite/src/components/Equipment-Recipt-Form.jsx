@@ -18,21 +18,10 @@ Font.register({
   fonts: [{ src: 'https://fonts.gstatic.com/s/helvetica/Helvetica.ttf' }],
 });
 
-
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 32,
-    gap: 3,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    maxWidth: '600px',
-    margin: 'auto',
-    flexDirection: 'column',
+    padding: 20,
   },
   sectionHeader: {
     fontSize: 11,
@@ -80,7 +69,6 @@ const styles = StyleSheet.create({
   rightSection: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   rightSection2: {
     flex: 1,
@@ -157,7 +145,7 @@ const styles = StyleSheet.create({
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={120} style={styles.sectionContainer}>
+  <View wrap={false} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -229,6 +217,11 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
           <Text style={[styles.value]}>
             {caseDetails?.ProblemDescription ?? 'N/A'}
           </Text>
+           <Text style={{width: '30%', fontSize: 8}}>Note</Text>
+            <Text style={{width: '2%', fontSize: 8}}>:</Text>
+            <Text style={{width: '68%', fontSize: 8, textAlign: 'justify'}}>
+              {caseDetails?.CaseProductNote ?? "N/A"}
+          </Text>
          </View>
 
           <View style={styles.rightSection}>
@@ -238,21 +231,9 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
             </View>
           </View>
         </View>
-
-          <View style={{display: 'flex', flexDirection: "row",}}>
-                   <View style={styles.leftSection}>
-                     <Text style={{width: '15%', fontSize: 8}}>Note</Text>
-                     <Text style={{width: '1%', fontSize: 8}}>:</Text>
-                     <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
-                       {caseDetails?.CaseProductNote ?? "N/A"}
-                     </Text>
-                   </View>
-                 </View>
-
       </Section>
 
       {/* Customer Section */}
-      {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
       <Section title="Customer">
         <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
@@ -332,7 +313,6 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
       </Section>
 
       {/* Product Section */}
-      {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
       <Section title="Product">
       <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
@@ -411,7 +391,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
       <Text style={[styles.textSmall, { fontWeight: 'bold', color: 'black' }]}>Repair Action : </Text>
      
       {/* Signature section */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View break style={{ flexDirection: 'row', justifyContent: 'space-between',}}>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
           <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
           <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />

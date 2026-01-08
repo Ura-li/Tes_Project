@@ -21,16 +21,7 @@ Font.register({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 32,
-    gap: 3,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    maxWidth: '600px',
-    margin: 'auto',
-    flexDirection: 'column',
+    padding: 20,
   },
   sectionHeader: {
     textAlign:"center",
@@ -78,7 +69,6 @@ const styles = StyleSheet.create({
   rightSection: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   rightSection2: {
     flex: 1,
@@ -186,7 +176,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={120} style={styles.sectionContainer}>
+  <View wrap={false} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -280,27 +270,23 @@ export const Invoice = ({
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
+
+             <Text style={{width: '30%', fontSize: 8}}>Note</Text>
+              <Text style={{width: '2%', fontSize: 8}}>:</Text>
+              <Text style={{width: '68%', fontSize: 8, textAlign: 'justify'}}>
+                {caseDetails?.CaseProductNote ?? "N/A"}
+              </Text>
           </View>
 
            <View style={styles.rightSection}>
-                      <Text style={[styles.textSmall, styles.bold]}>
-                        {caseDetails?.CaseID ?? "N/A"}
-                      </Text>
-                      <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
-                      <Image src={qrcode} style={styles.qrCode} />
-                      </View>
-                    </View>
+            <Text style={[styles.textSmall, styles.bold]}>
+              {caseDetails?.CaseID ?? "N/A"}
+            </Text>
+            <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
+            <Image src={qrcode} style={styles.qrCode} />
+            </View>
+          </View>
         </View>
-
-          <View style={{display: 'flex', flexDirection: "row",}}>
-                   <View style={styles.leftSection}>
-                     <Text style={{width: '15%', fontSize: 8}}>Note</Text>
-                     <Text style={{width: '1%', fontSize: 8}}>:</Text>
-                     <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
-                       {caseDetails?.CaseProductNote ?? "N/A"}
-                     </Text>
-                   </View>
-                 </View>
 
       </Section>
 
@@ -396,77 +382,38 @@ export const Invoice = ({
         </View>
       </Section>
 
-      {/* <Section title="Product">
-        <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
-          <View style={styles.leftSection}>
-            <Text style={styles.label}>Serial no</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Product no</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.ProductNumber ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Product name</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.product_information
-                ?.ProductName ?? "N/A"}
-            </Text>
-          </View>
-
-          <View style={styles.rightSection2}>
-            <Text style={styles.label}>Product tower</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.product_information?.product_type
-                ?.ProductTower ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Product group</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.product_information?.product_type
-                ?.ProductGroup ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Product type</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.asset_information?.product_information?.product_type
-                ?.ProductType ?? "N/A"}
-            </Text>
-          </View>
-        </View>
-      </Section>
-
-      <View style={[styles.tableRow, styles.tableHeader]}>
-        <Text style={styles.tableHeaderCell}>Accessories</Text>
-        <Text style={styles.tableHeaderCell}>Note</Text>
-        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-      </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{item.Accessories ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? "N/A"}</Text>
-          </View>
-        ))
-      ) : (
+      {/* DP TABLE */}
+      <View style={[styles.table, { marginTop: 5 }]}>
+        {/* Header */}
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
+          <Text style={[styles.tableHeaderCell, {flex: 0.7}]}>No</Text>
+          <Text style={[styles.tableHeaderCell, {flex: 3}]}>Dp Amount</Text>
+          <Text style={[styles.tableHeaderCell, {flex: 3}]}>Payment Type</Text>
+          <Text style={[styles.tableHeaderCell, {flex: 3.3}]}>Payment Date</Text>
         </View>
-      )} */}
+
+        {/* Body */}
+        {caseDetails?.down_payment_table?.map((dp, index) => (
+          <View style={styles.tableRow} key={index}>
+            <Text style={[styles.tableCell, styles.alignCenter,{flex: 0.7}]}>
+              {index + 1}
+            </Text>
+            <View style={[styles.tableCell,{flex: 3, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+              <Text>Rp.</Text>
+              {FormatRupiah({value: dp?.DPAmount}) ?? "N/A"}
+            </View>
+            <Text style={[styles.tableCell, styles.alignCenter,{flex: 3}]}>
+              {dp?.PaymentType ?? "N/A"}
+            </Text>
+            <Text style={[styles.tableCell, styles.alignCenter,{flex: 3.3}]}>
+              {formatDate(dp?.DPDate) || "N/A"}
+            </Text>
+          </View>
+        ))}
+      </View>
 
       {/* PARTS TABLE */}
-      <View style={[styles.table, { marginTop: 10 }]}>
+      <View style={[styles.table, { marginTop: 5 }]}>
         {/* Header */}
         <View style={styles.tableRow}>
           <Text style={[styles.tableHeaderCell, styles.partsColNo]}>No</Text>
@@ -632,7 +579,6 @@ export const Invoice = ({
         </View>
       </View>
 
-
       <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
         <View style={styles.leftSection} >
           <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
@@ -640,19 +586,18 @@ export const Invoice = ({
           </Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-           
           </Text>
         </View>
       </View>
+
         <View
           style={{
             flexDirection: "row",
             justifyContent: "flex-end",
-            
           }}
         >
           <View style={{ flexDirection: "column", alignItems: "center" }} >
-            <Text style={[styles.textSmall, { marginTop: 10,  }]}>
+            <Text style={[styles.textSmall]}>
               {formatDate(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.CreatedOn)}
             </Text>
             <Image style={{ width: 120, height: 60 }} />

@@ -27,7 +27,7 @@ export function NotificationCard({ }) {
                     <CardTitle className="text-sm font-semibold">{i.title || `Case ${i.caseId}`}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <CardDescription className={"dark:text-gray-400"}>{i.description} by {i.user }</CardDescription>
+                    <CardDescription className={"dark:text-gray-400"}>{i.description} by {i.user}</CardDescription>
                 </CardContent>
                 <CardFooter>
                     <Button variant={"outline"} className={"dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"} onClick={() =>  deleteNotification(i.token)}>
