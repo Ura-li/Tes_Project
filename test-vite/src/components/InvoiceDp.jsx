@@ -272,7 +272,7 @@ export const InvoiceDp = ({
                {dp?.DPInvoiceNo}
             </Text>
 
-            <Text style={styles.label}>Date</Text>
+            <Text style={styles.label}>Payment Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
                 {formatDate(dp?.DPDate) || "N/A"}

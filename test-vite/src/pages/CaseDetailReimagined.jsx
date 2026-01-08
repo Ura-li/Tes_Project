@@ -3573,9 +3573,10 @@ useEffect(() => {
                         />
                       </CaseField>
                       <CaseField label={"Tanggal Terima"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatDate(invoiceSummary.amountReceiveDate)}
+                        <DatePicker
+                          value={DatePickertoDateOrNull(
+                            invoiceSummary.amountReceiveDate
+                          )}
                           readOnly
                         />
                       </CaseField>
@@ -3644,7 +3645,7 @@ useEffect(() => {
                           />
                         </CaseField>
 
-                        <CaseField label="DP Date" lock={row.isPersisted} >
+                        <CaseField label="Payment Date" lock={row.isPersisted} >
                           <DatePicker
                             value={DatePickertoDateOrNull(row.DpDate)}
                             onChange={(e) =>

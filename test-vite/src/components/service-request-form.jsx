@@ -21,16 +21,7 @@ Font.register({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 32,
-    gap: 3,
-    borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    maxWidth: "600px",
-    margin: "auto",
-    flexDirection: "column",
+    padding: 20,
   },
   sectionHeader: {
     fontSize: 11,
@@ -164,7 +155,7 @@ const styles = StyleSheet.create({
 });
 
 const Section = ({ title, children}) => (
-  <View minPresenceAhead={120} style={styles.sectionContainer}>
+  <View wrap={false} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -251,6 +242,12 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
+
+            <Text style={{width: '30%', fontSize: 8}}>Note</Text>
+            <Text style={{width: '2%', fontSize: 8}}>:</Text>
+            <Text style={{width: '68%', fontSize: 8, textAlign: 'justify'}}>
+              {caseDetails?.CaseProductNote ?? "N/A"}
+            </Text>
           </View>
 
           <View style={styles.rightSection}>
@@ -258,24 +255,14 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
               {caseDetails?.CaseID ?? "N/A"}
             </Text>
             <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
-            <Image src={qrcode} style={styles.qrCode} />
+              <Image src={qrcode} style={styles.qrCode} />
             </View>
-          </View>
-        </View>
-        <View style={{display: 'flex', flexDirection: "row",}}>
-          <View style={styles.leftSection}>
-            <Text style={{width: '15%', fontSize: 8}}>Note</Text>
-            <Text style={{width: '1%', fontSize: 8}}>:</Text>
-            <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
-              {caseDetails?.CaseProductNote ?? "N/A"}
-            </Text>
           </View>
         </View>
       </Section>
 
       {/* Customer Section */}
       <Section title="Customer">
-        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Company</Text>
@@ -368,7 +355,6 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
 
       {/* Product Section */}
       <Section title="Product">
-        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Serial no</Text>
@@ -465,7 +451,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
       </Section>
 
       {/* Signature section */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View break style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flexDirection: "column", alignItems: "center" }}>
           <Text style={[styles.textSmall, { marginBottom: 10 }]}>
             Received By
@@ -482,7 +468,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
           </Text>
         </View>
         <View style={{ flexDirection: "column", alignItems: "center" }}>
-          <Image src="/random_qr.png" style={styles.qrCode} />
+          <Image src={qrcode} style={styles.qrCode} />
           <Text style={[styles.textSmall, styles.bold]}>
             Check Repair Status
           </Text>
@@ -526,7 +512,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
       </Text>
       <View style={{display: 'flex', alignItems: 'flex-end'}}>
         <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
-        <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+        <Text style={styles.bold,{fontSize: 10}}>
           Partner Of 
         </Text>
           <Image src="/hp.png" style={{ width: 34, height: 34 }} />

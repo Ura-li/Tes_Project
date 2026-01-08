@@ -1194,9 +1194,8 @@ export const Case_table = () => {
     }
 
     // purely optional debug param:
-    
-    if (user?.resource && !isAdmin) {
-      params.append("resource", !isAdmin ? user.resource : savedTeamId);
+    if (!isAdmin) {
+      params.append("resource", savedTeamId);
     }
 
     const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
