@@ -1188,17 +1188,6 @@ export default function NewCaseForm() {
         resources: savedTeamId
       };
 
-      Swal.fire({
-        title: "Apakah data tersebut sudah benar ?",
-        text: "Tolong check kembali data yang telah di input!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Iya",
-        cancelButtonText: "Tidak"
-      })
-
       const res = await ApiCustomer.post("/api/case-information/create-case",compositePayload);
       const createdCase = res.data?.data?.case;
       const caseId = createdCase?.CaseID;
