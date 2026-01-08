@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `down_payment_table` ADD COLUMN `PaymentDate` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0);

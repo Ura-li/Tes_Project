@@ -250,6 +250,7 @@ model down_payment_table {
 
   DPAmount Decimal  @default(0) @db.Decimal(12, 2)
   DPDate   DateTime @default(now()) @db.DateTime(0)
+  PaymentDate DateTime @default(now()) @db.DateTime(0)
 
   PaymentType String? @db.VarChar(20)
   DPNote      String? @db.Text
@@ -330,7 +331,7 @@ model materialorder {
   MOID             String              @id
   MO_Number       Int?      @db.Int
   WOID             String?             
-  OrderNumber      String?             @db.VarChar(100)
+  OrderNumber      String?             @db.VarChar(100) //Wait, why this is here? wtf is this even about? lol
   OrderStatus      MaterialOrderStatus @default(New)
   OrderType        String?             @db.VarChar(50)
   CreatedOn        DateTime?           @default(now()) @db.DateTime(0)
@@ -734,7 +735,7 @@ model workorder {
   WOID            String          @id 
   WO_Number       Int?      @db.Int
   CaseID          String?
-  WorkOrderNumber String?         @db.VarChar(100)
+  WorkOrderNumber String?         @db.VarChar(100) //THIS IS SAME AS WOID?
   WorkOrderType   String?         @db.VarChar(50)
   Priority        String?         @db.VarChar(50)
   SystemStatus    WorkOrderStatus @default(OPEN_UNSCHEDULED)
@@ -986,7 +987,7 @@ enum CaseStatus {
   Open
   InActive
   Close
-  Cancel 
+  Cancel
   Active
   Monitor
   Pending_Customer_Action

@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import React from "react";
 import { formatAccountingRupiah, formatDate } from "../lib/utils";
+import { FormatRupiah } from "./QuatationInvoice";
 
 Font.register({
   family: "Helvetice",
@@ -195,6 +196,8 @@ const List = ({ items }) => (
   </View>
 )
 
+let counter = 0;
+
 export const InvoiceDp = ({
   caseDetails,
   customerSignature,
@@ -269,7 +272,7 @@ export const InvoiceDp = ({
                {dp?.DPInvoiceNo}
             </Text>
 
-            <Text style={styles.label}>Date</Text>
+            <Text style={styles.label}>Payment Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
                 {formatDate(dp?.DPDate) || "N/A"}
@@ -342,99 +345,7 @@ export const InvoiceDp = ({
         </View>
       </View>
 
-      {/* <Section title="Customer">
-        <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
-          <View style={styles.leftSection}>
-            <Text style={styles.label}>Company</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.site_account?.Company ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Name</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.FirstName ||
-              caseDetails?.contact_information?.LastName
-                ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                    caseDetails?.contact_information?.LastName || ""
-                  }`.trim()
-                : "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Email</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.site_account
-                ? caseDetails?.site_account?.Email ?? "N/A"
-                : caseDetails?.contact_information?.Email ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>PIC name</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.FirstName ||
-              caseDetails?.contact_information?.LastName
-                ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                    caseDetails?.contact_information?.LastName || ""
-                  }`.trim()
-                : "N/A"}
-            </Text>
-
-            <Text style={styles.label}>PIC email</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.Email ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Address</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.site_account
-                ? caseDetails?.site_account?.AddressLine1 ?? "N/A"
-                : caseDetails?.contact_information?.AddressLine1 ?? "N/A"}
-            </Text>
-          </View>
-          <View style={styles.rightSection2}>
-            <Text style={styles.label}>Phone no</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.site_account
-                ? caseDetails?.site_account?.PrimaryPhone ?? "N/A"
-                : caseDetails?.contact_information?.Phone ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Mobile no</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.site_account
-                ? caseDetails?.site_account?.WhatsappNo ?? "N/A"
-                : caseDetails?.contact_information?.Mobile ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>Fax no</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.Fax ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>PIC phone no.</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.Phone ?? "N/A"}
-            </Text>
-
-            <Text style={styles.label}>PIC mobile no.</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.Mobile ?? "N/A"}
-            </Text>
-          </View>
-        </View>
-      </Section> */}
-
       <Section title="Product">
-        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Serial no</Text>
@@ -482,27 +393,6 @@ export const InvoiceDp = ({
         </View>
       </Section>
 
-      {/* <View style={[styles.tableRow, styles.tableHeader]}>
-        <Text style={styles.tableHeaderCell}>Accessories</Text>
-        <Text style={styles.tableHeaderCell}>Note</Text>
-        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-      </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{item.Accessories ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? "N/A"}</Text>
-          </View>
-        ))
-      ) : (
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-        </View>
-      )} */}
-
       {/* PARTS TABLE */}
       <View style={[styles.table, { marginTop: 10 }]}>
         {/* Header */}
@@ -540,34 +430,36 @@ export const InvoiceDp = ({
                       styles.alignCenter,
                     ]}
                   >
-                    {index + 1}
+                    {++counter}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColVendor]}>
+                  <Text style={[styles.tableCell, styles.partsColVendor, styles.alignCenter]}>
                     {line.servicecatalog_parts?.VendorPartNumber ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColHp]}>
+                  <Text style={[styles.tableCell, styles.partsColHp, styles.alignCenter]}>
                     {line.PartNumber ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColPartName]}>
+                  <Text style={[styles.tableCell, styles.partsColPartName, styles.alignCenter]}>
                     {line.Description ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColQty]}>
+                  <Text style={[styles.tableCell, styles.partsColQty, styles.alignCenter]}>
                     {line.Quantity ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-                    {formatAccountingRupiah(line.Price) ?? "0"}
-                  </Text>
+                  <View style={[styles.tableCell, styles.partsColUnitPrice,{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    <Text>Rp.</Text>
+                    {FormatRupiah({value: line.Price}) ?? "0"}
+                  </View>
 
-                  <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-                    {formatAccountingRupiah(
+                  <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    <Text>Rp.</Text>
+                    {FormatRupiah({value:
                       Number(line.Price) * Number(line.Quantity)
-                    ) || 0}
-                  </Text>
+                    }) || 0}
+                  </View>
                 </View>
               ))
             )
@@ -593,20 +485,22 @@ export const InvoiceDp = ({
           >
             Labor Fee :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-            {formatAccountingRupiah(
+          <View style={[styles.tableCell, styles.partsColUnitPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:
               caseDetails?.workorder[0]?.materialorder[0]
                 ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
                 ?.LaborFee
-            )}
-          </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
+            })}
+          </View>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:
               caseDetails?.workorder[0]?.materialorder[0]
                 ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
                 ?.LaborFee
-            )}
-          </Text>
+            })}
+          </View>
         </View>
 
         {/* Sub Total: colspan=6 */}
@@ -616,13 +510,14 @@ export const InvoiceDp = ({
           >
             Sub Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:
               caseDetails?.workorder[0]?.materialorder[0]
                 ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
                 ?.Subtotal
-            )}
-          </Text>
+           })}
+          </View>
         </View>
         <View style={styles.tableRow}>
           <Text
@@ -630,11 +525,14 @@ export const InvoiceDp = ({
           >
             VAT :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-             {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue ? 
-                       formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount)  : "0"
-                     }
-          </Text>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:
+              caseDetails?.workorder[0]?.materialorder[0]
+                ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
+                ?.VATAmount
+            })}
+          </View>
         </View>
 
         {/* Total: colspan=6 */}
@@ -644,13 +542,14 @@ export const InvoiceDp = ({
           >
             Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:
               caseDetails?.workorder[0]?.materialorder[0]
                 ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
                 ?.GrandTotal
-            )}
-          </Text>
+            })}
+          </View>
         </View>
       </View>
 

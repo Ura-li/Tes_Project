@@ -546,11 +546,11 @@ export const TabsServiceCaseDetails = () => {
 );
 
 const visibleButtons = isResponsive
-  ? allowedButtons.slice(0, -4)   
+  ? allowedButtons.slice(0, -2)   
   : allowedButtons;              
 
 const hiddenButtons = isResponsive
-  ? allowedButtons.slice(-4)      
+  ? allowedButtons.slice(-2)      
   : [];
 
   
@@ -756,69 +756,69 @@ const hiddenButtons = isResponsive
       toast.error(error?.response?.data?.message ?? "Failed to update!")
     }
   };
-     const Approve = async () => {
-      try {
-        Swal.fire({
-          title: "Saving...",
-          text: "Please wait while we update",
-          allowEscapeKey: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
+  const Approve = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update",
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
-        const caseUpdate = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
-          CaseStatus: "New",
-          Owner: caseDetails.CreatedBy,
-        })
-        
-        const assetUpdate = await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`,{
-          Warranty_Status: caseDetails.asset_information?.Warranty_Status,
-          needWarrantyApproval: true,
-          WarrantyApprovalStatus: "Add Info By WA",
-          WarrantyCardDate: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCardDate,
-          PurchaseDate: caseDetails.asset_information?.asset_warranty[0]?.PurchaseDate,
-          POPDocument: caseDetails.asset_information?.asset_warranty[0]?.POPDocument,
-          WarrantyCard: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCard,
-          PhotoUnit: caseDetails.asset_information?.asset_warranty[0]?.PhotoUnit,
-          EndUserName: caseDetails.asset_information?.asset_warranty[0]?.EndUserName,
-          EndUserPhone: caseDetails.asset_information?.asset_warranty[0]?.EndUserPhone,
-          EndUserAddress: caseDetails.asset_information?.asset_warranty[0]?.EndUserAddress,
-        })
+      const caseUpdate = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
+        CaseStatus: "New",
+        Owner: caseDetails.CreatedBy,
+      })
+      
+      const assetUpdate = await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`,{
+        Warranty_Status: caseDetails.asset_information?.Warranty_Status,
+        needWarrantyApproval: true,
+        WarrantyApprovalStatus: "Add Info By WA",
+        WarrantyCardDate: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCardDate,
+        PurchaseDate: caseDetails.asset_information?.asset_warranty[0]?.PurchaseDate,
+        POPDocument: caseDetails.asset_information?.asset_warranty[0]?.POPDocument,
+        WarrantyCard: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCard,
+        PhotoUnit: caseDetails.asset_information?.asset_warranty[0]?.PhotoUnit,
+        EndUserName: caseDetails.asset_information?.asset_warranty[0]?.EndUserName,
+        EndUserPhone: caseDetails.asset_information?.asset_warranty[0]?.EndUserPhone,
+        EndUserAddress: caseDetails.asset_information?.asset_warranty[0]?.EndUserAddress,
+      })
 
-        const LogNote = await ApiCustomer.post("/api/case-information/case-notes", {
-          LogType: "System Approved",
-          ActionType: "Approved",
-          Template: "Approve Requested",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note : `Approved by ${user?.role} - ${user?.name || "Uknown User"}`,
-          CaseID: caseDetails?.CaseID,
-          CreatedBy: user?.id,
-        })
+      const LogNote = await ApiCustomer.post("/api/case-information/case-notes", {
+        LogType: "System Approved",
+        ActionType: "Approved",
+        Template: "Approve Requested",
+        VisibleExternally: false,
+        MinutesSpent: 0,
+        Note : `Approved by ${user?.role} - ${user?.name || "Uknown User"}`,
+        CaseID: caseDetails?.CaseID,
+        CreatedBy: user?.id,
+      })
 
-        const actionLog = await ApiCustomer.post("/api/actionlog",{
-          CaseId: `${caseDetails.CaseID}`,
-          ReferenceId: ``,
-          model: "Case",
-          dataOld: caseDetails.CaseStatus,
-          dataNew: caseUpdate.data.data.CaseStatus,
-          changedBy: user?.id,
-          logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
-        })
-        Swal.fire({
-          icon: "success",
-          title: "Updated!",
-          text: "Updated Succes",
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          window.location.reload()
-        })
-      } catch (error) {
-          toast.error(error?.response?.data?.message ?? "Updated Failed")
-      }
+      const actionLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: ``,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: caseUpdate.data.data.CaseStatus,
+        changedBy: user?.id,
+        logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
+      })
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Updated Succes",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload()
+      })
+    } catch (error) {
+        toast.error(error?.response?.data?.message ?? "Updated Failed")
     }
+  }
 
 function fieldMO(caseDetails) {
   return mapMaterialOrdersToQuotationItems(caseDetails);
@@ -1576,7 +1576,7 @@ useEffect(() => {
 
                 {/* Queue */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium dark:text-white">{caseDetails.CaseStatus}</span>
+                  <span className="text-blue-600 font-medium dark:text-white">{STATUS_ENUM_TO_LABEL[caseDetails.CaseStatus]}</span>
                   <span className="text-muted-foreground">Status</span>
                 </div>
 
@@ -3085,12 +3085,12 @@ useEffect(() => {
                             <TableCell>{log.model}</TableCell>
                             <TableCell>{log.CaseId}</TableCell>
                             <TableCell>
-                              {log.changedByUser?.Role} -{" "}
+                              {log.changedByUser?.Role} - {" "}
                               {log.changedByUser?.Name} (
                               {log.changedByUser?.Username})
                             </TableCell>
-                            <TableCell>{log.dataOld}</TableCell>
-                            <TableCell>{log.dataNew}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataOld]}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataNew]}</TableCell>
                             <TableCell>
                               {new Date(log.ChangeAt).toLocaleString()}
                             </TableCell>
@@ -3573,9 +3573,10 @@ useEffect(() => {
                         />
                       </CaseField>
                       <CaseField label={"Tanggal Terima"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatDate(invoiceSummary.amountReceiveDate)}
+                        <DatePicker
+                          value={DatePickertoDateOrNull(
+                            invoiceSummary.amountReceiveDate
+                          )}
                           readOnly
                         />
                       </CaseField>
@@ -3644,7 +3645,7 @@ useEffect(() => {
                           />
                         </CaseField>
 
-                        <CaseField label="DP Date" lock={row.isPersisted} >
+                        <CaseField label="Payment Date" lock={row.isPersisted} >
                           <DatePicker
                             value={DatePickertoDateOrNull(row.DpDate)}
                             onChange={(e) =>

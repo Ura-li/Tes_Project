@@ -385,7 +385,7 @@ export async function POST(req) {
                 dataOld: currentCaseStatus ?? "Unknown",
                 dataNew: targetCaseStatus,
                 changedBy: Number(changedBy),
-                logDescription: `Import: change status ${currentCaseStatus} -> ${targetCaseStatus}`,
+                logDescription: `Import: Change status ${currentCaseStatus} -> ${targetCaseStatus}`,
               }
             })
           }

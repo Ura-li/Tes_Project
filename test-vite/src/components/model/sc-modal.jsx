@@ -4294,7 +4294,6 @@ export function PartAdd ({ onReload = true, onSuccess }) {
     try {
       const res = await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
       const createdPart = res.data?.data || res.data;
-
       Swal.fire({
         title: "Success!",
         text: "Part successfully added.",
@@ -4338,47 +4337,47 @@ export function PartAdd ({ onReload = true, onSuccess }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
           <div>
             <Label>Part Number <Label className="text-red-600">*</Label></Label>
-            <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+            <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div>
             <Label>Keyword <Label className="text-red-600">*</Label></Label>
-            <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+            <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div className="sm:col-span-2">
             <Label>Part Description <Label className="text-red-600">*</Label></Label>
-            <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+            <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div className="sm:col-span-2">
             <Label>Restriction Reason</Label>
-            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div>
             <Label>Price</Label>
-            <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+            <Input type="number" id="Price" value={formData.Price} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div>
             <Label>Freight Price</Label>
-            <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+            <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div>
             <Label>Shipping Fee</Label>
-            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div>
             <Label>Tax</Label>
-            <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+            <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} className={"mt-2"}/>
           </div>
 
           <div className="sm:col-span-2">
             <Label>Total</Label>
-            <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+            <Input type="number" id="Total" value={formData.Total} onChange={handleChange} className={"mt-2"}/>
           </div>
         </div>
 
