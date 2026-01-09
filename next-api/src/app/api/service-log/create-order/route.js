@@ -229,6 +229,26 @@ export async function POST(request) {
 
                 generatedNotes.add(normalizeNote(noteText));
 
+                 const workOrderLog = await tx.ActionLog.create({
+                    data: {
+                        CaseID_toActionLog: {
+                            connect: { CaseID },
+                        },
+                        ReferenceId: WOID,
+                        model: "Work",
+                        dataOld: "OPEN_UNSCHEDULED",
+                        dataNew: "OPEN_UNSCHEDULED",
+                        changedByUser: ownerIdNumber
+                            ? {
+                                connect: { IDUser: ownerIdNumber },
+                            }
+                            : undefined,
+                        logDescription: `New Work Order : ${WOID}`,
+                    },
+                    include: includeChangedBy,
+                });
+                createdLogs.push(workOrderLog);
+
                 const perMoLog = await tx.ActionLog.create({
                     data: {
                         CaseID_toActionLog: {
@@ -269,11 +289,9 @@ export async function POST(request) {
             }
 
             
-            console.log("IS OUT WARRANRY ", isOutWarranty)
             const caseUpdateData = { CaseStatus: "PartRequest" };
             if(isOutWarranty) caseUpdateData.CaseStatus = "Quote_Requested"
 
-            console.log("IS OUT WARRANRY ", caseUpdateData)
             if (assignApoId !== null) {
                 caseUpdateData.Owner = assignApoId;
             }   
@@ -324,25 +342,7 @@ export async function POST(request) {
             });
             createdLogs.push(statusLog);
 
-            const workOrderLog = await tx.ActionLog.create({
-                data: {
-                    CaseID_toActionLog: {
-                        connect: { CaseID },
-                    },
-                    ReferenceId: WOID,
-                    model: "Work",
-                    dataOld: "OPEN_UNSCHEDULED",
-                    dataNew: "OPEN_UNSCHEDULED",
-                    changedByUser: ownerIdNumber
-                        ? {
-                              connect: { IDUser: ownerIdNumber },
-                          }
-                        : undefined,
-                    logDescription: `New Work Order : ${WOID}`,
-                },
-                include: includeChangedBy,
-            });
-            createdLogs.push(workOrderLog);
+           
 
             return { WOID, MOIDs: createdMOIDs, actionLogs: createdLogs };
         }, { timeout: 20000 })

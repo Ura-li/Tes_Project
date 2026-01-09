@@ -1230,18 +1230,12 @@ const WarrantyConditionEnumToLabel = {
   OutWarranty: "Out of Warranty",
 };
 
-const OptionStorage = [
-  "Storage 1",
-  "Storage 2",
-  "Storage 3",
-  "Storage 4",
-  "Storage 5",
-  "Storage 6",
-  "Storage 7",
-  "Storage 8",
-  "Storage 9",
-  "Storage 10",
-];
+const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R","U","T"]
+const number  = [1,2,3,4,5]
+
+const OptionStorage = letters.flatMap(letter =>
+  number.map(num => ({ value: `${letter}${num}`, label: `${letter}${num}` }))
+);
 
 export const ServiceCase = () => {
   const { user } = useAuth();

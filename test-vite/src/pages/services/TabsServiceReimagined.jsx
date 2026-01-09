@@ -54,6 +54,7 @@ import {
   CopyXIcon,
   CircleArrowLeft,
   CircleChevronLeft,
+  Clock10,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -96,7 +97,6 @@ export const TabsServiceWO = () => {
   const navigate = useNavigate();
   const workOrders = useWorkOrderStore((s) => s.workOrder);
   const saveWorkOrder = useWorkOrderStore((s) => s.saveWorkOrder);
-
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
   const [onCancelWo, setOnCancelWo] = useState(false);
 
@@ -167,7 +167,7 @@ export const TabsServiceWO = () => {
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(false);
-          setOpenRepairDialog(true);
+          // setOpenRepairDialog(true);
         }
       },
     },
@@ -178,9 +178,14 @@ export const TabsServiceWO = () => {
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(true);
-          setOpenRepairDialog(true);
+          // setOpenRepairDialog(true);
         }
       },
+    },
+    {
+      icon: Clock10,
+      label: "Repair Action",
+      onClick: () => setOpenRepairDialog(true),
     },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
@@ -323,7 +328,7 @@ export const TabsServiceWO = () => {
           logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`,
         });
 
-        const statusCaseTarget = onCancelWo ? "CancelRepair" : "FinishRepair";
+        const statusCaseTarget = onCancelWo ? "CancelRepair" : workOrders?.caseinformation?.CaseStatus;
 
         await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
@@ -388,9 +393,37 @@ export const TabsServiceWO = () => {
     }
   };
 
-  const handleRepairSubmit = async (repairFormData) => {
-    setOpenRepairDialog(false);
-    await saveAndCloseWorkOrder(repairFormData);
+  const handleRepairSubmit = async () => {
+    try {
+       Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Work Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      await ApiCustomer.patch(
+          `/api/work-order/${workOrders.WOID}`,
+          {
+            SystemStatus: "OPEN_COMPLETED", 
+          }
+        );
+  
+        await ApiCustomer.patch(
+            `/api/case-information/${workOrders.CaseID}`,
+            {
+              Owner: workOrders?.caseinformation?.CreatedBy,
+              CaseStatus: "FinishRepair",
+            }
+        );
+        Swal.close();
+        toast.success("Repair Action saved successfully!");
+        setOpenRepairDialog(false);
+    } catch (error) {
+      toast.error("Failed to save Repair Action.");
+    }
   };
 
   return (
@@ -425,6 +458,7 @@ export const TabsServiceWO = () => {
 
 
 import { useMaterialOrderStore } from "@/hooks/useMaterialOrderStore";
+import { toast } from "sonner";
 // ...other imports...
 
 export const TabsServiceMO = ({

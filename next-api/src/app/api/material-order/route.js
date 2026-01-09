@@ -3,41 +3,6 @@ import prisma from "../../../../prisma/client";
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../lib/SocketClient";
 
-// export async function GET(request) {
-//     try{
-//         const { searchParams } = new URL(request.url);
-//         const search = searchParams.get("search") || "";
-//         const woidParam = searchParams.get("WOID"); // "wo1,wo2"
-        
-//         const woidArray = woidParam?.split(",") || [];
-        
-//         // const page = parseInt(searchParams.get("page")) || 1;
-//         // const limit = parseInt(searchParams.get("limit")) || 10;
-
-//         // console.log("Query Params:", { search, page, limit });
-//          // Initialize search filters
-//          const materialOrders = await prisma.materialorder.findMany({
-//             where: {
-//               WOID: { in: woidArray }
-//             },
-//           });
-
-//         return NextResponse.json({
-//             success: true,
-//             message: "List Data Material Order",
-//             data: materialOrders
-//         });
-//     }catch(err){
-//         console.error("🔥 ERROR in GET API:", err);
-
-//         return NextResponse.json({
-//             success: false,
-//             message: "Failed to fetch data",
-//             error: err.message
-//         }, { status: 500 });
-//     }
-// }
-
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -77,7 +42,7 @@ export async function GET(request) {
                     }
                 },
                 owner: true,
-                // materialorderlineitems: true
+                materialorderlineitems: true
 
             }
           });
@@ -217,117 +182,6 @@ export async function POST(request) {
 
     const { MOIDs, actionLog } = await prisma.$transaction(async (tx) => {
 
-      /**
-       * FORGOR TO REFACTOR THIS SHIT
-       */
-      // const MOID = await generateID("MO-", "materialorder", "MOID", tx);
-
-      // await tx.materialorder.create({
-      //   data: {
-      //     MOID,
-      //     WOID,
-      //     OrderStatus: "New",
-      //     OrderType: "Repair",
-      //     OwnerID: materialOrderOwnerID,
-      //   },
-      // });
-
-      // // Create Line Items
-      // await Promise.all(
-      //   selectedPartCatalog.map((part, i) =>
-      //     tx.materialorderlineitems.create({
-      //       data: {
-      //         LineNumber: i + 1,
-      //         Description: part.PartDescription,
-      //         Price: part.Price != null ? parseFloat(part.Price) : 0,
-      //         Quantity: part.qty || 1,
-      //         Status: "New",
-      //         RemovedPartNumber: part.RemovedPartNumber ?? null,
-      //         materialorder: { connect: { MOID } },
-      //         servicecatalog_parts: part.PartNumber
-      //           ? { connect: { PartNumber: part.PartNumber } }
-      //           : undefined,
-      //       },
-      //     })
-      //   )
-      // );
-
-      // const noteWarranty = isOutWarranty ? 'Request Quotation' : "Order"
-
-      // const noteLines = [
-      //     "[NOTICE] "+noteWarranty+" Part",
-      //     `${noteWarranty} Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}`
-      // ];
-
-      // if (isOutWarranty && part.Price !== undefined && part.Price !== null && part.Price !== "") {
-      //     noteLines.push(`Harga : Rp. ${part.Price}`);
-      // }
-
-      // if (part.RemovedPartNumber) {
-      //     noteLines.push(`Return CT Key : ${part.RemovedPartNumber}`);
-      // }
-      // if (part.UEFICode) {
-      //     noteLines.push(`UEFI Code : ${part.UEFICode}`);
-      // }
-      // if (part.UEFI_NO) {
-      //     noteLines.push(`UEFI No : ${part.UEFI_NO}`);
-      // }
-
-
-      // const requestedRecipient =
-      //   assignApo != null
-      //     ? (newOwnerName && newOwnerName !== "-" ? newOwnerName : String(assignApo))
-      //     : materialOrderOwnerID != null
-      //     ? String(materialOrderOwnerID)
-      //     : "-";
-
-      // const targetQuotation = isOutWarranty ? "CM" : "APO"
-      // noteLines.push(`Requested to ${targetQuotation} : ${requestedRecipient}`);
-
-      
-      // const noteText = noteLines.join("\n");
-      // // Optional Case Note for traceability
-      // if (caseInfo?.CaseID && noteText) {
-      //   await tx.casenotes.create({
-      //     data: {
-      //       CaseID: caseInfo.CaseID,
-      //       LogType: "NoticeOrderNote",
-      //       ActionType: "Action Plan",
-      //       Template: "",
-      //       VisibleExternally: true,
-      //       MinutesSpent: 0,
-      //       Note: noteText,
-      //       CreatedBy: OwnerID ?? caseInfo.CreatedBy ?? null,
-      //     },
-      //   });
-      // }
-
-      // const caseUpdateData = { CaseStatus: "PartRequest" };
-      // if(isOutWarranty) caseUpdateData.CaseStatus = "Quote_Requested"
-
-      // console.log("IS OUT WARRANRY ", caseUpdateData)
-      // if (assignApo !== null) {
-      //     caseUpdateData.Owner = assignApo;
-      // }   
-      // await tx.caseinformation.update({
-      //   where: { CaseID },
-      //   data: caseUpdateData,
-      // });
-      // // Action Log entry for new MO
-      // let actionLog = null;
-      // if (caseInfo?.CaseID) {
-      //   actionLog = await tx.ActionLog.create({
-      //     data: {
-      //       CaseID_toActionLog: { connect: { CaseID: caseInfo.CaseID } },
-      //       ReferenceId: MOID,
-      //       model: "Material Order",
-      //       dataOld: "New",
-      //       dataNew: "New",
-      //       changedByUser: OwnerID ? { connect: { IDUser: OwnerID } } : undefined,
-      //       logDescription: `New Material Order : ${MOID}`,
-      //     },
-      //   });
-      // }
 
       for (const part of selectedPartCatalog) {
         const MOID = await generateID("MO-", "materialorder", "MOID", tx, "MO_Number");

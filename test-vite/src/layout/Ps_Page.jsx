@@ -17,6 +17,62 @@ export default function ProductStorage() {
   const itemsPerPage = 4;
   const navigate = useNavigate();
 
+  const rules = [
+    { prefix: "A", range: [1,2,3,4,5], label: "Laptop Old Case"},
+    { prefix: "B", range: [1], label: "Part Bufer CE"},
+    { prefix: "B", range: [2], label: "Unit Laptop Big Box"},
+    { prefix: "B", range: [3,4,5], label: "Toner & Catridge"},
+    { prefix: "C", range: [1,2,3,4,5], label: "Unit Laptop IW"},
+    { prefix: "D", range: [1,2,3,4,5], label: "Unit Laptop OOW"},
+    { prefix: "E", range: [1], label: "Unit Buffer CE"},
+    { prefix: "E", range: [2], label: "Finish Repair Laptop(OOW)"},
+    { prefix: "E", range: [3,4,5], label: "AIO & Monitor"},
+    { prefix: "F", range: [1], label: "Unit Laptop OOW"},
+    { prefix: "F", range: [2], label: "AIO & Monitor"},
+    { prefix: "F", range: [3,4,5], label: "Finish Repair Laptop"},
+    { prefix: "G", range: [1,2,3,4,5], label: "Box-Box Mr. Hadi"},
+    { prefix: "H", range: [1], label: "Medium Printer"},
+    { prefix: "H", range: [2,3,4,5], label: "AIO & Medium PC"},
+    { prefix: "I", range: [1,2,3,4], label: "Large Printer"},
+    { prefix: "I", range: [5], label: "Medium Printer"},
+    { prefix: "J", range: [1,2,3,4,5], label: "Medium Printer"},
+    { prefix: "K", range: [1], label: "Large Printer"},
+    { prefix: "K", range: [2,3,4], label: "Medium Printer"},
+    { prefix: "K", range: [5], label: "Small Printer"},
+    { prefix: "L", range: [1], label: "Large Printer"},
+    { prefix: "L", range: [2,3,4,5], label: "Medium Printer"},
+    { prefix: "M", range: [1,2], label: "Large Printer"},
+    { prefix: "M", range: [3,4,5], label: "Medium Printer"},
+    { prefix: "N", range: [1], label: "Large Printer"},
+    { prefix: "N", range: [2,3], label: "Small Printer"},
+    { prefix: "N", range: [4,5], label: "Medium Printer"},
+    { prefix: "O", range: [1], label: "Large Printer"},
+    { prefix: "O", range: [2,3,4,5], label: "Medium Printer"},
+    { prefix: "P", range: [1,2,3,4,5], label: "Medium Printer"},
+    { prefix: "Q", range: [1], label: "Large Printer"},
+    { prefix: "Q", range: [2], label: "Finish Repair Printer"},
+    { prefix: "Q", range: [3,4,5], label: "Small PC & Printer"},
+    { prefix: "Q", range: [4,5], label: "Small Printer"},
+    { prefix: "R", range: [1,2], label: "New Incoming Laptop"},
+    { prefix: "R", range: [3,4,5], label: "Unit Temporarily"},
+    { prefix: "T", range: [1,2,3,4,5], label: "Finish Repair Laptop"},
+    { prefix: "U", range: [1,2,3,4,5], label: "Finish Repair Laptop"},
+  ]
+
+  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q","R", "U", "T"]
+  const maxNumber = 5;
+  const storageList = []
+
+  for (const letter of letters) {
+    for (let n = 1; n <= maxNumber; n++) {
+      const rule = rules.find(r => r.prefix === letter && r.range.includes(n));
+      
+      storageList.push({
+        value: `${letter}${n}`,
+        label: rule?.label ?? "Unknown"
+      });
+    }
+  }
 
   const fetchData = async () => {
     setRenderer(true);
@@ -135,22 +191,20 @@ export default function ProductStorage() {
          <SidebarContent className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"> 
           <SidebarGroup>
             <SidebarGroupContent className={"flex flex-col gap-5 p-2 "}>
-                {["Storage 1", "Storage 2", "Storage 3", "Storage 4", 
-                  "Storage 5", "Storage 6", "Storage 7", "Storage 8",
-                  "Storage 9", "Storage 10"].map((StorageLocationStore) => (
+                {storageList.map((item) => (
                     <button
-                      key={StorageLocationStore}
+                      key={item.value}
                       onClick={() => {
-                        setSelectedStorage(StorageLocationStore);
+                        setSelectedStorage(item.value);
                         setCurrentPage(1);
                       }}
                       className={`p-2 rounded-md cursor-pointer dark:border-b-slate-500 dark:bg-gradient-to-b dark:hover:border-purple-500 dark:border-1 dark:from-slate-700 dark:via-slate-600 dark:to-slate-900 ${
-                        selectedStorage === StorageLocationStore 
+                        selectedStorage === item.value 
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 hover:bg-gray-300"
                       }`}
                     >
-                      {StorageLocationStore}
+                      {item.value} - {item.label}
                     </button>
                   ))}
             </SidebarGroupContent>
