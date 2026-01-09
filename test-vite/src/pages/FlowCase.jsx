@@ -233,6 +233,8 @@ export const FlowCaseData = (user) => {
     { status: "Pending_Quote", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Quote_Requested", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Escalated", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "RepairProgress", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "PartAvailable", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
     { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
     { status: "Close", data: { ...emptyData }, hide: filterClose }
@@ -255,7 +257,7 @@ export const FlowCaseData = (user) => {
           dataStatus?.replace("Finish Repair","").toLowerCase() ===
           t.status?.replace("FinishRepair","").toLowerCase() || 
           dataStatus?.replace("Part Request","").toLowerCase() ===
-          t.status?.replace("PartRequest","").toLowerCase()
+          t.status?.replace("PartRequest","").toLowerCase() 
         )
       }
       );

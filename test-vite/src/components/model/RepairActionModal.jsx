@@ -151,8 +151,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     Object.entries(delayCodeEnumToLabel).map(([key, val]) => [val, key])
   );
 
-
-
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -185,6 +183,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
 
   const handleConfirm = () => {
     onSubmit(formData); // send data
+    
     setStep("form");
     onOpenChange(false); // close dialog
   };
