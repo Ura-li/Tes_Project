@@ -747,8 +747,7 @@ const hasIntentToSave = isDirty;
           })
           return false;
         }
-
-
+        
       Swal.fire({
         title: "Saving Case...",
         text: "Mohon tunggu sebentar",

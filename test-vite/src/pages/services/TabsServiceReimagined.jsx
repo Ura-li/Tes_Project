@@ -80,17 +80,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-
+import { STATUS_ENUM_TO_LABEL,statusEnumToLabelWO } from "../CaseDetailReimagined";
 import { BtnModalsServiceCatalog } from '../../components/model/sc-modal'
 import DatePicker from '../../components/date-picker'
-
-
 import { SearchCommandBlock } from "../../components/sc-select";
-
 import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
-
 import RepairActionDialog from "@/components/model/RepairActionModal";
 
 export const TabsServiceWO = () => {
@@ -98,7 +94,6 @@ export const TabsServiceWO = () => {
   const workOrders = useWorkOrderStore((s) => s.workOrder);
   const saveWorkOrder = useWorkOrderStore((s) => s.saveWorkOrder);
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
-  const [onCancelWo, setOnCancelWo] = useState(false);
 
   if (!workOrders) {
     return null;
@@ -150,7 +145,6 @@ export const TabsServiceWO = () => {
       label: "",
       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
-    // { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
@@ -166,8 +160,7 @@ export const TabsServiceWO = () => {
       onClick: async () => {
         const isValid = await validate();
         if (isValid !== false) {
-          setOnCancelWo(false);
-          // setOpenRepairDialog(true);
+          saveAndCloseWorkOrder({isCancel: false});
         }
       },
     },
@@ -177,8 +170,7 @@ export const TabsServiceWO = () => {
       onClick: async () => {
         const isValid = await validate();
         if (isValid !== false) {
-          setOnCancelWo(true);
-          // setOpenRepairDialog(true);
+          saveAndCloseWorkOrder({isCancel: true});
         }
       },
     },
@@ -272,7 +264,7 @@ export const TabsServiceWO = () => {
     return true;
   };
 
-  const saveAndCloseWorkOrder = async (repairFormData) => {
+  const saveAndCloseWorkOrder = async ({isCancel}) => {
     try {
       Swal.fire({
         title: "Saving...",
@@ -282,8 +274,9 @@ export const TabsServiceWO = () => {
           Swal.showLoading();
         },
       });
-
+      
       const tokenUser = getUserFromToken();
+      
       if (
         !tokenUser ||
         (String(tokenUser.role).toLowerCase() !== "ce" &&
@@ -297,7 +290,68 @@ export const TabsServiceWO = () => {
         });
       }
 
-      const statusTarget = onCancelWo ? "CLOSED_CANCELLED" : "CLOSED_POSTED";
+      const statusTarget = isCancel ?  workOrders.SystemStatus :"CLOSED_POSTED";
+
+      const token = { user: tokenUser };
+      
+      const res = await ApiCustomer.patch(
+          `/api/work-order/${workOrders.WOID}`,
+          {
+            SystemStatus: statusTarget,
+            IsCancel: isCancel, 
+          }
+        );
+
+        console.log("wo:",res)
+         await ApiCustomer.post("/api/actionlog", {
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.WOID}`,
+          model: "Work Orders",
+          dataOld: workOrders.SystemStatus,
+          dataNew: res.data.data.SystemStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${statusEnumToLabelWO[workOrders.SystemStatus]} to ${statusEnumToLabelWO[res.data.data.SystemStatus]}`,
+        });
+
+       const caseChangeStatus = await ApiCustomer.patch(
+            `/api/case-information/${workOrders.CaseID}`,
+            {
+              Owner: workOrders?.caseinformation?.CreatedBy,
+            }
+        );
+
+        Swal.close();
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/case/${workOrders.CaseID}`);
+        });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+
+  const handleRepairSubmit = async (repairFormData) => {
+    try {
+       Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Work Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const isCancelRepair = repairFormData.isCancelRepair === true ? "CLOSED_CANCELLED" : 'OPEN_COMPLETED';
+
       const res = await ApiCustomer.patch(
         `/api/work-order/${workOrders.WOID}`,
         {
@@ -310,8 +364,7 @@ export const TabsServiceWO = () => {
           RepairAction: repairFormData.repairAction,
           ServiceTypeId: repairFormData.serviceType,
           CancelReason: repairFormData.cancelReason,
-          SystemStatus: statusTarget,
-          IsCancel: onCancelWo,
+          SystemStatus: isCancelRepair,
         }
       );
 
@@ -325,28 +378,28 @@ export const TabsServiceWO = () => {
           dataOld: workOrders.SystemStatus,
           dataNew: res.data.data.SystemStatus,
           changedBy: token.user.id,
-          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${statusEnumToLabelWO[workOrders.SystemStatus]} to ${statusEnumToLabelWO[res.data.data.SystemStatus]}`,
         });
 
-        const statusCaseTarget = onCancelWo ? "CancelRepair" : workOrders?.caseinformation?.CaseStatus;
+        const isCancelRepairr = repairFormData.isCancelRepair === true ? 'CancelRepair' : 'FinishRepair'; 
+
+         const caseChangeStatus = await ApiCustomer.patch(
+          `/api/case-information/${workOrders.CaseID}`,
+          {
+            Owner: workOrders?.caseinformation?.CreatedBy,
+            CaseStatus: isCancelRepairr,
+          }
+        );
 
         await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.CaseID}`,
           model: "Case",
           dataOld: workOrders?.caseinformation?.CaseStatus,
-          dataNew: statusCaseTarget,
+          dataNew: isCancelRepairr,
           changedBy: token.user.id,
-          logDescription: `Edit : Changed Case Status ${workOrders.CaseID} from ${workOrders?.caseinformation?.CaseStatus} to ${statusCaseTarget}`,
+          logDescription: `Edit : Changed Case Status ${workOrders.CaseID} from ${STATUS_ENUM_TO_LABEL[workOrders?.caseinformation?.CaseStatus]} to ${STATUS_ENUM_TO_LABEL[isCancelRepairr]}`,
         });
-
-        const caseChangeStatus = await ApiCustomer.patch(
-          `/api/case-information/${workOrders.CaseID}`,
-          {
-            Owner: workOrders?.caseinformation?.CreatedBy,
-            CaseStatus: statusCaseTarget,
-          }
-        );
 
         const previousOwnerId = workOrders?.caseinformation?.Owner;
         const newOwnerId = workOrders?.caseinformation?.CreatedBy;
@@ -368,15 +421,10 @@ export const TabsServiceWO = () => {
           });
         }
 
-        Swal.fire({
-          icon: "success",
-          title: "Updated!",
-          text: res.data.message,
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          navigate(`/app/case/${workOrders.CaseID}`);
-        });
+        Swal.close();
+        toast.success("Repair Action saved successfully!");
+        setOpenRepairDialog(false);
+
       } else {
         Swal.fire({
           icon: "error",
@@ -384,43 +432,6 @@ export const TabsServiceWO = () => {
           text: res.data.message,
         });
       }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to update!",
-        text: error.message || "Something went wrong.",
-      });
-    }
-  };
-
-  const handleRepairSubmit = async () => {
-    try {
-       Swal.fire({
-        title: "Saving...",
-        text: "Please wait while we update the Work Order.",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      await ApiCustomer.patch(
-          `/api/work-order/${workOrders.WOID}`,
-          {
-            SystemStatus: "OPEN_COMPLETED", 
-          }
-        );
-  
-        await ApiCustomer.patch(
-            `/api/case-information/${workOrders.CaseID}`,
-            {
-              Owner: workOrders?.caseinformation?.CreatedBy,
-              CaseStatus: "FinishRepair",
-            }
-        );
-        Swal.close();
-        toast.success("Repair Action saved successfully!");
-        setOpenRepairDialog(false);
     } catch (error) {
       toast.error("Failed to save Repair Action.");
     }
@@ -447,8 +458,8 @@ export const TabsServiceWO = () => {
         open={openRepairDialog}
         onOpenChange={setOpenRepairDialog}
         onSubmit={handleRepairSubmit}
+        IsCancel={workOrders.IsCancel}
         canEdit={true}
-        onCancelWo={onCancelWo}
         workOrders={workOrders}
       />
     </>

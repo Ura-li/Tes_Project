@@ -17,7 +17,8 @@ import { debounce } from "lodash";
 import { SearchCommandBlock } from "../sc-select";
 import ApiCustomer from "@/api";
 import { toast } from "sonner";
-export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCancelWo, workOrders }) => {
+
+export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, IsCancel, workOrders }) => {
   const [step, setStep] = useState("form");
   const [NMUList, setNMUList] = useState([]);
   const [NMUItemNeed, setNMUItemNeed] = useState(false);
@@ -41,7 +42,14 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     delayCode : null,
     cancelReason: "",
   });
-  const isOutWarranty = workOrders?.serviceCatalog?.asset_information?.Warranty_Status === "01T"
+
+  // const isOutWarranty = workOrders?.serviceCatalog?.asset_information?.Warranty_Status === "01T"
+
+  const selectedServiceType = useMemo(() => {
+    return serviceTypeList.find(item => item.ServiceTypeId === formData.serviceType)
+  }, [serviceTypeList, formData.serviceType])
+
+  const isCancelRepair = selectedServiceType?.ServiceTypeName === "Cancel Repair"
 
   const fetchServiceType = async (problemCategory) => {
     try {
@@ -78,31 +86,32 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
       setNMUItemNotFound(true);
     }
   }
+
   useEffect(()=>{
-    isOutWarranty ? setProblemCategory('Hardware') : '';
+    // isOutWarranty ? setProblemCategory('Hardware') : '';
     fetchNMU();
   },[])
+
   useEffect(()=>{
     fetchServiceType(problemCategory)    
   },[problemCategory])
   
-  useEffect(()=>{
-    if(isOutWarranty){
-      const targetServiceType = onCancelWo ? "Cancel Repair" : "Standard Replacement / Failure (Part Used)"
-      const target = serviceTypeList.find(
-        item => item.ServiceTypeName === targetServiceType
-      );
-      if (target) {
-        handleChange("serviceType", target.ServiceTypeId);  
-      }
-    }
-  },[serviceTypeList, onCancelWo])
+  // useEffect(()=>{
+  //   if(isOutWarranty){
+  //     const targetServiceType = IsCancel ? "Cancel Repair" : "Standard Replacement / Failure (Part Used)"
+  //     const target = serviceTypeList.find(
+  //       item => item.ServiceTypeName === targetServiceType
+  //     );
+  //     if (target) {
+  //       handleChange("serviceType", target.ServiceTypeId);  
+  //     }
+  //   }
+  // },[serviceTypeList, IsCancel])
+
   useEffect(() => {
     setFormData(prev => ({ ...prev, nmuItem: null, Version: "" }));
-
     const foundNMU = NMUList.find(item => item.NMUId === formData.nmu);
     setSelectedNMU(foundNMU);
-
     if (foundNMU) {
       setNMUItemNeed(foundNMU.ItemNeeded);
       setNMUVersionNeed(foundNMU.VersionNeeded);
@@ -111,7 +120,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
       }
     }
   }, [formData.nmu]);
-
 
   useEffect(()=>{
     setSelectedNMUItem(NMUItemList.find(item => item.id === formData.nmuItem));
@@ -147,6 +155,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     AMRMonitor: "AMRMonitor",
     TravelDelay: "TravelDelay",
   };
+
   const labelToStatusEnum = Object.fromEntries(
     Object.entries(delayCodeEnumToLabel).map(([key, val]) => [val, key])
   );
@@ -182,7 +191,10 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
   };
 
   const handleConfirm = () => {
-    onSubmit(formData); // send data
+    onSubmit({
+      ...formData,
+      isCancelRepair
+    }); // send data
     
     setStep("form");
     onOpenChange(false); // close dialog
@@ -217,8 +229,8 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
         {step === "form" && (
           <Card className="mt-2">
             <CardContent className="grid grid-cols-4 gap-3">
-              {onCancelWo !== false && (
-                <CaseField label="Cancel Reason" lock={!canEdit} span={3} star={onCancelWo}>
+              {isCancelRepair && (
+                <CaseField label="Cancel Reason" lock={!canEdit} span={3} star={isCancelRepair}>
                   <Textarea
                     onChange={(e) => handleChange("cancelReason", e.target.value)}
                   />
@@ -337,7 +349,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
         {step === "confirm" && (
           <div className="mt-4 space-y-4">
             <p className="text-sm text-muted-foreground">
-                <span className="text-red-600 font-semibold">⚠️ WARNING : Status Work Order akan berubah menjadi {onCancelWo ? "CLOSED_CANCEL" : "CLOSED_POSTED"}</span>
+                <span className="text-red-600 font-semibold">⚠️ WARNING : Status Work Order akan berubah menjadi {isCancelRepair ? "CLOSED - CANCEL" : "OPEN - COMPLETED"}</span>
               <br />Berikut adalah data yang akan dikirim:
             </p>
 

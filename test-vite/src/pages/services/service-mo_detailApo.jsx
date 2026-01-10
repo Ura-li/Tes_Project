@@ -53,7 +53,7 @@ import { useAuth } from "@/context/auth-context";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-const GOOD_RETURN_REASON_OPTIONS = [
+export const GOOD_RETURN_REASON_OPTIONS = [
   { value: "AdminIssue", label: "Admin Issue" },
   { value: "CIDRejected", label: "CID Rejected By SC Team" },
   { value: "ComplexIssue", label: "Complex Issue" },
@@ -871,7 +871,7 @@ useEffect(() => {
                   <hr className="dark:border-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
-                  <CaseField label="CT Validation" star={canEditCE} lock={!canEditCE}>
+                  <CaseField label="CT Validation"  lock>
                     <SearchCommandBlock
                     className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     value={MODetailInput.CTValidation === true ? "Pass" : MODetailInput.CTValidation === false ? "Fail" : ""}
@@ -888,7 +888,7 @@ useEffect(() => {
                   </CaseField>
                   
           
-                <CaseField label={"Failure Code"} star={canEditCE} lock={!canEditCE}>
+                <CaseField label={"Failure Code"} lock>
                 <div className="relative w-full">
                   <SearchCommandBlock
                     name="failureId"
@@ -902,7 +902,7 @@ useEffect(() => {
               </div>
             </CaseField>
 
-                    <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
+                    <CaseField label="Return CT Key" lock>
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedPartNumber"
@@ -913,7 +913,7 @@ useEffect(() => {
                     />
                   </CaseField>
                   
-                  <CaseField label="New CT Key" star={canEditCE} lock={!canEditCE}>
+                  <CaseField label="New CT Key" lock>
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedSerialNumber"
@@ -923,16 +923,16 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label="Additional Failure Code" lock>
+                  <CaseField label="Additional Failure Code" lock hide={true}>
                     <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" 
                     />
                   </CaseField>
 
-                  <CaseField label="Part Usage Code" lock >
+                  <CaseField label="Part Usage Code" lock hide={true}>
                     <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
+                  <CaseField label="Part Used" lock>
                     <div className="flex items-center gap-2">
                       <Switch
                           checked={!!MODetailInput.QuantityUsed}
@@ -949,8 +949,7 @@ useEffect(() => {
                   </CaseField>
 
                   <CaseField label="Part Return Status" 
-                    star={canEditCE}
-                    lock={!canEditCE}
+                    lock
                     >
                     <SearchCommandBlock
                     className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
@@ -968,8 +967,8 @@ useEffect(() => {
 
                   <CaseField
                     label="DOA Reason"
-                    star={isDOASelected}
                     hide={!isDOASelected}
+                    lock
                   >
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -982,7 +981,7 @@ useEffect(() => {
 
                   <CaseField
                     label="Unit Photo"
-                    hide={Boolean(MODetailInput.QuantityUsed)} lock={!canEditCE}>
+                    hide={Boolean(MODetailInput.QuantityUsed)} lock>
                       <Input
                         type="file"
                         accept="image/*"
@@ -994,9 +993,8 @@ useEffect(() => {
                   
                   <CaseField
                     label="Good Return Reason"
-                    star={!MODetailInput.QuantityUsed && canEditCE}
                     hide={Boolean(MODetailInput.QuantityUsed)}
-                    lock={!canEditCE}
+                    lock
                   >
                     <SearchCommandBlock
                       value={MODetailInput.GoodReturnReason}

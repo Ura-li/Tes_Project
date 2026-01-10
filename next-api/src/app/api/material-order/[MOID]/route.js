@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
                     }
                 },
                 owner: true,
-                // materialorderlineitems: true
+                materialorderlineitems: true
             }
         });
     
