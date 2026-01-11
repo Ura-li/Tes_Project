@@ -1215,7 +1215,7 @@ const ROLE_STATUS_EXTRAS = {
 const ALL_STATUS_KEYS = Object.keys(STATUS_ENUM_TO_LABEL);
 const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_KEYS.includes(key));
 
-const statusEnumToLabelWO = {
+export const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
   OPEN_SCHEDULED: 'Open - Scheduled',
   OPEN_INPROGRES: 'Open - In Progress',

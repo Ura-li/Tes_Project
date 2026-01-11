@@ -165,7 +165,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View wrap={false} style={styles.sectionContainer}>
+  <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>

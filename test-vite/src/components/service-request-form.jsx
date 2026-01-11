@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 });
 
 const Section = ({ title, children}) => (
-  <View wrap={false} style={styles.sectionContainer}>
+  <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -451,7 +451,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
       </Section>
 
       {/* Signature section */}
-      <View break style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flexDirection: "column", alignItems: "center" }}>
           <Text style={[styles.textSmall, { marginBottom: 10 }]}>
             Received By

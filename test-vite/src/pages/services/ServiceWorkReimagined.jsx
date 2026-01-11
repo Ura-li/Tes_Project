@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router";
 
 import { useWorkOrderStore } from "@/hooks/useWorkOrderStore";
 import { getUserFromToken } from "@/lib/utils/auth";
-// import { TabsServiceWO } from "./service-case";
 import { QuickWOInput } from "@/components/quick-wo-input";
 import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
 import { NewBookableResourceBooking } from "../services/service-booking";
@@ -49,6 +48,10 @@ import {
 } from "@/components/ui/table";
 import { TabsServiceWO } from "./TabsServiceReimagined";
 import { toast } from "sonner";
+import debounce from "lodash.debounce";
+import { Switch } from "@/components/ui/switch";
+import { GOOD_RETURN_REASON_OPTIONS } from "./service-mo_detailApo";
+import { useMemo } from "react";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
@@ -62,10 +65,16 @@ export const ServiceWork = () => {
   const customerData = useWorkOrderStore((s) => s.customerData);
   const SLA = useWorkOrderStore((s) => s.SLA);
   const WOGeneral = useWorkOrderStore((s) => s.WOGeneral);
+  const MOLineGeneral = useWorkOrderStore((s) => s.MOLineGeneral);
+  const failureOptions = useWorkOrderStore((s) => s.failureOptions);
+  const partReturnStatusOptions = useWorkOrderStore((s) => s.partReturnStatusOptions)
   const setSLAField = useWorkOrderStore((s) => s.setSLAField);
   const setWOGeneralField = useWorkOrderStore((s) => s.setWOGeneralField);
+  const setMoLineGeneralField = useWorkOrderStore((s) => s.setMoLineGeneralField);
   const setSLA = useWorkOrderStore((s) => s.setSLA);
   const setWOGeneral = useWorkOrderStore((s) => s.setWOGeneral);
+  const uploadFotoMoLine = useWorkOrderStore((s) => s.uploadMOLinePhoto);
+  const removeFotoMoLine = useWorkOrderStore((s) => s.removeMOLinePhoto);
 
   // ---- local UI state only ----
   const [openAddMO, setOpenAddMO] = useState(false);
@@ -78,9 +87,7 @@ export const ServiceWork = () => {
   const [finishedOnDate, setFinishedOnDate] = useState(null);
 
 
-  const handleSLAChange =
-    (field) =>
-    (value) => {
+  const handleSLAChange = (field) =>  (value) => {
       // Normalize dates to ISO string in store
       const normalized =
         value instanceof Date
@@ -89,9 +96,7 @@ export const ServiceWork = () => {
       setSLAField(field, normalized);
     };
 
-  const handleWOGeneral =
-    (field) =>
-    (eOrValue) => {
+  const handleWOGeneral = (field) => (eOrValue) => {
       const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
       setWOGeneralField(field, value);
     };
@@ -100,6 +105,152 @@ export const ServiceWork = () => {
     if (!caseInformation) return;
     setCaseDetails(caseInformation);
     setOpenAddMO(true);
+  };
+
+  // Mo Line Item
+  const [photoUploadPreview, setPhotoUploadPreview] = useState(null);
+  const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState(null);
+
+  const searchResults = failureOptions.map((f, index) => ({
+    value: String(f.FailureId),
+    label: (
+      <div className="flex flex-col">
+      <span className="font-medium">
+        {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
+      </span>
+      <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
+    </div>
+    )
+  }))
+
+  const filteredPartReturnOptions = (mo) => {
+     const baseOptions = partReturnStatusOptions.filter((status) =>
+        status.StatusQuantityType === Boolean(mo.QuantityUsed),
+      ).map((status) => ({
+        value: status.ReturnStatusId.toString(),
+        label: status.StatusName,
+        data: status,
+      }));
+
+       const selectedId =
+        mo.PartReturnStatusId !== null
+          ? mo.PartReturnStatusId.toString()
+          : null;
+  
+      if (selectedId && !baseOptions.some((option) => option.value === selectedId)) {
+            const selectedFromSource = partReturnStatusOptions.find(
+            (status) => status.ReturnStatusId.toString() === selectedId,
+          );
+  
+        if (selectedFromSource) {
+          baseOptions.push({
+            value: selectedFromSource.ReturnStatusId.toString(),
+            label: selectedFromSource.StatusName,
+            data: selectedFromSource,
+          });
+        } else if (mo.PartReturnStatusName) {
+          baseOptions.push({
+            value: selectedId,
+            label: mo.PartReturnStatusName,
+            data: { DOA: mo.PartReturnDOA },
+          });
+        }
+      }
+
+      return baseOptions;
+  }
+
+  const renderPartReturnLabel = (option) => {
+      if (typeof option === "string") {
+        return option;
+      }
+      const label = option?.label ?? "";
+      return option?.data?.DOA ? `${label} (DOA)` : label;
+  };
+
+  const handleInputChange = (index, value) => {
+    const failureId = Number(value);
+    if (Number.isNaN(failureId)) return;
+
+    setMoLineGeneralField(index, "failureId", value);
+
+    if (failureId === 6){
+      setMoLineGeneralField(index, "isQuantityUsedDisabled", true)
+    }else if (failureId === 7){
+      setMoLineGeneralField(index, "QuantityUsed", false)
+    } else if (failureId === 8){
+      setMoLineGeneralField(index, "QuantityUsed", true)
+    }
+  };
+
+  const handleChange = (index, field) => (eOrValue) => {
+    const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
+    setMoLineGeneralField(index, field, value);
+  };
+
+  const handlePartReturnStatusChange = (index, statusId) => {
+    if (!statusId) {
+      setMoLineGeneralField(index, "PartReturnStatusId", null);
+      setMoLineGeneralField(index, "PartReturnStatusName", "");
+      setMoLineGeneralField(index, "PartReturnDOA", false);
+      setMoLineGeneralField(index, "DOAReason", "")
+      return;
+    }
+
+    const selectedStatus = partReturnStatusOptions.find(
+      (status) => status.ReturnStatusId.toString() === statusId.toString(),
+    );
+
+    if (!selectedStatus) return;
+
+    setMoLineGeneralField(index, "PartReturnStatusId", selectedStatus.ReturnStatusId);
+    setMoLineGeneralField(index, "PartReturnStatusName", selectedStatus.StatusName);
+    setMoLineGeneralField(index, "PartReturnDOA", selectedStatus.Doa);
+    setMoLineGeneralField(index, "DOAReason", selectedStatus.Doa ? "" : "");
+  };
+
+  const selectedPartReturnStatus = (mo) => {
+    return (
+      partReturnStatusOptions.find((status) => status.ReturnStatusId === mo.PartReturnStatusId) || null
+    )
+  }
+  
+ const handlePhotoUpload = async (index, event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  setPhotoUploadLoading(true);
+  try {
+    await uploadFotoMoLine(index, file);
+  } finally {
+    setPhotoUploadLoading(false);
+    event.target.value = "";
+  }
+};
+    
+  const handleRemovePhoto = async (index) => {
+    await removeFotoMoLine(index);
+  }
+    
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+    
+  const resolvedPhotoSrc = (mo) => {
+    if (photoUploadPreview) {
+      return photoUploadPreview;
+    }
+
+    const assetPath = mo.PhotoPartUnit;
+    if (!assetPath) {
+      return null;
+    }
+    if (assetPath.startsWith("http://") || assetPath.startsWith("https://") || assetPath.startsWith("data:")) {
+      return assetPath;
+    }
+    if (assetPath.startsWith("/")) {
+      return `${apiBaseUrl}${assetPath}`;
+    }
+    return `${apiBaseUrl}/${assetPath}`;
   };
 
   // permissions
@@ -113,6 +264,7 @@ export const ServiceWork = () => {
     { value: "wo_summary", label: "Wo Summary" },
     { value: "wo_bookings", label: "Wo Bookings" },
     { value: "wo_input", label: "Quick WO Input" },
+    { value: "mo_failure", label: "Failure & Return Details" },
   ];
 
   const statusEnumToLabelWO = {
@@ -123,7 +275,7 @@ export const ServiceWork = () => {
     CLOSED_POSTED: "Closed - Posted",
     CLOSED_CANCELLED: "Closed - Cancelled"
   };
-
+  
   const statusOptions = Object.entries(statusEnumToLabelWO).map(
     ([value, label]) => ({
       value,
@@ -152,7 +304,6 @@ export const ServiceWork = () => {
       return false;
     }
   };
-
 
   // Fungsi Deadline by RDT
   function Deadline({ target }) {
@@ -424,6 +575,13 @@ export const ServiceWork = () => {
                       onChange={handleWOGeneral("ShipmentState")}
                       placeholder="---"
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                    />
+                  </CaseField>
+
+                  <CaseField label="Cancel Reason" lock hide={!workOrder.CancelReason}>
+                    <Input
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
+                      value={workOrder.CancelReason || "---"}
                     />
                   </CaseField>
 
@@ -964,6 +1122,195 @@ export const ServiceWork = () => {
               />
             </TabsContent>
           )}
+
+          <TabsContent
+              value="mo_failure"
+              className={" flex flex-col gap-4 p-2"}
+            >
+              <Card className="flex-col dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    Failure & Usage Details
+                  </CardTitle>
+                  <hr className="dark:border-gray-400"/>
+                </CardHeader>
+                <CardContent className="grid grid-row-2 gap-4">
+                  {MOLineGeneral.map((mo, index) => {
+                    const OptionPartReturnStatus = filteredPartReturnOptions(mo)
+                    const SelectOptionPartReturn = selectedPartReturnStatus(mo)
+                    const isDOASelected = Boolean(SelectOptionPartReturn?.DOA)
+                    const reviewPhoto = resolvedPhotoSrc(mo)
+
+                    return (
+                    <div key={mo.MOID}>
+                    <span className="italic font-semibold">Sparepart {index + 1}</span>
+                    <div className="grid grid-cols-4 gap-4 border-2 mt-2 rounded-sm p-4">
+
+                    <CaseField label="CT Validation" star={editRoles} lock={!editRoles}>
+                      <SearchCommandBlock
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
+                      value={mo.CTValidation === true ? "Pass" : mo.CTValidation === false ? "Fail" : ""}
+                      onChange={(val) => {
+                        handleChange(index, "CTValidation")(
+                          val === 'Pass' ? true : val === 'Fail' ? false : null
+                        )
+                      }}
+                      options={[
+                        'Pass',
+                        'Fail'
+                      ]}
+                      />
+                    </CaseField>
+
+                    <CaseField label={"Failure Code"} star={editRoles} lock={!editRoles}>
+                    <div className="relative w-full">
+                      <SearchCommandBlock
+                        name="failureId"
+                        value={mo.failureId}
+                        onChange={(val) => handleInputChange(index, val)}
+                        placeholder="Search Failure..."
+                        options={searchResults}
+                        readOnly={!editRoles}
+                        className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
+                      />
+                    </div>
+                    </CaseField>
+
+                    <CaseField label="Return CT Key" star={editRoles} >
+                      <Input
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                        name="removedPartNumber"
+                        value={mo.removedPartNumber}
+                        onChange={handleChange(index, 'removedPartNumber')}
+                        placeholder="---"
+                        
+                      />
+                    </CaseField>
+
+                    <CaseField label="New CT Key" star={editRoles} lock={!editRoles}>
+                    <Input
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      name="removedSerialNumber"
+                      value={mo.removedSerialNumber}
+                      onChange={handleChange(index, 'removedSerialNumber')}
+                      placeholder="---"
+                    />
+                  </CaseField>
+
+                  <CaseField label="Part Used" star={editRoles} lock={!editRoles}>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                          checked={!!mo.QuantityUsed}
+                          onCheckedChange={(checked) => setMoLineGeneralField(index, "QuantityUsed", checked)}
+                          disabled={!editRoles || mo.isQuantityUsedDisabled}
+                      />
+                      <span>{mo.QuantityUsed ? "Used" : "Not Used"}</span>
+                    </div>
+                  </CaseField>
+
+                  <CaseField label="Part Return Status" 
+                    star={editRoles}
+                    lock={!editRoles}
+                    >
+                    <SearchCommandBlock
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
+                      value={mo.PartReturnStatusId !== null? mo.PartReturnStatusId.toString(): null}
+                      onChange={(val) => handlePartReturnStatusChange(index,val)}
+                      placeholder="Select Part Return Status"
+                      options={OptionPartReturnStatus}
+                      renderLabel={renderPartReturnLabel}
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="DOA Reason"
+                    star={isDOASelected}
+                    hide={!isDOASelected}
+                  >
+                    <Input
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      name="DOAReason"
+                      value={mo.DOAReason}
+                      onChange={handleChange(index, "DOAReason")}
+                      placeholder="Enter DOA reason"
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="Unit Photo"
+                    hide={Boolean(mo.QuantityUsed)} lock={!editRoles}>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>handlePhotoUpload(index, e)}
+                        disabled={!editRoles}
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      />
+                  </CaseField>
+                  
+                  <CaseField
+                    label="Good Return Reason"
+                    star={!mo.QuantityUsed && editRoles}
+                    hide={Boolean(mo.QuantityUsed)}
+                    lock={!editRoles}
+                  >
+                    <SearchCommandBlock
+                      value={mo.GoodReturnReason}
+                      onChange={handleChange(index,"GoodReturnReason")}
+                      placeholder="Select reason"
+                      options={GOOD_RETURN_REASON_OPTIONS}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
+                    />
+                  </CaseField>
+                   
+                  <div className="col-span-4 flex flex-col gap-2 pl-10">
+                     {photoUploadLoading && (
+                      <span className="text-sm text-muted-foreground">Uploading photo...</span>
+                    )}
+
+                    {/* Thumbnail */}
+                    {reviewPhoto && (
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={reviewPhoto}
+                          alt="Unit photo preview"
+                          className="max-h-24 rounded border object-cover cursor-pointer"
+                          onClick={() => setPreviewSrc(reviewPhoto)} // klik untuk preview
+                        />
+                        {editRoles && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleRemovePhoto(index)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Modal Preview */}
+                    {previewSrc && (
+                      <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                        onClick={() => setPreviewSrc(null)} // klik luar untuk tutup
+                      >
+                        <div className="max-w-3xl max-h-[90vh]">
+                          <img
+                            src={previewSrc}
+                            alt="Preview"
+                            className="rounded-lg max-h-[90vh] object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+                      </div>
+                    </div>
+                    </div>
+                  )})}
+                </CardContent>
+              </Card>
+            </TabsContent>
         </Tabs>
       </Card>
     </>
