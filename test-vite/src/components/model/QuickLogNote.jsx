@@ -16,15 +16,18 @@ import {
  import { useServiceCaseStore } from '../../hooks/useServiceCaseStore'
 import { Button } from '../ui/button'
 import { DialogTitle } from '@radix-ui/react-dialog'
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { toast } from "sonner";
 
 
 export const QuickLogNote = ({ open, onOpenChange }) => {
   const caseNoteFormData = useServiceCaseStore((s) => s.caseNoteFormData);
   const setCaseNoteField = useServiceCaseStore((s) => s.setCaseNoteField); 
   const saveAll = useServiceCaseStore((s) => s.saveAll);
+  const saveNoteOnly = useServiceCaseStore((s) => s.saveNoteOnly);
   const notesList = useServiceCaseStore((s) => s.notesList);
   const onChangeCaseNote = (field, value)  => setCaseNoteField(field, value);
-  const handleSave = (redirect = true) => saveAll({ redirect })
+  const handleSave = (confirm = true) => saveNoteOnly({ confirm })
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
 
@@ -34,8 +37,30 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
 
   const handleClick = () => {
     handleSave()
-    onOpenChange(false)
   }
+  const [askConfirm, setAskConfirm] = useState(false);
+
+const noteText = (caseNoteFormData?.Note ?? "").toString().trim();
+
+
+const onConfirmSave = async () => {
+
+  if (!noteText) {
+    toast.info("Isi Note terlebih dahulu", { position: "top-center" });
+    return;
+  }
+  try {
+    const ok = await saveNoteOnly({ confirm: false }); // store has no UI confirm
+    if (ok) {
+      setConfirmOpen(false);
+      // optional: close modal after save
+      // onOpenChange(false);
+    }
+  } finally {
+    setAskConfirm(false);
+  }
+};
+
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,9 +160,24 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
 
           <Button  variant={"outline"} className={"cursor-pointer dark:bg-gradient-to-tl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2"} onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPage))} disabled={currentPage === totalPage}>Next</Button>
         </div>
-        <div>
-          <Button variant={"outline"} className="cursor-pointer dark:bg-gradient-to-bl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2" onClick={() => handleClick()}>Save</Button>
-        </div>
+    <div className="flex items-center gap-2">
+  {!askConfirm ? (
+    <Button variant="outline" onClick={() => setAskConfirm(true)}>
+      Save
+    </Button>
+  ) : (
+    <div className="flex items-center gap-2 rounded-md border p-2">
+      <span className="text-xs text-muted-foreground">Simpan note?</span>
+      <Button size="sm" variant="outline" onClick={() => setAskConfirm(false)}>
+        Batal
+      </Button>
+      <Button size="sm" onClick={onConfirmSave}>
+        Simpan
+      </Button>
+    </div>
+  )}
+</div>
+
         </div>
         </DialogContent>
     </Dialog>

@@ -124,6 +124,7 @@ interface ServiceCaseState {
   // save
   saveAll: (opts?: { redirect?: boolean, onClose?: boolean }) => Promise<boolean>;
 
+   saveNoteOnly: (opts?: { confirm?: boolean }) => Promise<boolean>;
   //DP 
 
   setDirty: (dirty: boolean) => void;
@@ -1180,4 +1181,41 @@ const hasIntentToSave = isDirty;
       return false;
     }
   },
+
+saveNoteOnly: async ({ confirm = false } = {}) => {
+  const { caseDetails, caseNoteFormData, fetchCaseNotes } = get();
+  if (!caseDetails?.CaseID) return false;
+
+  const note = (caseNoteFormData.Note ?? "").toString().trim();
+  if (!note) {
+    toast.info("Isi Note terlebih dahulu", { position: "top-center" });
+    return false;
+  }
+
+  try {
+    const user = getUserFromToken();
+    await ApiCustomer.post("/api/case-information/case-notes", {
+      LogType: caseNoteFormData.LogType,
+      ActionType: caseNoteFormData.ActionType,
+      VisibleExternally: caseNoteFormData.VisibleExternally,
+      Note: note,
+      CaseID: caseDetails.CaseID,
+      CreatedBy: user?.id,
+    });
+
+    set((s) => ({
+      caseNoteFormData: { ...s.caseNoteFormData, Note: "" },
+      // optional if you track separate dirty for note
+      // isNoteDirty: false,
+    }));
+
+    toast.success("Note tersimpan");
+    await fetchCaseNotes();
+    return true;
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message ?? "Gagal menyimpan note");
+    return false;
+  }
+},
+
 }));

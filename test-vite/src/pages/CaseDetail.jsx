@@ -156,6 +156,7 @@ export const STATUS_ENUM_TO_LABEL = {
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
   CancelRepair: "Cancel Repair",
+  Cancel: "Cancel",
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
