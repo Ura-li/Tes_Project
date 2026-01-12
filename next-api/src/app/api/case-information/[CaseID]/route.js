@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 import { notifySocket } from "../../../../../lib/SocketClient";
 import { Prisma } from "@prisma/client";
+import redis, { deleteByPattern } from "../../../../../lib/redis";
 
 export async function GET(request, { params }) {
     //get params id
@@ -14,6 +15,12 @@ export async function GET(request, { params }) {
             { success: false, message: "Invalid Case ID" },
             { status: 400 }
         );
+    }
+
+    const cacheKey = `case:detail:${caseID}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+        return NextResponse.json(JSON.parse(cached), { status: 200 });
     }
 
     //get detail post
@@ -107,16 +114,15 @@ export async function GET(request, { params }) {
         );
     }
 
-    return NextResponse.json(
-        {
-            success:true,
-            message: "Detail Data Case",
-            data: case_information,
-        },
-        {
-            status: 200,
-        }
-    );
+    const response = {
+        success:true,
+        message: "Detail Data Case",
+        data: case_information,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+
+    return NextResponse.json(response, { status: 200 });
 }
 
 // update data
@@ -174,7 +180,10 @@ export async function PATCH(request, { params }) {
             where: { CaseID: caseID },
             data: dataToUpdate,
         });
-    
+
+        await deleteByPattern("case:list:*");
+        await redis.del(`case:detail:${caseID}`);
+
         await notifySocket("case:updated", case_information);
     
         return NextResponse.json(
@@ -230,6 +239,9 @@ export async function DELETE(request, { params }) {
             status: 200
         }
     );
+
+    await deleteByPattern("case:list:*");
+    await redis.del(`case:detail:${caseID}`);
 
     return NextResponse.json({
         success: true,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
+import redis, { deleteByPattern } from "../../../../lib/redis";
 
 export async function GET(request) {
   try {
@@ -13,27 +14,40 @@ export async function GET(request) {
     // if (tower) whereCondition.ProductTower = { equals: tower };
     // if (group) whereCondition.ProductGroup = { equals: group };
 
-    const servicecatalog_part = await prisma.servicecatalog_parts.findMany({
-        where: whereCondition,
-        orderBy: { PartNumber: "asc" },
-      });
-
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "List Data Product Type",
-        data: servicecatalog_part
-      },
-      {
+    const cacheKey = `servicecatalog-parts:list:${searchParams.toString() || "all"}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached), {
         status: 200,
         headers: {
           "Access-Control-Allow-Origin": "*", // Allow all origins
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
-      }
-    );
+      });
+    }
+
+    const servicecatalog_part = await prisma.servicecatalog_parts.findMany({
+        where: whereCondition,
+        orderBy: { PartNumber: "asc" },
+      });
+
+    const response = {
+      success: true,
+      message: "List Data Product Type",
+      data: servicecatalog_part
+    };
+
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*", // Allow all origins
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    });
   } catch (err) {
     console.error("🔥 ERROR in GET API:", err);
 
@@ -113,6 +127,8 @@ export async function POST(request) {
         Total: Total ? Number(Total) : null,
       },
     });
+
+    await deleteByPattern("servicecatalog-parts:list:*");
 
     return NextResponse.json(
       {
@@ -197,6 +213,9 @@ export async function PUT(request) {
         Total: Total ? Number(Total) : null,
       },
     });
+
+    await deleteByPattern("servicecatalog-parts:list:*");
+    await redis.del(`servicecatalog-parts:detail:${PartNumber}`);
 
     return NextResponse.json(
       {
