@@ -40,7 +40,14 @@ export const UploadRma = () => {
         <div className="p-2 mt-2">
             <Card className={"bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 dark:border-2 dark:border-gray-600"}>
                 <CardHeader>
+                    <div className="flex justify-between items-center">
                     <CardTitle>Update RMA status by export/import SO/RMA no.</CardTitle>
+                    {selectedRMAStatus !== "" && (
+                        <SOTemplateButton
+                            target={selectedRMAStatus}
+                        />
+                    )}
+                    </div>
                 <hr className="border-green-500 "/>
                 </CardHeader>
                 <CardContent className={"grid grid-cols-2 gap-2 "}>
@@ -77,18 +84,13 @@ export const UploadRma = () => {
                     </CaseField>
                     {selectedRMAStatus !== "" && (
                         <>
-                            <CaseField>
-                                <SOTemplateButton
-                                    target={selectedRMAStatus}
-                                    />
-                            </CaseField>
-                            <CaseField label={"SO / RMA no"} star>
-                                <SOImport
-                                    target={selectedRMAStatus}
-                                    dateRMA={dateRMA}
-
-                                />
-                            </CaseField>
+                        <div className="ml-9 col-span-2">
+                        <span>SO / RMA NO <label className="text-red-500">*</label></span>
+                        <SOImport
+                            target={selectedRMAStatus}
+                            dateRMA={dateRMA}
+                        />
+                        </div>
                         </>
                     )}
                 </CardContent>
