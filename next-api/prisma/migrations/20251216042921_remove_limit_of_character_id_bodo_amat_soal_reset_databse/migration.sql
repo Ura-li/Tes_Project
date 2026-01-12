@@ -12,8 +12,8 @@
 */
 
 -- Drop self-referencing FK (MISSING!)
--- ALTER TABLE `materialorder`
---   DROP FOREIGN KEY `materialorder_ParentMOID_fkey`;
+ALTER TABLE `materialorder`
+  DROP FOREIGN KEY `materialorder_ParentMOID_fkey`;
 
 
 -- DropForeignKey
