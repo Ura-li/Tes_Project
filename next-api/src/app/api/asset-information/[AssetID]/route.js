@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import prisma from "../../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../../lib/redis";
 
 export async function GET(request, { params }) {
     const { AssetID } = await params
@@ -12,12 +11,6 @@ export async function GET(request, { params }) {
             success: false,
             message: "Invalid Asset ID"
         }, { status: 400 });
-    }
-
-    const cacheKey = `asset:detail:${assetID}`;
-    const cached = await redis.get(cacheKey);
-    if (cached) {
-        return NextResponse.json(JSON.parse(cached), { status: 200 });
     }
 
     const asset_information = await prisma.asset_information.findUnique({
@@ -43,15 +36,11 @@ export async function GET(request, { params }) {
         }, { status: 404 });
     }
 
-    const response = {
+    return NextResponse.json({
         success: true,
         message: "Detail Data Asset Information",
         data: asset_information
-    };
-
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
-
-    return NextResponse.json(response, { status: 200 });
+    }, { status: 200 });
 }
 
 
@@ -213,9 +202,6 @@ export async function PATCH(request, { params }) {
 
             return updatedAsset;
         },{timeout: 50000});
-        await deleteByPattern("asset:list:*");
-        await redis.del(`asset:detail:${assetId}`);
-
         return NextResponse.json(
             {
                 success: true,
@@ -250,9 +236,6 @@ export async function DELETE(request, { params }) {
                 AssetID: assetID,
             },
         });
-
-        await deleteByPattern("asset:list:*");
-        await redis.del(`asset:detail:${assetID}`);
 
         return NextResponse.json({
             success: true,

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../../lib/redis";
 
 // GET Part by PartNumber
 export async function GET(request, { params }) {
@@ -14,12 +13,6 @@ export async function GET(request, { params }) {
         );
     }
 
-    const cacheKey = `servicecatalog-parts:detail:${partNumber}`;
-    const cached = await redis.get(cacheKey);
-    if (cached) {
-        return NextResponse.json(JSON.parse(cached), { status: 200 });
-    }
-
     const part = await prisma.servicecatalog_parts.findUnique({
         where: { PartNumber: partNumber },
     });
@@ -31,10 +24,10 @@ export async function GET(request, { params }) {
         );
     }
 
-    const response = { success: true, message: "Part detail fetched", data: part };
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
-
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(
+        { success: true, message: "Part detail fetched", data: part },
+        { status: 200 }
+    );
 }
 
 // UPDATE Part by PartNumber
@@ -87,9 +80,6 @@ export async function PATCH(request, { params }) {
             },
         });
 
-        await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
-
         return NextResponse.json(
             {
                 success: true,
@@ -119,9 +109,6 @@ export async function DELETE(request, { params }) {
         await prisma.servicecatalog_parts.delete({
             where: { PartNumber: partNumber },
         });
-
-        await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
 
         return NextResponse.json(
             { success: true, message: "Part deleted successfully!" },

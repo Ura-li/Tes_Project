@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
-import redis, { deleteByPattern } from "../../../../lib/redis";
 
 const toDateOrNull = (value) => {
     if (!value) return null;
@@ -22,19 +21,6 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get("limit")) || 100;
 
         console.log("Query Params:", { search, page, limit });
-
-        const cacheKey = `asset:list:${searchParams.toString() || "all"}`;
-        const cached = await redis.get(cacheKey);
-        if (cached) {
-            return NextResponse.json(JSON.parse(cached), {
-                status: 200,
-                headers: {
-                    "Access-Control-Allow-Origin": "*", // Allow all origins
-                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                },
-            });
-        }
 
         const baseConditions = [];
         if (siteAccountID !== null) {
@@ -89,24 +75,21 @@ export async function GET(request) {
             }
         });
 
-        const response = {
+        return NextResponse.json({
             success: true,
             message: "List Data Assets Information",
             data: asset_information,
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page
-        };
-
-        await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
-
-        return NextResponse.json(response, {
-            status: 200,
-            headers: {
-                "Access-Control-Allow-Origin": "*", // Allow all origins
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        },
+    {
+        status: 200,
+        headers: {
+            "Access-Control-Allow-Origin": "*", // Allow all origins
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
+    });
     } catch (error) {
         console.error("🔥 ERROR in GET API:", error);
 
@@ -194,8 +177,6 @@ export async function POST(request) {
             }
         });
     }
-
-    await deleteByPattern("asset:list:*");
 
     return NextResponse.json(
         {
