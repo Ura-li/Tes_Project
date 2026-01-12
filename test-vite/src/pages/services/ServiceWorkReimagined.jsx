@@ -1187,7 +1187,7 @@ export const ServiceWork = () => {
                       />
                     </CaseField>
 
-                    <CaseField label="New CT Key" star={editRoles} lock={!editRoles}>
+                    <CaseField label="New CT Key" lock>
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedSerialNumber"
