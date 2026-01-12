@@ -17,7 +17,6 @@ async function main() {
       ProfilePhoto: 'https://example.com/profile.png',
     },
   });
-  console.log('✅ Admin user created or already exists');
 
   
 
@@ -35,7 +34,6 @@ async function main() {
   await prisma.partReturnStatus.deleteMany() // kosongkan dulu
   await prisma.partReturnStatus.createMany({ data: statuses })
 
-  console.log('✅ PartReturnStatus seeded.')
 
   const NMU = [
     { NMUDesc: 'Bios Recobery (Win+B)', ItemNeeded: false, VersionNeeded: false },
@@ -61,7 +59,6 @@ async function main() {
     });
   }
 
-  console.log('✅ NMU & NMUItem seeded successfully');
   
   const ProblemDesc = [
     {ServiceTypeName: 'Health Check', ProblemCategory: 'Software' },
@@ -70,7 +67,7 @@ async function main() {
   
   await prisma.ServiceType.deleteMany();
   await prisma.ServiceType.createMany({data: ProblemDesc});
-  console.log('✅ Service Type seeded successfully');
+  
 }
 
 main()

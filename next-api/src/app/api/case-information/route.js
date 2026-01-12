@@ -23,10 +23,6 @@ export async function GET(request) {
   const resourceTarget = searchParams.get("resource");
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
-  // return console.log("ID ",resource)
-
-
-  // const resourceTarget = searchParams.get("resource");
   if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);

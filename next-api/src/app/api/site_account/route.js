@@ -14,8 +14,6 @@ export async function GET(request) {
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 100;
 
-        console.log("Query Params:", { search, page, limit });
-
          // Initialize search filters
          let whereCondition = {};
 
@@ -52,8 +50,6 @@ export async function GET(request) {
         const totalCount = await prisma.site_account.count({
             where: whereCondition
         });
-
-        console.log("Total Data:", totalCount);
 
         // Hitung offset berdasarkan halaman
         const skip = (page - 1) * limit;

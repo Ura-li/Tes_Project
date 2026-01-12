@@ -82,7 +82,6 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const targetStatus = searchParams.get("targetStatus");
 
-    // return console.log(targetStatus)
     const HEADER_MAP = {
       InOutCE: ["SO No.", "RMA No.", "CT Code New", "AWB No."],
 
@@ -310,8 +309,6 @@ export async function POST(req) {
               },
               data: updatedFieldMOLITarget,
             });
-            console.log("MOLI", updatedMoli)
-            console.log(`Updated LineItemID ${item.LineItemID}`);
             /**
              * TODO FOR SLAMET
              * MAPPING TARGET RMA STATUS
@@ -393,7 +390,6 @@ export async function POST(req) {
           
         }, {timeout: 50000});
       } catch (error) {
-        console.log(error);
         errors.push({ soNumber, message: error.message });
       }
     }

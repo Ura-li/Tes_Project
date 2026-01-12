@@ -29,7 +29,6 @@ export async function GET(request, { params }) {
       data: failure,
     });
 
-    console.log(failure);
   } catch (error) {
     console.error("🔥 ERROR:", error);
     return NextResponse.json({

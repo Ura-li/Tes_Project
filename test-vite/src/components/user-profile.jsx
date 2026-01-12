@@ -127,9 +127,6 @@ export function UserProfile() {
         Object.entries(formData).forEach(([key, value]) => {
             if (value) fd.append(key, value)
         })
-        for (let pair of fd.entries()) {
-            console.log(pair[0], pair[1]);
-        }
 
 
         try {
@@ -154,7 +151,6 @@ export function UserProfile() {
     }
 
     const { data: dominantHex } = useColor(preview.ProfilePhoto, 'hex', { crossOrigin: 'anonymous' });
-    console.log("Data : ",dominantHex)
     
     return (
         <div className="  flex  justify-center  items-center  h-full ">

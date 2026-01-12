@@ -178,7 +178,6 @@ export async function POST(request) {
       createdBy,
       caseId
     } = body;
-    // return console.log("POST",body)
 
     if (!quotationNo) {
       return NextResponse.json(

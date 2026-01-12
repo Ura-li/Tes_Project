@@ -69,7 +69,6 @@ export async function PATCH(request, { params }) {
       caseId,
       createdBy
     } = body;
-    // return console.log(body);
 
     if (!Array.isArray(lineItems) || lineItems.length === 0) {
       return NextResponse.json(
@@ -217,7 +216,6 @@ export async function PATCH(request, { params }) {
       },
     };
     
-    // return console.log("Apa ini:",normalizedLineItems)
     const quotation = await prisma.$transaction(async (tx) => {
       const existingLineItems = await tx.quotation_lineitem.findMany({
         where: { QuotationNo },
