@@ -5,6 +5,8 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+
 }
 
 model asset_information {
@@ -585,7 +587,7 @@ model test_table {
 
 model User {
   IDUser       Int       @id @default(autoincrement())
-  Email        String    @unique @db.VarChar(255)
+  Email        String?    @unique @db.VarChar(255)
   Username     String    @unique @db.VarChar(100)
   Password     String    @db.VarChar(255)
   Name         String    @db.VarChar(255)
