@@ -9,8 +9,6 @@ export async function POST(req) {
     const caseId = formData.get("caseId");
     const files = formData.getAll("files");
 
-    console.log("formdata files", formData);
-    console.log("files", files);
     if(!caseId){
         return NextResponse.json({error: "Missing caseid"}, {status: 400})
     }

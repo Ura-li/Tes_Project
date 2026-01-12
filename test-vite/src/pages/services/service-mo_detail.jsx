@@ -92,7 +92,7 @@ export const ServiceMoDetail = () => {
       const data = res.data.data;
   
       setMoLineItems(data);
-      console.log(data)
+      
   
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
@@ -160,7 +160,6 @@ export const ServiceMoDetail = () => {
         OtherReason: MODetailInput.otherReason,
       });
   
-      console.log("Material Order Line Item updated successfully.");
     } catch (error) {
       console.error("Error updating Material Order Line Item:", error);
     }
@@ -607,7 +606,6 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
       failureId: selected.value,
       failureName: selected.label,
     }));
-    console.log("selected.value",selected.value)
   };
 
   // Handle focus and blur events

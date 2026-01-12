@@ -316,10 +316,7 @@ export const FlowCaseData = (user) => {
       setCurrentPage(page);
     }
   };
-
   const allowedRoles = ["fd", "admin"];
-console.log("CHECK DATA CASE",filteredCases)
-
   const navigate = useNavigate();
   return (
     <>

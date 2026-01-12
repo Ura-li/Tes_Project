@@ -302,7 +302,6 @@ export const TabsServiceWO = () => {
           }
         );
 
-        console.log("wo:",res)
          await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.WOID}`,
@@ -413,7 +412,7 @@ export const TabsServiceWO = () => {
           await ApiCustomer.post("/api/actionlog", {
             CaseId: `${workOrders.CaseID}`,
             ReferenceId: `${workOrders.CaseID}`,
-            model: "CaseOwner",
+            model: "Case Owner",
             dataOld: String(previousOwnerId ?? ""),
             dataNew: String(newOwnerId ?? ""),
             changedBy: token.user.id,

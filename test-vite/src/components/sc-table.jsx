@@ -51,12 +51,6 @@ export function TableCompany({
   }) {
 
 
-
-
-    useEffect(() => {
-      console.log("Updated selectedContact 123:", selectedContact);
-    }, [selectedContact]); //  Logs the updated value when `selectedAsset` changes
-
     const [checkedCompanies, setCheckedCompanies] = useState({});
     const [relatedData, setRelatedData] = useState({}); // Stores related contacts/assets
 
@@ -77,7 +71,6 @@ export function TableCompany({
 
   //refactor any Data to Arry for accepting table
   
-  console.log("Final company in TableCompany:", companyBasedOnContactsSearch); //  Debugging log
   const companyData = Array.isArray(selectedCompany) && selectedCompany.length > 0
   ? selectedCompany[0] // Take the first company from array
   : selectedCompany && Object.keys(selectedCompany).length > 0
@@ -88,18 +81,6 @@ export function TableCompany({
   ? companyBasedOnContactsSearch[0] // Take the first company from array
   : null;
 
-
-  console.log("Selected Asset : ", selectedAsset)
-
-  // const companies = companyData ? [
-  //   {
-  //     key: companyData.SiteAccountID,
-  //     company: companyData.Company,
-  //   },
-  //   {
-  //     text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone : ${companyData.PrimaryPhone}`,
-  //   },
-  // ] : [];
 
 
   //contacts
@@ -120,11 +101,6 @@ export function TableCompany({
       }))
     : [];
 
-
-  console.log("Final contact in TableCompany:", selectedContact); //  Debugging log
-  console.log("Final contact in TableCompany:", contactsBasedOnContactsSearch); //  Debugging log
-  
-  // const contactData = contacts.length > 0 ? contacts[0] : contactsBasedOnContactsSearch.length > 0 ? contactsBasedOnContactsSearch : [];
   const contactData = Array.isArray(contacts) && contacts.length > 0
   ? contacts
   : Array.isArray(contactsBasedOnContactsSearch) && contactsBasedOnContactsSearch.length > 0
@@ -193,20 +169,9 @@ export function TableCompany({
         });
       }
     })
-    // companies.push(...contactData.map(contact => ({
-    //   key: contact.ContactID,
-    //   company: `${contact.FirstName} ${contact.LastName} (Contact)`,
-    //   type: 'contacts',
-    //   text: `Email: ${contact.Email} | Phone: ${contact.Phone} | Country: ${contact.Country}`,
-    // })));
   }
-  console.log("Company Data : ",companyData)
-  console.log("Contact Data : ",contactData)
-  console.log("Total Companies Checkbox Data : ",companies)
-
 
   //asset
-  // const assets = Array.isArray(selectedAsset) ? selectedAsset : [];
   const assets = Array.isArray(selectedAsset) && selectedAsset.length > 0 
   ? selectedAsset.map((asset) => ({
       AssetID: asset.AssetID,
@@ -231,13 +196,9 @@ export function TableCompany({
       ...prevChecked,
       [company.key]: newCheckedState,
     }));
-    
-    console.log("company variable checked : ",checkedCompanies)
     if (newCheckedState) {
       try {
         //check the type of search checked
-        // console.log("Type after checked company",company.type)
-        // console.log("Key after checked company",company.key)
         setLoadingAssets(true);
         setLoadingContacts(true);
         let response = [];
@@ -255,7 +216,6 @@ export function TableCompany({
           }));
   
           //  Ensure correct state updates
-          console.log("Fetched Checking:", result.data);
           if (result.data.assets.length > 0) {
             setSelectedAsset(result.data.assets);
           } else {
@@ -267,9 +227,7 @@ export function TableCompany({
           } else {
             setSelectedContact([]);
           }
-  
-          console.log(`Company ${company.company} has contact:`, result.data.contacts.length > 0);
- 
+
         }
       } catch (err) {
         console.error("Error fetching company affiliations:", err);
@@ -285,11 +243,9 @@ export function TableCompany({
   }
    const handleSelectedAssetForCaseRelated = async (asset) => {
     setSelectedAssetForCase(asset);
-    console.log("Asset in Selected Asset For Case Related : ", asset);
     try{
       const response = await ApiCustomer(`/api/asset-information/${asset.AssetID}`)
       const assetRelated = response.data.data;
-      console.log("Asset in ApiCustomer Asset For Case Related : ", assetRelated);
   
       if (assetRelated.contactID !== null) {
         setSelectedContact(assetRelated.contact_information); //  Auto-select related contact
@@ -302,16 +258,6 @@ export function TableCompany({
   };
 
   
-  // useEffect(() => {
-  //   console.log("Checked Companies : ",checkedCompanies);
-  // }, [checkedCompanies]); //  Run only when `companies` updates
-  
-  console.log("selectedAsset:", selectedAsset);
-  console.log("selectedCompany:", selectedCompany);
-  console.log("selectedContact:", selectedContact);
-
-
-  console.log("selectedContactForCase in BtnModalAsset:", selectedContactForCase);
 
   // Ensure checkbox is checked if a company or at least one contact exists
   
