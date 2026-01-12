@@ -276,7 +276,7 @@ export const TabsServiceWO = () => {
       });
       
       const tokenUser = getUserFromToken();
-      
+      // ** (perhaps still needed) **
       // if (
       //   !tokenUser ||
       //   (String(tokenUser.role).toLowerCase() !== "ce" &&
@@ -549,6 +549,8 @@ export const TabsServiceMO = ({
               Swal.showLoading();
             },
           });
+
+          // ** (perhaps still needed) **
           // Role guard: only CE can close MO
           // const tokenUser = getUserFromToken();
           // if (
