@@ -474,7 +474,7 @@ export async function PATCH(request, { params }) {
           },
         },
       });
-    });
+    },{timeout: 60000});
 
     return NextResponse.json({
       success: true,

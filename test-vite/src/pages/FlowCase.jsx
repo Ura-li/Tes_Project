@@ -65,10 +65,10 @@ export const FlowCaseData = (user) => {
     try {
       const response = await ApiCustomer.get('/api/case-information');
       const filtercases = response.data.data.filter(c => {
-      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'FinishRepair';
+      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'Cancel';
         
       if (isToggleUser && !filterClose) {
-        return c?.CaseStatus === "Close"
+        return (c?.CaseStatus === "Close" || c.CaseStatus === "Cancel")
       }
       if (isToggleUser && !filterFinish) {
         return c?.CaseStatus === "FinishRepair"
@@ -134,6 +134,7 @@ export const FlowCaseData = (user) => {
   const filteredCases = caseData
     .filter(c => {
       const isCreatedBy = c?.caseinformation?.CreatedBy == user.user.id;
+
       const isOwner = c?.Owner == user.user.id;
       const matchesStatus =
         !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
@@ -177,7 +178,7 @@ export const FlowCaseData = (user) => {
         (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
         (filters.Status === "" || c.CaseStatus === filters.Status) &&
         (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
-        (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner)) &&
+        (filters.Role === "" || (filters.Role === "CreatedBy" && c.caseinformation.CreatedBy === user.user.id) || (filters.Role === "Owner" && c.caseinformation.Owner === user.user.id)) &&
           isInCreatedRange &&
         isInTimeLength
       );
@@ -284,9 +285,9 @@ export const FlowCaseData = (user) => {
 
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 6;
+  const [pageSize, setPageSize] = useState(5);
   // if the window width size more than 2400px set page size to 12
-  const totalPages = Math.ceil(filteredCases.length / PAGE_SIZE);
+  const totalPages = Math.ceil(filteredCases.length / pageSize);
   const MAX_PAGES_SHOWN = 3;
   const getPaginationPages = () => {
     if (totalPages <= MAX_PAGES_SHOWN) {
@@ -302,9 +303,13 @@ export const FlowCaseData = (user) => {
   };
   const paginationPages = getPaginationPages();
   const currentPageData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredCases.slice(start, start + PAGE_SIZE);
-  }, [filteredCases, currentPage]);
+    const start = (currentPage - 1) * pageSize;
+    return filteredCases.slice(start, start + pageSize);
+  }, [filteredCases, currentPage, pageSize]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -313,17 +318,18 @@ export const FlowCaseData = (user) => {
   };
 
   const allowedRoles = ["fd", "admin"];
+console.log("CHECK DATA CASE",filteredCases)
 
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
+      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"} id='your-case'>
         <SidebarInset className={"dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
           <div className="flex flex-col w-full ">
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
                 {isToggleUser &&
-                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md">
+                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md" id='case-toggle'>
                   <Switch
                     checked={filterFinish === false}
                     onCheckedChange={(checked) => {
@@ -361,7 +367,7 @@ export const FlowCaseData = (user) => {
               </div>
             </div>
 
-            <div className="space-y-3 p-5">
+            <div className="space-y-3 p-5" >
               {renderer ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i} className="p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
@@ -374,16 +380,16 @@ export const FlowCaseData = (user) => {
                     key={c.CaseID}
                     className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700",
                       c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600" :
-                      c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
+                      (c.CaseStatus === "Close" || c.CaseStatus === "Cancel") ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
                         c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
                     )}
-                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)} id='case-card'
                   >
                     <div>
                       <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
                       <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
                     </div>
-                    <div className="flex flex-col items-center gap-2 align-middle">  
+                    <div className="flex flex-col items-center gap-2 align-middle" id='case-badge'>  
                         <div className="space-x-2 justify-center inline-flex">
                           {c?.caseinformation?.asset_information
                             ?.WarrantyOTCCode?.WarrantyCondition ===
@@ -413,7 +419,7 @@ export const FlowCaseData = (user) => {
                 ))
               )
             }
-              <Pagination className="flex justify-start">
+              <Pagination className="flex justify-start" id='case-pagination'>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
@@ -482,6 +488,18 @@ export const FlowCaseData = (user) => {
                   </div>
 		
                 </PaginationContent>
+                <div className="flex items-center ml-4 gap-2">
+                  <span className="text-sm">Page Size:</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="border rounded-md p-1 dark:bg-slate-800"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </Pagination>
               {error ? <h1 className="text-center text-destructive dark:text-red-500">Something went wrong</h1> : ""}
             </div>

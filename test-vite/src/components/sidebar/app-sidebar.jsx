@@ -97,7 +97,7 @@ export function AppSidebar({
           },
           {
             title: "Product Type",
-            url: "/app/master/ProductType_table ",
+            url: "/app/master/ProductType_table",
             icon: Tag
           },
                   
