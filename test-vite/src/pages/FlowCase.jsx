@@ -252,13 +252,14 @@ export const FlowCaseData = (user) => {
   if (caseData) {
     groupedDataTime = dataTime.map((t) => {
       const filt = caseData.filter((data) => {
-        const dataStatus = data.UpdatedActionLogs[0]?.dataNew;
-
+        // const dataStatus = data.UpdatedActionLogs[0]?.dataNew;
+        const dataStatus = data.CaseStatus
         return (
-          dataStatus?.replace("Finish Repair","").toLowerCase() ===
-          t.status?.replace("FinishRepair","").toLowerCase() || 
-          dataStatus?.replace("Part Request","").toLowerCase() ===
-          t.status?.replace("PartRequest","").toLowerCase() 
+          // dataStatus?.replace("Finish Repair","").toLowerCase() ===
+          // t.status?.replace("FinishRepair","").toLowerCase() || 
+          // dataStatus?.replace("Part Request","").toLowerCase() ===
+          // t.status?.replace("PartRequest","").toLowerCase() 
+          dataStatus === t.status
         )
       }
       );
