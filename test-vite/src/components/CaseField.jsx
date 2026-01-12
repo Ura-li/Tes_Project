@@ -13,7 +13,7 @@ const spanMap = {
     6: "lg:col-span-6",
 };
 
-const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide}) => {
+const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide, labelId, fieldId }) => {
     if (hide) return null;
     
     // Determine which lock to use
@@ -28,7 +28,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
         <>
             <Label className={twMerge(
                 `font-normal flex  items-center gap-4 text-md ${className}`
-            )}>
+            )}  id={labelId}>
                 {IconComponent ? (
                     <IconComponent className="size-4 shrink-0" />
                 ) : (
@@ -37,7 +37,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
                 {label}
                 {star ? <span className="text-red-400 dark:text-[#FF8A80]">*</span> : ""}
             </Label>
-            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex")}>
+            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex")} id={fieldId}>
                 {modifiedChildren}
             </CardTitle>
         </>

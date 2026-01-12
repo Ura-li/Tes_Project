@@ -77,9 +77,9 @@ export default function Logistik() {
 
 
     return (
-      <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
+      <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full" id='dashboard'>
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3 ">
-            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
+            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"} id='profile'>
                 <CardHeader className={"grid grid-cols-2 items-start"}>
                     {!preview.ProfilePhoto && (
                     <div className="flex justify-start">
@@ -115,7 +115,7 @@ export default function Logistik() {
                 </span>
             </Card>
 
-             <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
+             <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"} id='sparepart'>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2">
@@ -226,7 +226,7 @@ export default function Logistik() {
         </CardFooter>
             </Card>
 
-        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"} id='notifications'>
             <CardHeader>
                 <CardTitle>Notifications</CardTitle>
             </CardHeader>

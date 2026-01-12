@@ -153,7 +153,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   caseDetails: null,
   entitlementStatus: initialEntitlement,
   dpList: initialDpList,
-
   
   caseForm: {
     CaseType: "",
@@ -1107,6 +1106,7 @@ const hasIntentToSave = isDirty;
                   }
                 }
               } catch (err: any) {
+                console.error("Error during update:", err);
                 toast.error("Update gagal",err)
               }
             }

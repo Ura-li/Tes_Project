@@ -148,3 +148,19 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+label:has(+ .driver-active-element),
+label:has(+ * .driver-active-element) {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+/* Optional subtle background (safe, no collision) */
+label:has(+ .driver-active-element) {
+  z-index: 10001;
+  background: rgba(255, 255, 255);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-right: 4px;
+  transition: all 0.3s ease-in-out;
+}

@@ -21,10 +21,28 @@ export async function GET(request) {
   const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
   const Owner = searchParams.get("IDUser");
   const resourceTarget = searchParams.get("resource");
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
   // return console.log("ID ",resource)
 
 
   // const resourceTarget = searchParams.get("resource");
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+
+    if (end - start > oneYearMs) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Date range maksimal adalah satu tahun"
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   //prisma query filter
   const filters = {};
@@ -65,6 +83,17 @@ export async function GET(request) {
         },
       },
     ];
+  }
+  if (startDate || endDate) {
+    filters.CreatedOn = {};
+
+    if (startDate) {
+      filters.CreatedOn.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+      filters.CreatedOn.lte = new Date (endDate + "T23:59:59");
+    }
   }
 
   const finalWhere = {
