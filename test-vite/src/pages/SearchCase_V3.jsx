@@ -1188,7 +1188,7 @@ export default function NewCaseForm() {
         resources: savedTeamId
       };
 
-      Swal.fire({
+      const confirmcreate = await Swal.fire({
         title: "Apakah data tersebut sudah benar ?",
         text: "Tolong check kembali data yang telah di input!",
         icon: "warning",
@@ -1198,6 +1198,8 @@ export default function NewCaseForm() {
         confirmButtonText: "Iya",
         cancelButtonText: "Tidak"
       })
+
+      if (!confirmcreate.isConfirmed) return;
 
       const res = await ApiCustomer.post("/api/case-information/create-case",compositePayload);
       const createdCase = res.data?.data?.case;
@@ -1316,7 +1318,7 @@ export default function NewCaseForm() {
                     setSerialQuery(v);
                     searchAsset(v);
                   }}
-                  className={"dark:text-white dark:border-gray-400"}
+                  className={"dark:text-white dark:border-gray-400 ring-1 ring-gray-400"}
                 />
                 <Button variant="outline" type="button" onClick={() => searchAsset.flush()} className={"dark:bg-cyan-700 cursor-pointer dark:border-gray-400"}>
                   <Search className="w-4 h-4" />
@@ -1376,7 +1378,7 @@ export default function NewCaseForm() {
                     setCustomerQuery(v);
                     searchCustomer(v);
                   }}
-                  className={"dark:text-white dark:border-gray-400"}
+                  className={"dark:text-white dark:border-gray-400 ring-1 ring-gray-400"}
                 />
                 <Button variant="outline" type="button" onClick={() => searchCustomer.flush()} className={"dark:bg-cyan-700 cursor-pointer dark:border-gray-400"}>
                   <Search className="w-4 h-4" />
@@ -1553,7 +1555,7 @@ export default function NewCaseForm() {
           <CardContent className="space-y-6">
             <div className="grid grid-flow-row  gap-4 ">
               {/* Customer */}
-              <div className="space-y-2 border-2 p-2 dark:border-gray-400 dark:rounded-sm">
+              <div className="space-y-2  p-2 dark:border-gray-400 dark:rounded-sm">
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Salutation<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <div className="col-span-2">
@@ -1693,7 +1695,7 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center pt-4 border-t">
                       <Label className="col-span-1">Nama PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input
-                        className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                        className={"dark:text-white ring-gray-400 ring-1 dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Nama PIC"
                         value={contactPICName}
                         onChange={(e) => setContactPICName(e.target.value)}
@@ -1702,7 +1704,7 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Email PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input
-                        className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                        className={"dark:text-white ring-gray-400 ring-1 dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Email PIC"
                         type="email"
                         value={contactPICEmail}
@@ -1711,7 +1713,7 @@ export default function NewCaseForm() {
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
+                      <Input className={"dark:text-white ring-gray-400 ring-1 dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
                     </div>
                   </>
                 )}

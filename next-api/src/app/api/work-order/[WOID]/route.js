@@ -27,6 +27,10 @@ export async function GET(request, {params}) {
                   asset_information: true,
                 }
               },
+              materialorder: {
+                include: {
+                  materialorderlineitems: true,
+                }},
               NMU: true,
               NMUItem: true,
               ServiceType: true,

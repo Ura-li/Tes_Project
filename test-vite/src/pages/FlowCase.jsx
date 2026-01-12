@@ -65,10 +65,10 @@ export const FlowCaseData = (user) => {
     try {
       const response = await ApiCustomer.get('/api/case-information');
       const filtercases = response.data.data.filter(c => {
-      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'FinishRepair';
+      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'Cancel';
         
       if (isToggleUser && !filterClose) {
-        return c?.CaseStatus === "Close"
+        return (c?.CaseStatus === "Close" || c.CaseStatus === "Cancel")
       }
       if (isToggleUser && !filterFinish) {
         return c?.CaseStatus === "FinishRepair"
@@ -134,6 +134,7 @@ export const FlowCaseData = (user) => {
   const filteredCases = caseData
     .filter(c => {
       const isCreatedBy = c?.caseinformation?.CreatedBy == user.user.id;
+
       const isOwner = c?.Owner == user.user.id;
       const matchesStatus =
         !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
@@ -177,7 +178,7 @@ export const FlowCaseData = (user) => {
         (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
         (filters.Status === "" || c.CaseStatus === filters.Status) &&
         (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
-        (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner)) &&
+        (filters.Role === "" || (filters.Role === "CreatedBy" && c.caseinformation.CreatedBy === user.user.id) || (filters.Role === "Owner" && c.caseinformation.Owner === user.user.id)) &&
           isInCreatedRange &&
         isInTimeLength
       );
@@ -233,6 +234,8 @@ export const FlowCaseData = (user) => {
     { status: "Pending_Quote", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Quote_Requested", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Escalated", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "RepairProgress", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "PartAvailable", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
     { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
     { status: "Close", data: { ...emptyData }, hide: filterClose }
@@ -255,7 +258,7 @@ export const FlowCaseData = (user) => {
           dataStatus?.replace("Finish Repair","").toLowerCase() ===
           t.status?.replace("FinishRepair","").toLowerCase() || 
           dataStatus?.replace("Part Request","").toLowerCase() ===
-          t.status?.replace("PartRequest","").toLowerCase()
+          t.status?.replace("PartRequest","").toLowerCase() 
         )
       }
       );
@@ -315,6 +318,7 @@ export const FlowCaseData = (user) => {
   };
 
   const allowedRoles = ["fd", "admin"];
+console.log("CHECK DATA CASE",filteredCases)
 
   const navigate = useNavigate();
   return (
@@ -376,7 +380,7 @@ export const FlowCaseData = (user) => {
                     key={c.CaseID}
                     className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700",
                       c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600" :
-                      c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
+                      (c.CaseStatus === "Close" || c.CaseStatus === "Cancel") ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
                         c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
                     )}
                     onClick={() => navigate(`/app/case/${c.CaseID}`)} id='case-card'
