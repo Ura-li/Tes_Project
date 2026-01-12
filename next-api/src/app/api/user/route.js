@@ -26,6 +26,7 @@ export async function GET(request) {
         { Username: { contains: search } },
         { Name: { contains: search } },
         { Phone: { contains: search } },
+        { Role: {contains: search }},
       ];
     }
 
