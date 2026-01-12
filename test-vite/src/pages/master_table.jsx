@@ -957,54 +957,54 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[75vh] overflow-auto overscroll-contain
+      <div className="relative w-full max-h-[600px] overflow-auto overscroll-contain
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className="min-w-full border-collapse text-xs sm:text-sm">
+        <Table className="min-w-full border-collapse text-[10.5px] leading-[1.15]">
           <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
             <TableRow className="text-slate-800 dark:text-slate-100">
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
                 Company  {getSortIcon("Company")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("PrimaryPhone")}>
                 Primary Phone {getSortIcon("PrimaryPhone")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("WhatsappNo")}>
                 Whatsapp {getSortIcon("WhatsappNo")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
-              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("NPWP")}>
                 NPWP {getSortIcon("NPWP")}
               </TableHead>
@@ -1016,20 +1016,20 @@ export const Company_table = () => {
               currentData.map((c, i) => (
                 <TableRow key={c.SiteAccountID}
                     className={`hover:bg-blue-50/70 dark:hover:bg-slate-700 ${i % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-gray-50 dark:bg-slate-800/80"}`}>
-                  <TableCell className="p-3 text-center border border-slate-200 dark:border-slate-800">
+                  <TableCell className="px-2 py-1 text-[11px] text-center border border-slate-200 dark:border-slate-800">
                     {(currentPage - 1) * itemsPerPage + i + 1}
                   </TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Company}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-normal break-words align-top max-w-[260px] sm:max-w-[320px]">{c.AddressLine1}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.City}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.ZipPostalCode}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.NPWP}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Company}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-[10.5px] border border-slate-200 dark:border-800 align-center"> <div className=" whitespace-normal break-words w-100 max-h-[8.4em] leading-[1.2] oferflow-hidden cursor-help" title={c.AddressLine1}>{c.AddressLine1}</div></TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.City}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.ZipPostalCode}</TableCell>
+                  <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.NPWP}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-3 border border-slate-200 dark:border-slate-800">
                     <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
                     <CompanyDelete siteAccountId={c.SiteAccountID}
@@ -1142,6 +1142,17 @@ export const Company_table = () => {
   );
 };
 
+const getToday = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+const getOneYearAgo = () => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 1);
+  return d.toISOString().split("T")[0];
+};
+
 export const Case_table = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
@@ -1163,6 +1174,8 @@ export const Case_table = () => {
   const [selectedCaseType, setSelectedCaseType] = useState(null);
   const [selectedWarrantyType, setSelectedWarrantyType] = useState(null);
   const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState(null);
+  const [startDate, setStartDate] = useState(getOneYearAgo);
+  const [endDate, setEndDate] = useState(getToday);
 
   // 🔹 Sort state
   const [sortConfig, setSortConfig] = useState({
@@ -1181,6 +1194,19 @@ export const Case_table = () => {
 
   // 🔹 Fetch data
   const fetchCaseDataTable = async () => {
+    // if (startDate && endDate) {
+    //   const start = new Date(startDate);
+    //   const end = new Date(endDate);
+
+    //   const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+
+    //   if (end - start > oneYearMs) {
+    //     Swal.fire({
+    //       icon: "warning",
+    //       title
+    //     })
+    //   }
+    // }
     /**
      * THIS IS THE TEMPORARY FIX
      * THE RESOURCE ID IS EXPOSED WHILE DOING THIS
@@ -1198,6 +1224,14 @@ export const Case_table = () => {
     // purely optional debug param:
     if (!isAdmin) {
       params.append("resource", savedTeamId);
+    }
+
+    if (startDate) {
+      params.append("startDate", startDate);
+    }
+
+    if (endDate) {
+      params.append("endDate", endDate);
     }
 
     const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
@@ -1223,21 +1257,37 @@ export const Case_table = () => {
       }
       Swal.close();
     } catch (err) {
-      toast.error("Error fetching case data:",err)
-      setError("Error fetching data");
       Swal.close();
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data perusahaan.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+
+      // 👉 cek apakah error dari backend
+      if (err.response) {
+        const message = err.response.data?.message || "Terjadi kesalahan";
+
+        toast.error(message);
+
+        Swal.fire({
+          title: "Range melebihi batas",
+          text: message,
+          icon: "info",
+          confirmButtonText: "OK",
+        });
+      } else {
+        // 👉 error jaringan / timeout / dll
+        toast.error("Network error");
+
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal terhubung ke server.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
     }
   };
 
   useEffect(() => {
     fetchCaseDataTable();
-  }, [openClose]);
+  }, [openClose, startDate, endDate]);
 
   // 🔹 Unique dropdown values
   const uniqueHW = ["All", ...new Set(caseData.map((c) => c.HW))];
@@ -1480,6 +1530,8 @@ const sortedData = useMemo(() => {
     setSelectedCaseType(null);
     setSelectedWarrantyType(null);     
     setSelectedWarrantyStatus(null);
+    setStartDate(getOneYearAgo());
+    setEndDate(getToday());
   };
 
   // 🔹 Handle sort
@@ -1684,6 +1736,18 @@ const EnumToLabel = {
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Created Date (From)</label>
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="p-2 text-sm border rounded-lg"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Created Date (To)</label>
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="p-2 text-sm border rounded-lg"
           />
         </div>
 
