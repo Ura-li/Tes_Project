@@ -43,7 +43,7 @@ export async function POST(req) {
     const rows = sheet.map((row, idx) => {
       const soNumber = normalize(row["SO No."]);
       const rmaNumber = normalize(row["RMA No."]);
-      const awbIn = normalize(row["AWB No."]);
+      const awbIn = normalize(row["AWB In No."]);
       const awbOut = normalize(row["AWB Out No."]);
       const removedSerial = normalize(row["CT Code New"]);
       const removedPart = normalize(row["CT Code Bad / Part SN"]);

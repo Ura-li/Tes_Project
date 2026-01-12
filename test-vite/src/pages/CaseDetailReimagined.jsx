@@ -44,7 +44,7 @@ export const TabsServiceCaseDetails = () => {
   const { user } = useAuth();
   const { open } = useSidebar();
   // TO DO : Slamet 
-  const  isResponsive  = useMediaQuery({query: '(max-width: 1824px)'})
+  // const  isResponsive  = useMediaQuery({query: '(max-width: 1824px)'})
 
   // ---- pull state from zustand ----
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
@@ -545,13 +545,13 @@ export const TabsServiceCaseDetails = () => {
   btn.roles.includes(user.role)
 );
 
-const visibleButtons = isResponsive
-  ? allowedButtons.slice(0, -2)   
-  : allowedButtons;              
+// const visibleButtons = isResponsive
+//   ? allowedButtons.slice(0, -2)   
+//   : allowedButtons;              
 
-const hiddenButtons = isResponsive
-  ? allowedButtons.slice(-2)      
-  : [];
+// const hiddenButtons = isResponsive
+//   ? allowedButtons.slice(-2)      
+//   : [];
 
   
   const handleInvoiceOpenChange = (nextOpen = true) => {
@@ -964,9 +964,8 @@ function fieldMO(caseDetails) {
         
         <div className="w-full overflow-x-auto no-scrollbar">
           
-          <div className="flex items-center min-w-max" id="case-buttons">
-            
-            {visibleButtons.map((btn, index) => (
+          <div className="flex items-center min-w-max">
+            {allowedButtons.map((btn, index) => (
               <Button
                 key={index}
                 onClick={btn.onClick}
@@ -983,7 +982,7 @@ function fieldMO(caseDetails) {
                 )}
               </Button>
             ))}
-            {hiddenButtons.length > 0 && (
+            {/* {hiddenButtons.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -1006,7 +1005,7 @@ function fieldMO(caseDetails) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-          )}
+          )} */}
             {(isTechRole && caseDetails?.CaseStatus !== "Close") && (
               <div className="shrink-0">
                 <BtnModalsServiceCatalog
@@ -3067,7 +3066,8 @@ useEffect(() => {
                     </TableHeader>
                     <TableBody>
                       {actionLogs?.length > 0 ? (
-                        actionLogs.map((log, index) => (
+                        [...actionLogs].sort((a,b) => new Date(b.ChangeAt) - new Date(a.ChangeAt))
+                        .map((log, index) => (
                           <TableRow key={log.id || index} className={cn(
                                             "hover:bg-blue-50/70 dark:hover:bg-slate-700",
                                             index % 2 === 0

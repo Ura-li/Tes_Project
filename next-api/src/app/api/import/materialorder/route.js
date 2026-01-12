@@ -389,10 +389,6 @@ export async function POST(req) {
               }
             })
           }
-
-           
-
-
           successes.push({ soNumber, updatedLines: moli.length, moli });
           
         }, {timeout: 50000});
@@ -401,10 +397,9 @@ export async function POST(req) {
         errors.push({ soNumber, message: error.message });
       }
     }
-    console.log(successes);
     return NextResponse.json({
       success: errors.length === 0,
-      message: `Processed ${sheet.length} rows.`,
+      message: `Upload ${sheet.length} rows SO/RMA NO Successes.`,
       updated: successes,
       errors: errors,
     });

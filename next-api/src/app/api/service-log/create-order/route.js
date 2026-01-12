@@ -201,7 +201,6 @@ export async function POST(request) {
                     noteLines.push(`UEFI No : ${part.UEFI_NO}`);
                 }
 
-
                 const requestedRecipient =
                     assignApo != null
                         ? (newOwnerName && newOwnerName !== "-" ? newOwnerName : String(assignApo))
@@ -287,8 +286,7 @@ export async function POST(request) {
                     },
                 });
             }
-
-            
+   
             const caseUpdateData = { CaseStatus: "PartRequest" };
             if(isOutWarranty) caseUpdateData.CaseStatus = "Quote_Requested"
 
@@ -300,29 +298,7 @@ export async function POST(request) {
                 where: { CaseID },
                 data: caseUpdateData,
             });
-
-            if (assignApoId !== null && assignApoId !== caseInfo.Owner) {
-                const ownerLog = await tx.ActionLog.create({
-                    data: {
-                        CaseID_toActionLog: {
-                            connect: { CaseID },
-                        },
-                        model: "CaseOwner",
-                        dataOld: oldOwnerName,
-                        dataNew: newOwnerName,
-                        changedByUser: ownerIdNumber
-                            ? {
-                                  connect: { IDUser: ownerIdNumber },
-                              }
-                            : undefined,
-                        logDescription: `Edit: change owner from ${oldOwnerName} to ${newOwnerName}`,
-                    },
-                    include: includeChangedBy,
-                });
-
-                createdLogs.push(ownerLog);
-            }
-
+          
             const statusLog = await tx.ActionLog.create({
                 data: {
                     CaseID_toActionLog: {
@@ -342,7 +318,26 @@ export async function POST(request) {
             });
             createdLogs.push(statusLog);
 
-           
+              if (assignApoId !== null && assignApoId !== caseInfo.Owner) {
+                const ownerLog = await tx.ActionLog.create({
+                    data: {
+                        CaseID_toActionLog: {
+                            connect: { CaseID },
+                        },
+                        model: "CaseOwner",
+                        dataOld: oldOwnerName,
+                        dataNew: newOwnerName,
+                        changedByUser: ownerIdNumber
+                            ? {
+                                  connect: { IDUser: ownerIdNumber },
+                              }
+                            : undefined,
+                        logDescription: `Edit: change owner from ${oldOwnerName} to ${newOwnerName}`,
+                    },
+                    include: includeChangedBy,
+                });
+                createdLogs.push(ownerLog);
+            }
 
             return { WOID, MOIDs: createdMOIDs, actionLogs: createdLogs };
         }, { timeout: 50000 })

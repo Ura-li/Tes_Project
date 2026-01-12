@@ -46,7 +46,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ExportExcel } from "@/components/Export-Excel";
-
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/auth-context";
 import {
@@ -60,6 +59,7 @@ import {
 import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 import { toast } from "sonner";
+import { STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -1213,7 +1213,7 @@ export const Case_table = () => {
      * I TRY ANOTHER METHOD WHEN THIS IS DONE
      *  -miku21
      */
-    const isAdmin = user?.role === 'admin';
+    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm';
     const savedTeamId = localStorage.getItem("activeTeamId");
     const baseurl = `/api/case-information`;
     const params = new URLSearchParams();
@@ -1221,8 +1221,7 @@ export const Case_table = () => {
       params.append("CaseStatus", openClose);
     }
 
-    // purely optional debug param:
-    if (!isAdmin) {
+    if (!isAgreeAllResource) {
       params.append("resource", savedTeamId);
     }
 
@@ -1564,39 +1563,6 @@ const sortedData = useMemo(() => {
     setGoToPageInput("");
   };
 
-const EnumToLabel = {
-  New : "New",
-  Open: "Open",
-  InActive: "In Active",
-  Close: "Close",
-  Active: "Active",
-  Monitor: "Monitor",
-  Pending_Customer_Action: "Pending Customer",
-  Quote_Requested: "Quote Requested",
-  Pending_Follow_Up: "Pending Follow Up",
-  Pending_Order: "Pending Order",
-  Escalated: "Escalated",
-  Quote_Approved: "Quote Approved",
-  Quote_Rejected: "Quote Rejected",
-  Pending_Quote: "Pending Quote",
-  NEW_AssignCE: "New Assign CE",
-  NEW_AssignAPO: "New Assign APO",
-  NEW_AssignLeader: "New Assign Leader",
-  NEW_AssignPS: "New Assign PS",
-  NEW_POPDoc: "POP Document",
-  NEW_Warranty: "New Warranty",
-  AssignCE: "Assign CE",
-  AssignAPO: "Assign APO",
-  AssignLeader: "Assign Leader",
-  AssignPS: "Assign PS",
-  PartOrder: "Part Order",
-  PartRequest: "Part Request",
-  PartRequestLog: "Part Request Log",
-  PartAvailable: "Part Available",
-  RepairProgress: "Repair Progress",
-  FinishRepair: "Finish Repair",
-  Cancel: "Cancel"
-}
 
   return (
     <div id="view-all-case" className="grid p-6 grid-cols-1 w-full rounded-2xl
@@ -1780,7 +1746,7 @@ const EnumToLabel = {
           >
             Reset Filters
           </Button>
-           {user?.role === 'admin' || user?.role === 'fd' ? 
+           {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ? 
           <ExportExcel caseData={caseData} />
           : null}
         </div>
@@ -1890,7 +1856,7 @@ const EnumToLabel = {
                       "bg-amber-300/80 border-amber-400 text-amber-900 font-extrabold shadow-sm dark:bg-amber-600/80 dark:border-amber-500 dark:text-amber-100"
                   )}
                 >
-                 {EnumToLabel[caseItem.CaseStatus]}
+                 {STATUS_ENUM_TO_LABEL[caseItem.CaseStatus]}
                 </TableCell>
               </TableRow>
             ))}

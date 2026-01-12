@@ -13,6 +13,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { Input } from "../ui/input";
 
 export function SOTemplateButton({ target = "" }) {
   const handleDownload = () => {
@@ -141,13 +142,13 @@ export function SOImport({ target, dateRMA }) {
   };
 
   return (
-    <div className="flex flex-col items-start space-y-4 w-full">
+    <div className="mt-2 flex flex-col items-start space-y-4 w-full">
       <div className="flex items-center space-x-3">
-        <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
         <Button variant="outline" onClick={() => handlePreview()} className={"dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-2 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"}>
           {previewLoading ? "Previewing..." : "Preview Import"}
         </Button>
         <Button variant="outline" onClick={handleImport} className={"dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-2 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"} >Import Asset Data</Button>
+      <Input variant={"outline"} type="file" accept=".xlsx, .xls" onChange={handleFileUpload}/>
       </div>
 
       {previewError && (
@@ -164,7 +165,6 @@ export function SOImport({ target, dateRMA }) {
 
       {previewRows.length > 0 && (
         <div className="w-full overflow-auto rounded-md border border-dashed border-slate-300 dark:border-slate-600">
-
             <Table className="min-w-full border-collapse text-xs sm:text-sm">
             <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
                 <TableRow className="text-slate-800 dark:text-slate-100">
@@ -245,7 +245,7 @@ export function SOImport({ target, dateRMA }) {
             </TableBody>
             </Table>
         </div>
-        )}
+      )}
 
     </div>
   );
