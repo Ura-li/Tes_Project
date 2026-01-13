@@ -13,7 +13,6 @@ export async function GET(request) {
 
     const woid = searchParams.get('WOID') || '';
 
-    console.log('Query Params:', { search, page, limit });
 
     const whereCondition = {
       WOID: woid || undefined, // filter by WOID if given
@@ -93,7 +92,6 @@ export async function POST(request) {
     }
 
     const workorder = caseinfo.workorder.find(work => work.WOID = woid)
-    console.log("CASE INFO WO BOOKING Owner : ", workorder?.owner?.IDUser)
 
     const result = await prisma.$transaction(async (tx) => {
       //get work order data
@@ -120,7 +118,6 @@ export async function POST(request) {
           }
         })
 
-        console.log("engineer : ",engineer);
         if(!engineer || rolebooking.includes(!engineer?.Role)) throw new Error("Owner WO bukan engineer / tidak ditemukan");
         
         resourceIdFromEngineer = engineer.ResourceId ?? null;
@@ -138,7 +135,6 @@ export async function POST(request) {
         })
 
         
-        console.log("resource Account : ",resourceAccount)
         resourceAccountIdFromEngineer = resourceAccount[0].ResourceAccountId;
       }
       // 1. Buat booking

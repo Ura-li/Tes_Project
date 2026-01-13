@@ -8,7 +8,6 @@ export default function ModalProvider({
   selectedContactForCase,
  }) {
   const closeModal = () => setActiveModal(null)
-  console.log("Check for modal provide data",selectedContactForCase)
   return (
     <>
       {/* <AccountModal open={activeModal === "account"} onOpenChange={(open) => setActiveModal(open ? "account" : null)} /> */}

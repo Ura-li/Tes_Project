@@ -102,8 +102,7 @@ export const ServiceMaterialApo = () => {
       ...prev,
       [lineItemID]: newStatus
     }));
-    console.log("Handle Status Change ",lineItemID)
-    console.log("Handle Status Change ",newStatus)
+ 
   };
 
 
@@ -212,8 +211,6 @@ export const ServiceMaterialApo = () => {
         RMANumber: data.RMANumber || "",
       });
 
-      console.log("Fetched Material Order:", data);
-
       updateDraft("moid", data.MOID);
     } catch (err) {
       console.error("Failed to fetch material orders:", err);
@@ -282,8 +279,6 @@ export const ServiceMaterialApo = () => {
     canEditapo = allowedRoles.includes(user?.role);
   }
 
-  console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
-  
   return (
     <div>
       {materialOrders.OrderStatus === "Closed" ? (
@@ -466,7 +461,6 @@ export const ServiceMaterialApo = () => {
                     lock={!canEditapo}
                     star= {user?.role === 'apo'}
                   >
-                    {console.log("MATERIAL ORDER INFO ", materialOrderInformation)}
                     <DatePicker
                       value={materialOrderInformation?.DeliveryRequestedDate ? new Date(materialOrderInformation?.DeliveryRequestedDate) : null}
                       onChange={handleMaterialOrderChange("DeliveryRequestedDate")}

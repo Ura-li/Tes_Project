@@ -61,7 +61,6 @@ export const ServiceWork = () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${woid}`);
       setWorkOrders(res.data.data); // adjust based on API response shape
-      console.log("Fetch Work Order: ", res);
     } catch (err) {
       console.error("Failed to fetch work orders:", err);
     }
@@ -71,7 +70,6 @@ export const ServiceWork = () => {
   const fetchMaterialOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
-      console.log("Material Order in WO Detail : ", res);
       setMaterialOrders(res.data.data);
     } catch (err) {
       console.error("Failed to fetch Material orders:", err);
@@ -108,7 +106,6 @@ export const ServiceWork = () => {
           const resBooking = await ApiCustomer.get(
             `/api/bookings?WOID=${woid}`
           );
-          console.log("Res Booking : ", resBooking.data.data);
           setBookings(resBooking.data.data);
         }
 

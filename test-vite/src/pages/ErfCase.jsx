@@ -26,7 +26,7 @@ export const ErfCase = () => {
       setCaseData(data)
       return data
     } catch (err) {
-      console.log("THIS THING GIVE ME ERROR", err)
+      console.error("THIS THING GIVE ME ERROR", err)
     }
   }
 
@@ -62,7 +62,6 @@ export const ErfCase = () => {
     const res = await ApiCustomer.post("/api/case-information/erf", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    console.log(res.data);
 
     if (res.data.success) {
       toast.info(`Upload ERF Successs`)

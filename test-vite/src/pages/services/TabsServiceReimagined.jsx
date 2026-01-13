@@ -276,19 +276,19 @@ export const TabsServiceWO = () => {
       });
       
       const tokenUser = getUserFromToken();
-      
-      if (
-        !tokenUser ||
-        (String(tokenUser.role).toLowerCase() !== "ce" &&
-          String(tokenUser.role).toLowerCase() !== "celead")
-      ) {
-        Swal.close();
-        return Swal.fire({
-          icon: "error",
-          title: "Unauthorized",
-          text: "Only CE can close a Work Order.",
-        });
-      }
+      // ** (perhaps still needed) **
+      // if (
+      //   !tokenUser ||
+      //   (String(tokenUser.role).toLowerCase() !== "ce" &&
+      //     String(tokenUser.role).toLowerCase() !== "celead")
+      // ) {
+      //   Swal.close();
+      //   return Swal.fire({
+      //     icon: "error",
+      //     title: "Unauthorized",
+      //     text: "Only CE can close a Work Order.",
+      //   });
+      // }
 
       const statusTarget = isCancel ?  workOrders.SystemStatus :"CLOSED_POSTED";
 
@@ -302,7 +302,6 @@ export const TabsServiceWO = () => {
           }
         );
 
-        console.log("wo:",res)
          await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.WOID}`,
@@ -413,7 +412,7 @@ export const TabsServiceWO = () => {
           await ApiCustomer.post("/api/actionlog", {
             CaseId: `${workOrders.CaseID}`,
             ReferenceId: `${workOrders.CaseID}`,
-            model: "CaseOwner",
+            model: "Case Owner",
             dataOld: String(previousOwnerId ?? ""),
             dataNew: String(newOwnerId ?? ""),
             changedBy: token.user.id,
@@ -550,20 +549,22 @@ export const TabsServiceMO = ({
               Swal.showLoading();
             },
           });
+
+          // ** (perhaps still needed) **
           // Role guard: only CE can close MO
-          const tokenUser = getUserFromToken();
-          if (
-            !tokenUser ||
-            (String(tokenUser.role).toLowerCase() !== "ce" &&
-              String(tokenUser.role).toLowerCase() !== "celead")
-          ) {
-            Swal.close();
-            return Swal.fire({
-              icon: "error",
-              title: "Unauthorized",
-              text: "Only CE can close a Material Order.",
-            });
-          }
+          // const tokenUser = getUserFromToken();
+          // if (
+          //   !tokenUser ||
+          //   (String(tokenUser.role).toLowerCase() !== "ce" &&
+          //     String(tokenUser.role).toLowerCase() !== "celead")
+          // ) {
+          //   Swal.close();
+          //   return Swal.fire({
+          //     icon: "error",
+          //     title: "Unauthorized",
+          //     text: "Only CE can close a Material Order.",
+          //   });
+          // }
 
           // Validation: all MO line items must be Closed
           try {
