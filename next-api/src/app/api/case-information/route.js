@@ -154,7 +154,7 @@ export async function GET(request) {
     data: case_information.map((caseData) => ({
       CaseID: caseData.CaseID,
       // CreatedOn: caseData.CreatedOn,
-      CreatedOn: caseData.CreatedOn.toLocaleString("id-ID"),
+      CreatedOn: caseData.CreatedOn.toLocaleString(),
       UpdateOn: caseData.ActionLog[0]?.ChangeAt ,
       // Actionlog: caseData.ActionLog[0]?.ChangeAt,
       CaseSubject: caseData.CaseSubject,
