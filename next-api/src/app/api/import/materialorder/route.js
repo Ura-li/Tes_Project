@@ -390,6 +390,7 @@ export async function POST(req) {
           
         }, {timeout: 50000});
       } catch (error) {
+        console.log(error);
         errors.push({ soNumber, message: error.message });
       }
     }

@@ -117,6 +117,7 @@ export async function GET(request) {
         asset_information:{
           include: {
             product_information: { include: { product_type: true}},
+            WarrantyOTCCode: true,
           },
         },
         contact_information: {

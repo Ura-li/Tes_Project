@@ -17,6 +17,7 @@ async function main() {
       ProfilePhoto: 'https://example.com/profile.png',
     },
   });
+  console.log('✅ Admin user created  ');
 
   
 
@@ -33,6 +34,7 @@ async function main() {
 
   await prisma.partReturnStatus.deleteMany() // kosongkan dulu
   await prisma.partReturnStatus.createMany({ data: statuses })
+  console.log('✅ PartReturnStatus seeded.')
 
 
   const NMU = [
@@ -58,6 +60,8 @@ async function main() {
       },
     });
   }
+  
+  console.log('✅ NMU & NMUItem seeded successfully');
 
   
   const ProblemDesc = [
@@ -67,6 +71,8 @@ async function main() {
   
   await prisma.ServiceType.deleteMany();
   await prisma.ServiceType.createMany({data: ProblemDesc});
+
+  console.log('✅ Service Type seeded successfully');
   
 }
 
