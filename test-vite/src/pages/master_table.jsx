@@ -60,6 +60,7 @@ import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 import { toast } from "sonner";
 import { STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
+import { format } from "date-fns";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -1838,7 +1839,13 @@ const sortedData = useMemo(() => {
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseType}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedOn}</TableCell>
-                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual_Date ? 
+                  format(
+                    new Date(caseItem.caseinformation?.CaseID_Manual_Date),
+                    "yyyy-MM-dd HH:mm"
+                  )
+                  : "N/A"}
+                </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Primary}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedName}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Owner}</TableCell>
