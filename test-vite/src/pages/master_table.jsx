@@ -43,7 +43,7 @@ import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ExportExcel } from "@/components/Export-Excel";
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "@/components/ui/select";
@@ -60,6 +60,7 @@ import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 import { toast } from "sonner";
 import { STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
+import { format } from "date-fns";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -1837,8 +1838,19 @@ const sortedData = useMemo(() => {
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseType}</TableCell>
-                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedOn}</TableCell>
-                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedOn ? 
+                  format(
+                    new Date(caseItem.CreatedOn),
+                    "yyyy-MM-dd HH:mm"
+                  )
+                  : "N/A"}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual_Date ? 
+                  format(
+                    new Date(caseItem.caseinformation?.CaseID_Manual_Date),
+                    "yyyy-MM-dd HH:mm"
+                  )
+                  : "N/A"}
+                </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Primary}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedName}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Owner}</TableCell>

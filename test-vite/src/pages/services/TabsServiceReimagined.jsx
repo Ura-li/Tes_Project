@@ -663,6 +663,7 @@ export const TabsServiceMO = ({
       hidden:
         currentRole !== "ce" &&
         currentRole !== "celead" &&
+        currentRole !== "apo" &&
         currentRole !== "admin",
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
