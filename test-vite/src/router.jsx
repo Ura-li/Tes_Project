@@ -50,6 +50,7 @@ const Forbidden = lazy(() => import("./pages/forbidden"));
 const FrontDesk_Page = lazy(() => import("./layout/FrontDesk_Page"));
 import { ViewCase } from "./pages/ViewCase";
 import { UploadRma } from "./pages/uploadRMA";
+const ErrorPage = lazy(() => import("./lib/error/Errorpage"))
 
 // --- Master tables (same as before) ---
 const masterTables = {
@@ -217,6 +218,7 @@ export const router = createBrowserRouter([
   {
     path: "/app",
     element: <GateKeepingRouting />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Landing /> },
 
