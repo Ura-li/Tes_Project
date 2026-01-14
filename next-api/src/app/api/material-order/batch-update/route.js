@@ -207,7 +207,7 @@ export async function PATCH(request) {
         let logisticUser = await tx.user.findUnique({ where: { Username: "logis" } });
         if (!logisticUser) {
           logisticUser = await tx.user.findFirst({
-            where: { Role: { equals: "lg", mode: "insensitive" } },
+            where: { Role: { equals: "lg" } },
             orderBy: { IDUser: "asc" },
           });
         }
