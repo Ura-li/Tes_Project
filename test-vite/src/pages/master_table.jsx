@@ -34,6 +34,7 @@ import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
 import { NmuItemAdd, NmuItemEdit, NmuItemDelete } from "@/components/model/sc-modal";
 import { AssetTemplateButton, AssetImport } from "@/components/importFileComponent/AssetImport"
 import { ProductTemplateButton, ProductImport } from "@/components/importFileComponent/ProductImport"
+import { UserTemplateButton, UserImport } from "@/components/importFileComponent/UserImport"
 import { PartTemplateButton, PartImport } from "@/components/importFileComponent/PartImport"
 import { FailureAdd, 
   FailureEdit, 
@@ -4922,6 +4923,8 @@ const sortedData = useMemo(() => {
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 User Table</h2>
+      <UserImport />
+      <UserTemplateButton/>
 
       {/* Flexbox container for search input and Add button */}
       <div className="flex flex-warp items-center gap-2 mb-4 ">
