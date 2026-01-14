@@ -469,6 +469,7 @@ export const TabsServiceWO = () => {
 
 import { useMaterialOrderStore } from "@/hooks/useMaterialOrderStore";
 import { toast } from "sonner";
+import { isCancel } from "axios";
 // ...other imports...
 
 export const TabsServiceMO = ({
@@ -535,7 +536,7 @@ export const TabsServiceMO = ({
   };
 
   // close logic stays as your original saveAndCloseMaterialOrder for now
-  const saveAndCloseMaterialOrder = async () => {
+  const saveAndCloseMaterialOrder = async ({IsCancel}) => {
     // unchanged logic from your code: role guard, validate all line items closed,
     // patch OrderStatus: "Closed", log action, navigate back to WO
     // ...\
@@ -594,10 +595,13 @@ export const TabsServiceMO = ({
               text: "Unable to verify line items status. Try again.",
             });
           }
+
+          const statusMO = IsCancel ? "Cancelled" : "Closed";
+
           const res = await ApiCustomer.patch(
             `/api/material-order/${materialOrder.MOID}`,
             {
-              OrderStatus: "Closed",
+              OrderStatus: statusMO,
             }
           );
           if (res.data.success) {
@@ -613,6 +617,7 @@ export const TabsServiceMO = ({
               changedBy: token.user.id,
               logDescription: `Edit : Changed Material Order ${materialOrder.MOID} from ${materialOrder.OrderStatus} to ${res.data.data.OrderStatus}`,
             });
+
             Swal.fire({
               icon: "success",
               title: "Updated!",
@@ -644,7 +649,6 @@ export const TabsServiceMO = ({
       label: "",
       onClick: () => navigate(`/app/work/${materialOrder.WOID}`),
     },
-    // { icon: SquareArrowOutUpRight, label: "" },
     {
       icon: Save,
       label: "Save",
@@ -659,7 +663,17 @@ export const TabsServiceMO = ({
     {
       icon: CopyXIcon,
       label: "Close MO",
-      onClick: () => saveAndCloseMaterialOrder(),
+      onClick: () => saveAndCloseMaterialOrder({IsCancel: false}),
+      hidden:
+        currentRole !== "ce" &&
+        currentRole !== "celead" &&
+        currentRole !== "apo" &&
+        currentRole !== "admin",
+    },
+    {
+      icon: CopyXIcon,
+      label: "Cancel MO",
+      onClick: () => saveAndCloseMaterialOrder({IsCancel: true}),
       hidden:
         currentRole !== "ce" &&
         currentRole !== "celead" &&
