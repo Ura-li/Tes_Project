@@ -5707,22 +5707,21 @@ export function BtnModalsServiceCatalog({
 
     // Skip warranty step when creating MO from WO
     const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
-
     switch (effectiveStep) {
       case 1:
         return (
-          <DialogContent   className="
-    w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-    max-h-[90vh] overflow-y-auto
-    flex flex-col justify-center
-    gap-0 p-0 bg-white
-    [&>button]:hidden
-  " >
+          <DialogContent  className="
+            w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+            max-h-[90vh] overflow-y-auto
+            flex flex-col justify-center
+            gap-0 p-0 bg-white
+            [&>button]:hidden
+          " >
             <DialogHeader>
               <div className="flex items-end justify-end ">
-                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                {/* <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button> */}
                 <DialogClose asChild>
-                <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                <Button type="button" variant="outline" className={'hover:bg-gray-200 active:bg-gray-700 border-none'}>
                   <XIcon/>
                 </Button>
                 </DialogClose>
@@ -5732,12 +5731,30 @@ export function BtnModalsServiceCatalog({
             </DialogHeader>
             <div className="flex justify-between gap-4 p-2 my-2 ">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
-              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
-                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
-                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description} </p>
-                <p>Currency</p><p>: </p>
+              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-2">
+                <CaseField label="Product Number">
+                  <Input
+                  value={assetForWorkOrderCreation?.ProductNumber || "-"}    
+                  readOnly              
+                  />
+                </CaseField>
+                <CaseField label="Product Name">
+                  <Input
+                  value={assetForWorkOrderCreation?.product_information?.ProductName || "-"}     
+                  readOnly             
+                  />
+                </CaseField>
+                <CaseField label="Serial Number">
+                  <Input
+                  value={assetForWorkOrderCreation?.SerialNumber || "-"}
+                  readOnly             
+                  />
+                </CaseField>
+                <CaseField label="Warranty Status">
+                  <Input
+                    value={`${assetForWorkOrderCreation?.Warranty_Status ?? ""} - ${assetForWorkOrderCreation?.WarrantyOTCCode?.Description ?? ""}`}
+                  />
+                </CaseField>
               </div>
             </div>
   
@@ -5818,41 +5835,39 @@ export function BtnModalsServiceCatalog({
           </DialogContent>
         );
   
-      case 2:
-       
-       
+      case 2:  
         return (
           <DialogContent
             className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
     flex flex-col justify-center
     gap-0 p-0 bg-white
-    [&>button]:hidden rounded-none"
+    [&>button]:hidden"
           >
-            <DialogHeader className={" "}>
+            <DialogHeader>
               <div className="flex items-end justify-end">
-                <Button className={"bg-transparent "}>
-                  <ExternalLink color="black"></ExternalLink>
-                </Button>
                 <DialogClose asChild>
                   <Button
                     type="button"
-                    variant="secondary"
-                    className={"hover:bg-gray-200 active:bg-gray-700"}
+                    variant="outline"
+                    className={"hover:bg-gray-200 active:bg-gray-700  border-none"}
                   >
                     <XIcon />
                   </Button>
                 </DialogClose>
               </div>
+              <div className={"flex flex-col"}>
               <DialogTitle className={"text-blue-600 text-2xl"}>
                 Service Catalog
               </DialogTitle>
               <DialogDescription>
                 Select parts required for the repair.
               </DialogDescription>
+
+              </div>
             </DialogHeader>
-            <div className="flex flex-col sm:flex-row justify-between gap-3">
+            <div className="">
               {/* Kolom kiri  */}
-              <div className=" bg-gray-200 p-2 space-y-1 h-[5em]">
+              <div className=" bg-gray-200 p-2">
                 <div className="flex">
                   <p className="font-medium w-40">Service OfferID</p>
                   <p>: {effectiveWarrantyService?.Service_offerID ?? "-"}</p>
@@ -5866,7 +5881,7 @@ export function BtnModalsServiceCatalog({
               </div>
 
               {/* Kolom kanan  */}
-              <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
+              {/* <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
                 <p>Product Number</p>
                 <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p>
@@ -5884,20 +5899,16 @@ export function BtnModalsServiceCatalog({
                 </p>
                 <p>Currency</p>
                 <p>:</p>
-              </div>
+              </div> */}
             </div>
-
-            {/* <div className="flex items-center justify-end mt-3 gap-2"> */}
-              {/* <Label htmlFor="orderability">Orderability</Label> */}
-              {/* <Switch id="orderability" /> */}
-            {/* </div> */}
 
             <Tabs defaultValue="parts" className={"h-[50vh] "}>
               <TabsList className={"py-5 px-0 bg-white"}>
                 <TabsTrigger
                   variant={"fullsize"}
                   value="parts"
-                  className={"cursor-pointer "}
+                  className={"cursor-pointer rounded-t-2xl"}
+                  hidden
                 >
                   Parts
                 </TabsTrigger>
@@ -5911,15 +5922,15 @@ export function BtnModalsServiceCatalog({
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="parts" className={"overflow-y-auto"}>
-                <Table className={"max-h-[400px] overflow-y-auto"}>
+                <Table className={"max-h-[400px] overflow-y-auto "}>
                   <TableHeader>
-                    <TableRow className={"bg-gray-300 "}>
+                    <TableRow className={"bg-gray-300 hover:bg-gray-300"}>
                       <TableHead className={"font-black text-black"}>
                         Select
                       </TableHead>
                       <TableHead className={"font-black text-black p-2"}>
                         Parts #
-                        <span className="flex items-center">
+                        <span className="flex items-center mt-1">
                           <Input
                             className={"bg-white font-medium"}
                             value={partNumberSearch}
@@ -5927,19 +5938,19 @@ export function BtnModalsServiceCatalog({
                               setPartNumberSearch(e.target.value)
                             }
                           />
-                          <XIcon
+                          {/* <XIcon
                             className="cursor-pointer"
                             onClick={() => setPartNumberSearch("")}
-                          />
+                          /> */}
                         </span>
                       </TableHead>
                       <TableHead
                         className={
-                          "  whitespace-break-spaces font-black text-black"
+                          "whitespace-break-spaces font-black text-black"
                         }
                       >
                         Keyword
-                        <span className="flex items-center">
+                        <span className="flex items-center mt-1">
                           <Input
                             className={
                               "  whitespace-break-spaces bg-white font-medium"
@@ -5947,35 +5958,35 @@ export function BtnModalsServiceCatalog({
                             value={keywordSearch}
                             onChange={(e) => setKeywordSearch(e.target.value)}
                           />
-                          <XIcon
+                          {/* <XIcon
                             className="cursor-pointer"
                             onClick={() => setKeywordSearch("")}
-                          />
+                          /> */}
                         </span>
                       </TableHead>
                       <TableHead
                         className={
-                          "  whitespace-break-spaces font-black text-black"
+                          "whitespace-break-spaces font-black text-black"
                         }
                       >
                         Part Description
-                        <span className="flex items-center">
+                        <span className="flex items-center mt-1">
                           <Input
                             className={
-                              "  whitespace-break-spaces bg-white font-medium"
+                              "whitespace-break-spaces bg-white font-medium"
                             }
                             value={descriptionSearch}
                             onChange={(e) =>
                               setDescriptionSearch(e.target.value)
                             }
                           />
-                          <XIcon
+                          {/* <XIcon
                             className="cursor-pointer"
                             onClick={() => setDescriptionSearch("")}
-                          />
+                          /> */}
                         </span>
                       </TableHead>
-                      <TableHead
+                      {/* <TableHead
                         className={
                           "  whitespace-break-spaces font-black text-black"
                         }
@@ -6072,7 +6083,7 @@ export function BtnModalsServiceCatalog({
                         }
                       >
                         Total
-                      </TableHead>
+                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -6105,7 +6116,7 @@ export function BtnModalsServiceCatalog({
                           <TableCell>{part.PartNumber}</TableCell>
                           <TableCell>{part.Keyword}</TableCell>
                           <TableCell>{part.PartDescription}</TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             {part.Orderability ? "Yes" : "No"}
                           </TableCell>
                           <TableCell>{part.ResistrictionReason}</TableCell>
@@ -6128,7 +6139,7 @@ export function BtnModalsServiceCatalog({
                           <TableCell>{part.Price}</TableCell>
                           <TableCell>{part.Freightprice}</TableCell>
                           <TableCell>{part.Tax}</TableCell>
-                          <TableCell>{part.Total}</TableCell>
+                          <TableCell>{part.Total}</TableCell> */}
                         </TableRow>
                       );
                     })}
@@ -6230,15 +6241,15 @@ export function BtnModalsServiceCatalog({
       case 3:
         return (
           <DialogContent className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-    max-h-[90vh] overflow-y-auto
-    flex flex-col justify-center
-    gap-0 p-0 bg-white
-    [&>button]:hidden ">
+            max-h-[90vh] overflow-y-auto
+            flex flex-col justify-center
+            gap-0 p-0 bg-white
+            [&>button]:hidden ">
             <DialogHeader>
               <div className="flex items-end justify-end">
-                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                {/* <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button> */}
                 <DialogClose asChild>
-                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <Button type="button" variant="outline" className={'hover:bg-gray-200 active:bg-gray-700 border-none'}>
                   <XIcon/>
                   </Button>
                 </DialogClose>
@@ -6250,12 +6261,30 @@ export function BtnModalsServiceCatalog({
 
             </DialogHeader>
             <div className="flex justify-end gap-4 p-2 my-2">
-              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
-                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
-                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description} </p>
-                <p>Currency</p><p>: </p>
+              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-2">
+                <CaseField label="Product Number">
+                  <Input
+                  value={assetForWorkOrderCreation?.ProductNumber || "-"}    
+                  readOnly              
+                  />
+                </CaseField>
+                <CaseField label="Product Name">
+                  <Input
+                  value={assetForWorkOrderCreation?.product_information?.ProductName || "-"}     
+                  readOnly             
+                  />
+                </CaseField>
+                <CaseField label="Serial Number">
+                  <Input
+                  value={assetForWorkOrderCreation?.SerialNumber || "-"}
+                  readOnly             
+                  />
+                </CaseField>
+                <CaseField label="Warranty Status">
+                  <Input
+                    value={`${assetForWorkOrderCreation?.Warranty_Status ?? ""} - ${assetForWorkOrderCreation?.WarrantyOTCCode?.Description ?? ""}`}
+                  />
+                </CaseField>
               </div>
             </div>
             <div className="overflow-auto max-h-[30dvh]">
@@ -6285,10 +6314,11 @@ export function BtnModalsServiceCatalog({
                 </TableBody>
                 <TableHeader>
                   <TableRow className={'bg-blue-400'}>
+                    <TableHead className={'font-bold text-black'}>Select</TableHead>
                     <TableHead className={'font-bold text-black'}>Part #</TableHead>
                     <TableHead className={'font-bold text-black'}>Description</TableHead>
                     <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
-                    <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
+                    {/* <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead> */}
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
                     <TableHead className={'font-bold text-black'}>CT KEY RETURN</TableHead>
                     <TableHead className={'font-bold text-black'}>UEFI CODE</TableHead>
@@ -6314,7 +6344,6 @@ export function BtnModalsServiceCatalog({
                         <TableCell>{part.Shipping_Fee}</TableCell>
                         <TableCell>{part.qty} </TableCell>
                         <TableCell>
-
                           <Input
                             placeholder="Enter Return CT Key"
                             className="bg-white"
@@ -6433,7 +6462,7 @@ export function BtnModalsServiceCatalog({
             </DialogFooter>
           </DialogContent>
         );
-  
+
       default:
         return null;
     }

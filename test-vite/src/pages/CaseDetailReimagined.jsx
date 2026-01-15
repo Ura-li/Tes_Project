@@ -1136,6 +1136,8 @@ export const STATUS_ENUM_TO_LABEL = {
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
   CancelRepair: "Cancel Repair",
+  Closed: "Closed",
+  Cancelled: "Cancelled"
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
@@ -1692,6 +1694,10 @@ useEffect(() => {
                       }
                       onChange={onChangeCase("CaseID_Manual_Date")}
                     />
+                  </CaseField>
+
+                  <CaseField label={"Reference Case"} lock={!canEditFd} span={2}>
+                    <Input/>
                   </CaseField>
 
                   {/* detail owner */}
