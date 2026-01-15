@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 
@@ -20,12 +20,14 @@ import { useDraft } from "@/components/DraftContext";
 
 import { ServiceWork } from "./services/ServiceWorkReimagined";
 import { Skeleton } from "../components/ui/skeleton";
+import { useServiceCaseStore } from "@/hooks/useServiceCaseStore";
 export const Work = () => {
   const { woid } = useParams();
   const user = getUserFromToken();
   const { updateDraft } = useDraft();
 
-  const loading = useWorkOrderStore((s) => s.loading);
+  const [loading, setLoading] = useState(true)
+//  const loading = useWorkOrderStore((s) => s.loading);
   const error = useWorkOrderStore((s) => s.error);
   const workOrder = useWorkOrderStore((s) => s.workOrder);
   const caseInformation = useWorkOrderStore((s) => s.caseInformation);
@@ -48,9 +50,20 @@ export const Work = () => {
       // });
 
   try {
-    await fetchWorkOrderBundle(woid);
+    setLoading(true);
+    await  fetchWorkOrderBundle(woid);
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Gagal memuat data",
+      text: "Terjadi kesalahan saat mengambil data kasus",
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
   } finally {
-    
+    setLoading(false);
   }
     };
 
@@ -61,8 +74,7 @@ export const Work = () => {
   if (!woid) {
     return <div className="p-4">WOID is missing in the URL.</div>;
   }
-
-  if (loading && !workOrder) {
+  if (loading) {
     return (
       <div className="p-2 space-y-6 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
         <Skeleton className="h-6 w-1/4" />

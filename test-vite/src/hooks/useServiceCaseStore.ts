@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import ApiCustomer from "../api";
 import { getUserFromToken } from "../lib/utils/auth";
 import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetailReimagined";
-
+import { useCaseNotesStore, EMPTY_DRAFT } from "@/hooks/useCaseNoteStore";
 // --- small helper ---
 const hasAnyNonEmptyValue = (obj: any = {}) =>
   Object.values(obj).some((v) => {
@@ -78,6 +78,14 @@ interface ServiceCaseState {
 
   // is dirty checkers
   isDirty: boolean;
+
+  saveIntent: null | { redirect: boolean; onClose: boolean };
+quickLogOpen: boolean;
+
+requestSaveAll: (opts?: { redirect?: boolean; onClose?: boolean }) => void;
+continueSaveAllAfterNote: () => Promise<boolean>;
+setQuickLogOpen: (open: boolean) => void;
+
 
 
   // ---- actions ----
@@ -153,7 +161,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   caseDetails: null,
   entitlementStatus: initialEntitlement,
   dpList: initialDpList,
-  
+
   caseForm: {
     CaseType: "",
     CaseStatus: "",
@@ -184,20 +192,20 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     pendingCustomerAction: "",
     customerRequestedCloseDate: "",
   },
-//  entitlementStatus: {
-//    OTCCode: "",
-//    PurchaseDate: "",
-//    WarrantyCardDate: "",
-//    EOW_Date: "",
-//    EndUserName: "",
-//    EndUserPhone: "",
-//    EndUserAddress: "",
-//    WarrantyApprovalStatus: "",
-//    needWarrantyApproval: false,
-//    POPDocument: "",
-//    WarrantyCard: "",
-//    PhotoUnit: "",
-//  },
+  //  entitlementStatus: {
+  //    OTCCode: "",
+  //    PurchaseDate: "",
+  //    WarrantyCardDate: "",
+  //    EOW_Date: "",
+  //    EndUserName: "",
+  //    EndUserPhone: "",
+  //    EndUserAddress: "",
+  //    WarrantyApprovalStatus: "",
+  //    needWarrantyApproval: false,
+  //    POPDocument: "",
+  //    WarrantyCard: "",
+  //    PhotoUnit: "",
+  //  },
   productForm: {
     HWPC: "",
     ProductTypeID: "",
@@ -248,23 +256,67 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     DpNote: "",
   },
 
-//  dpList: [
-    // SET TO NULL FIRST
-    // {
-    //   tempId: `${Date.now()}-${Math.random()}`,
-    //   InvoiceNo: null,
-    //   DpAmount: "",
-    //   DpDate: "",
-    //   PaymentType: "",
-    //   DpNote: "",
-    //   isPersisted: false,
-    // },
-//  ],
+  //  dpList: [
+  // SET TO NULL FIRST
+  // {
+  //   tempId: `${Date.now()}-${Math.random()}`,
+  //   InvoiceNo: null,
+  //   DpAmount: "",
+  //   DpDate: "",
+  //   PaymentType: "",
+  //   DpNote: "",
+  //   isPersisted: false,
+  // },
+  //  ],
   isDirty: false,
-  setDirty: (dirty) => set({ isDirty: dirty }),
+  saveIntent: null,
+quickLogOpen: false,
+setQuickLogOpen: (open) => set({ quickLogOpen: open }),
 
+  setDirty: (dirty) => set({ isDirty: dirty }),
+  requestSaveAll: ({ redirect = true, onClose = false } = {}) => {
+    const caseId = get().caseDetails?.CaseID;
+    if (!caseId) return;
+
+    const noteDraft =
+      useCaseNotesStore.getState().draftByCaseId[caseId] ?? EMPTY_DRAFT;
+    const note = (noteDraft.Note ?? "").toString().trim();
+
+    // Gatekeeping: require note before saving case changes
+    if (!note) {
+      set({
+        saveIntent: { redirect, onClose },
+        quickLogOpen: true,
+      });
+      return;
+    }
+
+    // If note already typed, you can either:
+    // A) still open modal to force user to confirm/save note first (best UX consistency),
+    // B) or auto-save note then saveAll (fast, but less explicit)
+    set({
+      saveIntent: { redirect, onClose },
+      quickLogOpen: true,
+    });
+  },
+
+  continueSaveAllAfterNote: async () => {
+    const intent = get().saveIntent;
+    if (!intent) return false;
+
+    // do NOT save note here if QuickLogNote already saved it.
+    // Just continue with case save.
+    const ok = await get().saveAll({
+      redirect: intent.redirect,
+      onClose: intent.onClose,
+    });
+
+    if (ok) set({ saveIntent: null, quickLogOpen: false });
+
+    return ok;
+  },
   // ---------------- RESETTERS ----------------
-  resetCaseScopedState: () => 
+  resetCaseScopedState: () =>
     set({
       entitlementStatus: initialEntitlement,
       dpList: [],
@@ -273,12 +325,9 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       csrForm: {},
     }),
 
-  resetEntitlement: () =>
-    set({ entitlementStatus: initialEntitlement }),
+  resetEntitlement: () => set({ entitlementStatus: initialEntitlement }),
 
-  resetDp: () =>
-    set({ dpList: [] }),
-
+  resetDp: () => set({ dpList: [] }),
 
   // ------------ simple setters -------------
   initFromCaseDetails: (caseDetails) =>
@@ -325,7 +374,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       entitlementStatus: { ...state.entitlementStatus, [field]: value },
       isDirty: true,
     })),
-    
+
   setEntitlementFieldSilent: (field, value) =>
     set((state) => ({
       entitlementStatus: { ...state.entitlementStatus, [field]: value },
@@ -382,7 +431,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   setDpField: (tempId, field, value) =>
     set((state) => ({
       dpList: state.dpList.map((row) =>
-        row.tempId === tempId ? { ...row, [field]: value } : row
+        row.tempId === tempId ? { ...row, [field]: value } : row,
       ),
       isDirty: true,
     })),
@@ -405,7 +454,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const resMainAccount = await ApiCustomer.get(
-        `/api/contact-information/${caseDetails.ContactID}`
+        `/api/contact-information/${caseDetails.ContactID}`,
       );
       const next: any = {
         MainAccount: resMainAccount.data.data,
@@ -414,7 +463,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       };
       if (caseDetails.SiteAccountID !== null) {
         const resSiteAccount = await ApiCustomer.get(
-          `/api/site_account/${caseDetails.SiteAccountID}`
+          `/api/site_account/${caseDetails.SiteAccountID}`,
         );
         next.SiteAccount = resSiteAccount.data.data;
         next.Type = "SiteAccount";
@@ -434,13 +483,11 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const resAsset = await ApiCustomer.get(
-        `/api/asset-information/${caseDetails.AssetID}`
+        `/api/asset-information/${caseDetails.AssetID}`,
       );
       set({ assetInformation: resAsset.data.data });
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ?? "Gagal mengambil data asset",
-      );
+      toast.error(err?.response?.data?.message ?? "Gagal mengambil data asset");
     }
   },
 
@@ -449,7 +496,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const res = await ApiCustomer.get(
-        `/api/case-information/case-notes?caseId=${caseDetails.CaseID}`
+        `/api/case-information/case-notes?caseId=${caseDetails.CaseID}`,
       );
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       set({ notesList: list });
@@ -466,7 +513,9 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`);
       set({ ownerUserData: response.data.data });
     } catch (error: any) {
-      toast.error(error?.response?.data?.message ?? "WRONG THING IN FETCH OWNER");
+      toast.error(
+        error?.response?.data?.message ?? "WRONG THING IN FETCH OWNER",
+      );
     }
   },
 
@@ -475,7 +524,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const res = await ApiCustomer.get(
-        `/api/work-order?CaseID=${caseDetails.CaseID}`
+        `/api/work-order?CaseID=${caseDetails.CaseID}`,
       );
       const data = res.data.data || [];
       set({ workOrders: data });
@@ -484,12 +533,14 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       if (data.length) {
         const woidList = data.map((wo: any) => wo.WOID).join(",");
         const moRes = await ApiCustomer.get(
-          `/api/material-order?WOID=${woidList}`
+          `/api/material-order?WOID=${woidList}`,
         );
         set({ materialOrders: moRes.data.data || [] });
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to fetch work orders");
+      toast.error(
+        err?.response?.data?.message ?? "Failed to fetch work orders",
+      );
     }
   },
 
@@ -501,7 +552,9 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
       set({ materialOrders: res.data.data || [] });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to fetch Material orders");
+      toast.error(
+        err?.response?.data?.message ?? "Failed to fetch Material orders",
+      );
     }
   },
 
@@ -548,7 +601,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const res = await ApiCustomer.get(
-        `/api/case-information/${caseDetails.CaseID}`
+        `/api/case-information/${caseDetails.CaseID}`,
       );
       set({ caseForm: { ...caseForm, ...res.data.data } });
     } catch (err: any) {
@@ -561,7 +614,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     if (!caseDetails) return;
     try {
       const actionlog = await ApiCustomer.get(
-        `/api/actionlog?caseId=${caseDetails.CaseID}`
+        `/api/actionlog?caseId=${caseDetails.CaseID}`,
       );
       set({ actionLogs: actionlog.data.data || [] });
     } catch (error: any) {
@@ -579,58 +632,58 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   },
 
   fetchInvoiceData: async (opts) => {
-  const { caseDetails, invoiceData } = get();
-  if (!caseDetails?.CaseID) return;
+    const { caseDetails, invoiceData } = get();
+    if (!caseDetails?.CaseID) return;
 
-  const force = opts?.force ?? false;
+    const force = opts?.force ?? false;
 
-  // ---- simple cache check ----
-  if (!force && invoiceData && invoiceData.__caseId === caseDetails.CaseID) {
-    // Already have data for this CaseID, just reuse
-    return invoiceData;
-  }
+    // ---- simple cache check ----
+    if (!force && invoiceData && invoiceData.__caseId === caseDetails.CaseID) {
+      // Already have data for this CaseID, just reuse
+      return invoiceData;
+    }
 
-  set({ invoiceLoading: true });
-  try {
-    const response = await ApiCustomer.get(
-      `/api/invoice-information?caseId=${caseDetails.CaseID}`
-    );
-    const data = response.data?.data ?? null;
+    set({ invoiceLoading: true });
+    try {
+      const response = await ApiCustomer.get(
+        `/api/invoice-information?caseId=${caseDetails.CaseID}`,
+      );
+      const data = response.data?.data ?? null;
 
-    // attach metadata for cache check
-    const wrapped = { ...data, __caseId: caseDetails.CaseID };
+      // attach metadata for cache check
+      const wrapped = { ...data, __caseId: caseDetails.CaseID };
 
-    set({ invoiceData: wrapped });
-    return wrapped;
-  } catch (error: any) {
-    toast.error(
-      error?.response?.data?.message ?? "Gagal mengambil data invoice."
-    );
-  } finally {
-    set({ invoiceLoading: false });
-  }
-},
+      set({ invoiceData: wrapped });
+      return wrapped;
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ?? "Gagal mengambil data invoice.",
+      );
+    } finally {
+      set({ invoiceLoading: false });
+    }
+  },
 
   fetchDPData: async (opts) => {
     const { caseDetails, dpList } = get();
     if (!caseDetails?.CaseID) return;
     const force = opts?.force ?? false;
 
-  // if we already mapped persisted DP rows for this case and not forcing, skip
-  const alreadyHydrated =
-    !force &&
-    Array.isArray(dpList) &&
-    dpList.length > 0 &&
-    dpList.every((dp: any) => dp.isPersisted);
+    // if we already mapped persisted DP rows for this case and not forcing, skip
+    const alreadyHydrated =
+      !force &&
+      Array.isArray(dpList) &&
+      dpList.length > 0 &&
+      dpList.every((dp: any) => dp.isPersisted);
 
-  if (alreadyHydrated) {
-    return dpList;
-  }
+    if (alreadyHydrated) {
+      return dpList;
+    }
 
     set({ dpLoading: true });
     try {
       const response = await ApiCustomer.get(
-        `/api/dp-information?caseId=${caseDetails.CaseID}`
+        `/api/dp-information?caseId=${caseDetails.CaseID}`,
       );
       const data = response.data?.data;
       const arrayData = Array.isArray(data) ? data : data ? [data] : [];
@@ -653,13 +706,12 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     }
   },
 
-
   fetchProduct: async () => {
     const { caseDetails } = get();
     if (!caseDetails) return;
     try {
       const resProduct = await ApiCustomer.get(
-        `/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`
+        `/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`,
       );
       set({
         productForm: {
@@ -668,7 +720,9 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         },
       });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Gagal mengambil data product");
+      toast.error(
+        err?.response?.data?.message ?? "Gagal mengambil data product",
+      );
     }
   },
 
@@ -687,7 +741,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       setOwnerUserData,
       toggleRefresh,
       dpList,
-      dpDataForm,
       setDirty,
       isDirty,
     } = get();
@@ -722,32 +775,32 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           (row.DpAmount.trim() !== "" ||
             row.DpDate !== null ||
             row.PaymentType.trim() !== "" ||
-            row.DpNote.trim() !== "")
+            row.DpNote.trim() !== ""),
       );
 
-const hasIntentToSave = isDirty;
+      const hasIntentToSave = isDirty;
 
-      if(!onClose){
-        const confirm = await Swal.fire({
-          title: "Simpan perubahan?",
-          text: "Perubahan akan disimpan ke database.",
-          icon: "question",
-          showCancelButton: true,
-          confirmButtonText: "Simpan",
-          cancelButtonText: "Batal",
-        });
-        if (!confirm.isConfirmed) {
-          return false;
-        }
-      }
-      
-        if (caseNoteFormData.Note === "") {
-          toast.info("Isi Note terlebih dahulu", {
-            position: 'top-center',
-          })
-          return false;
-        }
-        
+     // if (!onClose) {
+     //   const confirm = await Swal.fire({
+     //     title: "Simpan perubahan?",
+     //     text: "Perubahan akan disimpan ke database.",
+     //     icon: "question",
+     //     showCancelButton: true,
+     //     confirmButtonText: "Simpan",
+     //     cancelButtonText: "Batal",
+     //   });
+     //   if (!confirm.isConfirmed) {
+     //     return false;
+     //   }
+     // }
+
+//      if (caseNoteFormData.Note === "") {
+//        toast.info("Isi Note terlebih dahulu", {
+//          position: "top-center",
+//        });
+//        return false;
+//      }
+
       Swal.fire({
         title: "Saving Case...",
         text: "Mohon tunggu sebentar",
@@ -780,7 +833,7 @@ const hasIntentToSave = isDirty;
                   Note: caseNoteFormData.Note,
                   CaseID: caseDetails.CaseID,
                   CreatedBy: user?.id,
-                }
+                },
               );
               dataToUpdate.CaseNote = response.data.data.NoteID;
               if (selectedSymptom) {
@@ -799,7 +852,7 @@ const hasIntentToSave = isDirty;
                   ...gtcForm,
                   screening_id: gtcForm.screening_id || "",
                   CaseID: caseDetails.CaseID,
-                }
+                },
               );
               savedModules.push("GTC");
             }
@@ -811,39 +864,39 @@ const hasIntentToSave = isDirty;
               const formData = new FormData();
               formData.append(
                 "Warranty_Status",
-                entitlementStatus.OTCCode || ""
+                entitlementStatus.OTCCode || "",
               );
               formData.append(
                 "EOW_Date",
-                entitlementStatus.EOW_Date?.toISOString?.() || ""
+                entitlementStatus.EOW_Date?.toISOString?.() || "",
               );
               formData.append(
                 "PurchaseDate",
-                entitlementStatus.PurchaseDate?.toISOString?.() || ""
+                entitlementStatus.PurchaseDate?.toISOString?.() || "",
               );
               formData.append(
                 "WarrantyCardDate",
-                entitlementStatus.WarrantyCardDate?.toISOString?.() || ""
+                entitlementStatus.WarrantyCardDate?.toISOString?.() || "",
               );
               formData.append(
                 "EndUserName",
-                entitlementStatus.EndUserName || ""
+                entitlementStatus.EndUserName || "",
               );
               formData.append(
                 "EndUserPhone",
-                entitlementStatus.EndUserPhone || ""
+                entitlementStatus.EndUserPhone || "",
               );
               formData.append(
                 "EndUserAddress",
-                entitlementStatus.EndUserAddress || ""
+                entitlementStatus.EndUserAddress || "",
               );
               formData.append(
                 "WarrantyApprovalStatus",
-                entitlementStatus.WarrantyApprovalStatus || ""
+                entitlementStatus.WarrantyApprovalStatus || "",
               );
               formData.append(
                 "needWarrantyApproval",
-                entitlementStatus.needWarrantyApproval ? "true" : "false"
+                entitlementStatus.needWarrantyApproval ? "true" : "false",
               );
 
               const maybeFile = (v: any) =>
@@ -861,14 +914,15 @@ const hasIntentToSave = isDirty;
                 formData,
                 {
                   headers: { "Content-Type": "multipart/form-data" },
-                }
+                },
               );
 
               if (
-                (entitlementStatus.needWarrantyApproval === true && caseDetails.CaseStatus === "NEW_POPDoc") 
+                entitlementStatus.needWarrantyApproval === true &&
+                caseDetails.CaseStatus === "NEW_POPDoc"
               ) {
                 const getAsset = await ApiCustomer.get(
-                  `/api/asset-information/${caseDetails.AssetID}`
+                  `/api/asset-information/${caseDetails.AssetID}`,
                 );
                 const fieldAsset = getAsset.data.data;
                 const status =
@@ -884,9 +938,8 @@ const hasIntentToSave = isDirty;
                   case "Add Info By WA":
                   case "New":
                   default:
-                    const userTarget = await ApiCustomer.get(
-                      `/api/user?role=apv`
-                    );
+                    const userTarget =
+                      await ApiCustomer.get(`/api/user?role=apv`);
                     const OwnerApv = userTarget.data.data[0];
                     newOwner = OwnerApv?.IDUser;
                     break;
@@ -897,7 +950,7 @@ const hasIntentToSave = isDirty;
                     `/api/case-information/${caseDetails.CaseID}`,
                     {
                       Owner: newOwner,
-                    }
+                    },
                   );
                 }
               }
@@ -916,7 +969,7 @@ const hasIntentToSave = isDirty;
                   {
                     ...csrForm,
                     caseResolutionCode: csrForm.caseResolutionCode || "",
-                  }
+                  },
                 );
               } else {
                 response = await ApiCustomer.post("/api/caseResolution", {
@@ -938,7 +991,7 @@ const hasIntentToSave = isDirty;
                   ...productForm,
                   HWPC: productForm.HWPC || "",
                   ProductTypeID: productForm.ProductTypeID,
-                }
+                },
               );
               savedModules.push("PRODUCT");
             }
@@ -999,7 +1052,7 @@ const hasIntentToSave = isDirty;
 
                 await ApiCustomer.patch(
                   `/api/case-information/${caseDetails.CaseID}`,
-                  caseUpdates
+                  caseUpdates,
                 );
                 Object.assign(dataToUpdate, caseUpdates);
 
@@ -1071,13 +1124,13 @@ const hasIntentToSave = isDirty;
                     let newOwnerInfo = null;
                     try {
                       const newOwnerResponse = await ApiCustomer.get(
-                        `/api/user/${nextOwnerId}`
+                        `/api/user/${nextOwnerId}`,
                       );
                       newOwnerInfo = newOwnerResponse.data.data;
                     } catch (infoError) {
                       console.warn(
                         "Failed to fetch new owner info:",
-                        infoError
+                        infoError,
                       );
                     }
 
@@ -1101,13 +1154,13 @@ const hasIntentToSave = isDirty;
                   } catch (ownerLogError) {
                     toast.error(
                       "Failed to create owner change log:",
-                      ownerLogError
+                      ownerLogError,
                     );
                   }
                 }
               } catch (err: any) {
                 console.error("Error during update:", err);
-                toast.error("Update gagal",err)
+                toast.error("Update gagal", err);
               }
             }
             break;
@@ -1139,7 +1192,7 @@ const hasIntentToSave = isDirty;
             };
             const response = await ApiCustomer.post(
               `/api/dp-information`,
-              payload
+              payload,
             );
 
             dataToUpdate.dp = response.data.data;
@@ -1152,17 +1205,17 @@ const hasIntentToSave = isDirty;
       if (savedModules.length > 0) {
         setDirty(false);
         if (redirect) {
-        await Swal.fire({
-          icon: "success",
-          title: "Berhasil Disimpan",
-          text: "Data berhasil disimpan",
-          timer: 2500,
-          showConfirmButton: false,
-        });
-        toggleRefresh();
-      } else {
-         Swal.close();
-      }
+          await Swal.fire({
+            icon: "success",
+            title: "Berhasil Disimpan",
+            text: "Data berhasil disimpan",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+          toggleRefresh();
+        } else {
+          Swal.close();
+        }
         return true;
       }
 
@@ -1182,40 +1235,39 @@ const hasIntentToSave = isDirty;
     }
   },
 
-saveNoteOnly: async ({ confirm = false } = {}) => {
-  const { caseDetails, caseNoteFormData, fetchCaseNotes } = get();
-  if (!caseDetails?.CaseID) return false;
+  saveNoteOnly: async ({ confirm = false } = {}) => {
+    const { caseDetails, caseNoteFormData, fetchCaseNotes } = get();
+    if (!caseDetails?.CaseID) return false;
 
-  const note = (caseNoteFormData.Note ?? "").toString().trim();
-  if (!note) {
-    toast.info("Isi Note terlebih dahulu", { position: "top-center" });
-    return false;
-  }
+    const note = (caseNoteFormData.Note ?? "").toString().trim();
+    if (!note) {
+      toast.info("Isi Note terlebih dahulu", { position: "top-center" });
+      return false;
+    }
 
-  try {
-    const user = getUserFromToken();
-    await ApiCustomer.post("/api/case-information/case-notes", {
-      LogType: caseNoteFormData.LogType,
-      ActionType: caseNoteFormData.ActionType,
-      VisibleExternally: caseNoteFormData.VisibleExternally,
-      Note: note,
-      CaseID: caseDetails.CaseID,
-      CreatedBy: user?.id,
-    });
+    try {
+      const user = getUserFromToken();
+      await ApiCustomer.post("/api/case-information/case-notes", {
+        LogType: caseNoteFormData.LogType,
+        ActionType: caseNoteFormData.ActionType,
+        VisibleExternally: caseNoteFormData.VisibleExternally,
+        Note: note,
+        CaseID: caseDetails.CaseID,
+        CreatedBy: user?.id,
+      });
 
-    set((s) => ({
-      caseNoteFormData: { ...s.caseNoteFormData, Note: "" },
-      // optional if you track separate dirty for note
-      // isNoteDirty: false,
-    }));
+      set((s) => ({
+        caseNoteFormData: { ...s.caseNoteFormData, Note: "" },
+        // optional if you track separate dirty for note
+        // isNoteDirty: false,
+      }));
 
-    toast.success("Note tersimpan");
-    await fetchCaseNotes();
-    return true;
-  } catch (err: any) {
-    toast.error(err?.response?.data?.message ?? "Gagal menyimpan note");
-    return false;
-  }
-},
-
+      toast.success("Note tersimpan");
+      await fetchCaseNotes();
+      return true;
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Gagal menyimpan note");
+      return false;
+    }
+  },
 }));

@@ -355,7 +355,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 
 			await Promise.all([
 				get().fetchFailureOptions(),
-				get().fetchPartReturnStatusOptions()
+				get().fetchPartReturnStatusOptions(),
 			])
 
 			let caseInformation: any = null;

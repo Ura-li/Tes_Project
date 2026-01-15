@@ -126,6 +126,7 @@ import { useServiceCaseStore } from '@/hooks/useServiceCaseStore';
 //? This is the new one comment this when the old one is in use
 import { TabsServiceCaseDetails } from './CaseDetailReimagined';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard';
+import { useCaseNotesStore } from '@/hooks/useCaseNoteStore';
 
 export const Case = () => {
   const { user } = useAuth();
@@ -161,6 +162,8 @@ export const Case = () => {
   const resetCaseScopedState = useServiceCaseStore(
   (s) => s.resetCaseScopedState
 );
+
+  const fetchNotes = useCaseNotesStore((s) => s.fetchNotes);
     useUnsavedChangesGuard();
  useEffect(() => {
   if (!caseId) return;
@@ -184,7 +187,7 @@ export const Case = () => {
         fetchCustomerData(),
         fetchAssetInformation(),
         fetchProduct(),
-        fetchCaseNotes(),
+        fetchNotes(),
         fetchOwnerUserData(),
         fetchWorkOrders(),
         // fetchMaterialOrders(),

@@ -75,7 +75,8 @@ export const ServiceWork = () => {
   const setWOGeneral = useWorkOrderStore((s) => s.setWOGeneral);
   const uploadFotoMoLine = useWorkOrderStore((s) => s.uploadMOLinePhoto);
   const removeFotoMoLine = useWorkOrderStore((s) => s.removeMOLinePhoto);
-
+  
+  const notesList = useWorkOrderStore((s) => s.notesList);
   // ---- local UI state only ----
   const [openAddMO, setOpenAddMO] = useState(false);
   const [caseDetails, setCaseDetails] = useState(null);
@@ -886,7 +887,7 @@ export const ServiceWork = () => {
                 </Table>{" "}
               </CardContent>
             </Card>
-
+    {canEdit &&
             <BtnModalsServiceCatalog
               open={openAddMO}
               setOpen={setOpenAddMO}
@@ -894,6 +895,7 @@ export const ServiceWork = () => {
               serviceCatalogType="wo-add-mo"
               WOID={workOrder?.WOID}
             />
+    }
           </TabsContent>
 
           {/* ========= TAB: WO BOOKINGS ========= */}
@@ -1140,9 +1142,8 @@ export const ServiceWork = () => {
                     const SelectOptionPartReturn = selectedPartReturnStatus(mo)
                     const isDOASelected = Boolean(SelectOptionPartReturn?.DOA)
                     const reviewPhoto = resolvedPhotoSrc(mo)
-
                     return (
-                    <div key={mo.MOID}>
+                    <div key={mo.moid}>
                     <span className="italic font-semibold">Sparepart {index + 1}</span>
                     <div className="grid grid-cols-4 gap-4 border-2 mt-2 rounded-sm p-4">
 

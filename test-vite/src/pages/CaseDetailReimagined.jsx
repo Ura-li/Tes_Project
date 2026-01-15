@@ -97,6 +97,22 @@ export const TabsServiceCaseDetails = () => {
   const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
   const [cancelState, setCancelState] = useState(false);
   const [logNoteOpen, setLogNoteOpen] = useState(false)
+const quickLogOpen = useServiceCaseStore((s) => s.quickLogOpen);
+const setQuickLogOpen = useServiceCaseStore((s) => s.setQuickLogOpen);
+const requestSaveAll = useServiceCaseStore((s) => s.requestSaveAll);
+const continueSaveAllAfterNote = useServiceCaseStore((s) => s.continueSaveAllAfterNote);
+
+const [quickLogMode, setQuickLogMode] = useState("noteOnly");
+
+const openNoteOnly = () => {
+  setQuickLogMode("noteOnly");
+  setQuickLogOpen(true);
+};
+
+const openSaveAll = () => {
+  setQuickLogMode("saveAll");
+  requestSaveAll({ redirect: true, onClose: false });
+};
 
 //QR CODE
   const [qrCodeImg,setQrCodeImg]= useState("");
@@ -204,7 +220,7 @@ export const TabsServiceCaseDetails = () => {
     {
       icon: Save,
       label: "Save",
-      onClick: () => handleSave(),
+      onClick: () => openSaveAll(),
       roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","apv"],
     },
     {
@@ -537,7 +553,7 @@ export const TabsServiceCaseDetails = () => {
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
         },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
   ];
 
 
@@ -1026,8 +1042,12 @@ function fieldMO(caseDetails) {
         <InvoiceDialog />
         <ServiceCase /> 
         <QuickLogNote 
-          open={logNoteOpen}
-          onOpenChange={setLogNoteOpen}
+          open={quickLogOpen}
+          onOpenChange={setQuickLogOpen}
+          caseId={caseDetails.CaseID}
+    createdBy={user?.id}
+    mode={quickLogMode}
+    onAfterSaveAll={continueSaveAllAfterNote}
         />
       </div>
     </div>
@@ -1087,6 +1107,7 @@ import { mapMaterialOrdersToQuotationItems } from "../lib/mappers/fieldMO";
 import { QuickLogNote } from "../components/model/QuickLogNote";
 import Approvel from "../layout/Apv_page";
 import { DatePickertoDateOrNull, formatDateForInput } from "../lib/utils";
+import { EMPTY_DRAFT, EMPTY_NOTES, useCaseNotesStore } from "@/hooks/useCaseNoteStore";
 
 const suffixToRoleMap = {
   CE: "ce",
@@ -1245,17 +1266,29 @@ export const ServiceCase = () => {
 
   // ------ pull state from zustand ------
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
-
+  const caseId = caseDetails?.CaseID;
   const caseForm = useServiceCaseStore((s) => s.caseForm);
   const setCaseFormField = useServiceCaseStore((s) => s.setCaseFormField);
 
   const caseNoteFormData = useServiceCaseStore((s) => s.caseNoteFormData);
   const setCaseNoteField = useServiceCaseStore((s) => s.setCaseNoteField);
 
+
+  const setDraftField = useCaseNotesStore((s) => s.setDraftField);
+
+  const notesList = useCaseNotesStore(
+    (s) => (caseId ? s.notesByCaseId[caseId] : EMPTY_NOTES) ?? EMPTY_NOTES
+  );
+
+  const draft = useCaseNotesStore(
+    (s) => (caseId ? s.draftByCaseId[caseId] : EMPTY_DRAFT) ?? EMPTY_DRAFT
+  );
+
+
   const customerData = useServiceCaseStore((s) => s.customerData);
   const assetInformation = useServiceCaseStore((s) => s.assetInformation);
   const ownerUserData = useServiceCaseStore((s) => s.ownerUserData);
-  const notesList = useServiceCaseStore((s) => s.notesList);
+ // const notesList = useServiceCaseStore((s) => s.notesList);
   const workOrders = useServiceCaseStore((s) => s.workOrders);
   const materialOrders = useServiceCaseStore((s) => s.materialOrders);
   const actionLogs = useServiceCaseStore((s) => s.actionLogs);
@@ -2290,8 +2323,8 @@ useEffect(() => {
 
                       <SearchCommandBlock
                         id="log-type"
-                        value={caseNoteFormData?.LogType}
-                        onChange={(val) => onChangeCaseNote("LogType", val)}
+                        value={draft?.LogType}
+                        onChange={(val) => setDraftField(caseId,"LogType", val)}
                         options={["Notes Log", "Phone Log"]}
                         placeholder="--Select--"
                         className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
@@ -2301,8 +2334,8 @@ useEffect(() => {
                     <CaseField label="Action Type">
                       <SearchCommandBlock
                         id="action-type"
-                        value={caseNoteFormData?.ActionType}
-                        onChange={(val) => onChangeCaseNote("ActionType", val)}
+                        value={draft?.ActionType}
+                        onChange={(val) => setDraftField(caseId,"ActionType", val)}
                         placeholder="--Select--"
                         options={[
                           "Inbound Customer call",
@@ -2319,9 +2352,9 @@ useEffect(() => {
                       <textarea
                         id="notes"
                         className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm dark:bg-gray-500/10 dark:border-gray-400"
-                        value={caseNoteFormData?.Note || ""}
+                        value={draft?.Note || ""}
                         onChange={(e) =>
-                          onChangeCaseNote("Note", e.target.value)
+                          setDraftField(caseId,"Note", e.target.value)
                         }
                         placeholder="Write your note"
                       />

@@ -55,6 +55,7 @@ import {
   CircleArrowLeft,
   CircleChevronLeft,
   Clock10,
+  ClipboardPenLine,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -88,6 +89,7 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
 import RepairActionDialog from "@/components/model/RepairActionModal";
+import { useCaseNotesStore, EMPTY_DRAFT } from "@/hooks/useCaseNoteStore";
 
 export const TabsServiceWO = () => {
   const navigate = useNavigate();
@@ -95,12 +97,32 @@ export const TabsServiceWO = () => {
   const saveWorkOrder = useWorkOrderStore((s) => s.saveWorkOrder);
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
 
+  const { user } = useAuth();
   if (!workOrders) {
     return null;
   }
 
   const WOID = workOrders.WOID;
+const [logNoteOpen, setLogNoteOpen] = useState(false);
+const [quickLogMode, setQuickLogMode] = useState("noteOnly");
+const [pendingAfterNote, setPendingAfterNote] = useState(null);
 
+const caseId = workOrders?.CaseID;
+const openSaveGate = (after) => {
+  if (!caseId) return;
+
+  const notesState = useCaseNotesStore.getState();
+  const draft = notesState.draftByCaseId[caseId] ?? EMPTY_DRAFT;
+  const note = (draft.Note ?? "").toString().trim();
+
+  setPendingAfterNote(() => after);
+
+  setQuickLogMode("saveAll");
+  setLogNoteOpen(true);
+
+  // If you want: if note already typed, you can still open modal
+  // to force explicit "save note" before saving changes.
+};
   const handleSave = async () => {
     try {
       Swal.fire({
@@ -121,13 +143,19 @@ export const TabsServiceWO = () => {
           icon: "error",
           title: "Update Failed",
           text: result.message || "Unknown error",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false ,
         });
       }
 
       return Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Work Order updated successfully!",
+        text: "Work Order updated successfully!", 
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false ,
       });
     } catch (error) {
       Swal.close();
@@ -145,7 +173,7 @@ export const TabsServiceWO = () => {
       label: "",
       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
-    { icon: Save, label: "Save", onClick: () => handleSave() },
+    { icon: Save, label: "Save", onClick: () => openSaveGate(handleSave) },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -179,6 +207,8 @@ export const TabsServiceWO = () => {
       label: "Repair Action",
       onClick: () => setOpenRepairDialog(true),
     },
+    
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
     { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
@@ -461,6 +491,19 @@ export const TabsServiceWO = () => {
         canEdit={true}
         workOrders={workOrders}
       />
+    <QuickLogNote
+    open={logNoteOpen}
+    onOpenChange={setLogNoteOpen}
+    caseId={workOrders?.CaseID}
+    createdBy={user?.id}
+mode={quickLogMode}
+  onAfterSaveAll={async () => {
+    if (quickLogMode === "saveAll" && pendingAfterNote) {
+      await pendingAfterNote();
+      setPendingAfterNote(null);
+    }
+  }}
+    />
     </>
   );
 };
@@ -470,6 +513,7 @@ export const TabsServiceWO = () => {
 import { useMaterialOrderStore } from "@/hooks/useMaterialOrderStore";
 import { toast } from "sonner";
 import { isCancel } from "axios";
+import { QuickLogNote } from "@/components/model/QuickLogNote";
 // ...other imports...
 
 export const TabsServiceMO = ({
