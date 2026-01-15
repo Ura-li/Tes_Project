@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
     }
 
     const response = { success: true, message: "Part detail fetched", data: part };
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 300);
 
     return NextResponse.json(response, { status: 200 });
 }

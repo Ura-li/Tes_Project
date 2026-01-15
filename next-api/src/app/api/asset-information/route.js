@@ -93,7 +93,7 @@ export async function GET(request) {
             currentPage: page
         };
 
-        await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+        await redis.set(cacheKey, JSON.stringify(response), "EX", 300);
 
         return NextResponse.json(response, {
             status: 200,
