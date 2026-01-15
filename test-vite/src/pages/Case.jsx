@@ -187,7 +187,7 @@ export const Case = () => {
         fetchCustomerData(),
         fetchAssetInformation(),
         fetchProduct(),
-        fetchNotes(),
+        fetchNotes(caseId),
         fetchOwnerUserData(),
         fetchWorkOrders(),
         // fetchMaterialOrders(),
