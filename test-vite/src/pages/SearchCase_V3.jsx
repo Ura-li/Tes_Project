@@ -1030,7 +1030,7 @@ export default function NewCaseForm() {
       if (warrantySearchValue !== "01T" && needWarrantyApproval) {
     setNeedWarrantyApproval(false);
   }
-    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus("New");
+    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus(caseStatus ?? "New");
   }, [warrantySearchValue, needWarrantyApproval])
 
   const onCreateCase = async () => {
@@ -1506,7 +1506,7 @@ export default function NewCaseForm() {
                 value={caseStatus} 
                 onValueChange={async (label) => {
                   const enumValue = label
-                  setCaseStatus(enumValue || caseStatus)
+                  setCaseStatus(enumValue ?? caseStatus)
                   const isNewAssign = typeof enumValue === "string" && enumValue?.startsWith("NEW_Assign");
                   setHideAssignTo(isNewAssign);
                   if(isNewAssign){
