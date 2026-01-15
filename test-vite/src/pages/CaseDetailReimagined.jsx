@@ -1730,8 +1730,12 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Reference Case"} lock={!canEditFd} span={2}>
-                    <Input/>
+                  <CaseField label={"Reference Case"} lock span={2}>
+                    <Input
+                      value={caseDetails.ReferenceCase}
+                      readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                    />
                   </CaseField>
 
                   {/* detail owner */}
