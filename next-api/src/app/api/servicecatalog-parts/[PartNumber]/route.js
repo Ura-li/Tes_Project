@@ -88,7 +88,7 @@ export async function PATCH(request, { params }) {
         });
 
         await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
+        await redis.del(redisKey(`servicecatalog-parts:detail:${partNumber}`));
 
         return NextResponse.json(
             {
@@ -121,7 +121,7 @@ export async function DELETE(request, { params }) {
         });
 
         await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
+        await redis.del(redisKey(`servicecatalog-parts:detail:${partNumber}`));
 
         return NextResponse.json(
             { success: true, message: "Part deleted successfully!" },

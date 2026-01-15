@@ -1465,6 +1465,7 @@ useEffect(() => {
       const FilterAllUserByRole = FetchAllUserByRole.filter(u => u.ResourceId === user.resource)
       setRoleAssign(FilterAllUserByRole);      
     } catch (err) {
+      console.error(err)
       toast.error("Error fetching role");
     }
   };
@@ -1834,6 +1835,7 @@ useEffect(() => {
                             try {
                               fetchUserAssign(role);
                             } catch (err) {
+                              console.error(err)
                               toast.error("Error fetching role");
                             }
                           }

@@ -215,7 +215,7 @@ export async function PUT(request) {
     });
 
     await deleteByPattern("servicecatalog-parts:list:*");
-    await redis.del(`servicecatalog-parts:detail:${PartNumber}`);
+    await redis.del(redisKey(`servicecatalog-parts:detail:${PartNumber}`));
 
     return NextResponse.json(
       {

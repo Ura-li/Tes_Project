@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import { formatDateForInput,formatDate } from "@/lib/utils";
 import Swal from "sweetalert2";
 import { extractRoleFromStatus, STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
+import CaseField from "@/components/CaseField";
+import { useAuth } from "@/context/auth-context";
 
 /**
  * @fileoverview Create Case page (SearchCase_V3)
@@ -284,6 +286,7 @@ const DateHelper = {
  * @returns {JSX.Element}
  */
 export default function NewCaseForm() {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Global state
@@ -311,6 +314,9 @@ export default function NewCaseForm() {
   const [problemDesc, setProblemDesc] = useState("");
   const [caseNote, setCaseNote] = useState("");
   const [kciFlag, setKciFlag] = useState(false);
+
+  const [roleAssign, setRoleAssign] = useState([]);
+  const [caseAssign, setCaseAssign] = useState(null)
 
   // Lookup: Asset by serial
   /** @type {[string, (val: string) => void]} */
@@ -525,6 +531,19 @@ export default function NewCaseForm() {
       }, 400),
     []
   );
+
+  // ------ fetch assignable users by role when needed ------
+  const fetchUserAssign = async (role) => {
+    try {
+      const res = await ApiCustomer.get(`/api/user?role=${role}`);
+      const FetchAllUserByRole = res.data.data || [];
+      const FilterAllUserByRole = FetchAllUserByRole.filter(u => u.ResourceId === user.resource)
+      setRoleAssign(FilterAllUserByRole);
+    } catch (err) {
+      console.error(err)
+      toast.error("Error fetching role");
+    }
+  };
 
   /**
    * Search Warranty OTC Code (debounced).
@@ -1152,6 +1171,7 @@ export default function NewCaseForm() {
         SymptomCode: null,
         CaseResolution: null,
         CreatedBy: user?.id,
+        Owner: caseAssign ?? user?.id,
         ProblemDescription: problemDesc,
         CaseNoteProduct: caseNote,
         ReferenceCase: referenceCase
@@ -1485,20 +1505,21 @@ export default function NewCaseForm() {
               <Select 
                 value={caseStatus} 
                 onValueChange={async (label) => {
-                  const enumValue = LABEL_TO_STATUS_ENUM[label]
+                  const enumValue = label
                   setCaseStatus(enumValue || caseStatus)
                   const isNewAssign = typeof enumValue === "string" && enumValue?.startsWith("NEW_Assign");
                   setHideAssignTo(isNewAssign);
-
                   if(isNewAssign){
                     const role = extractRoleFromStatus(enumValue);
                     if(role){
                       try {
-                        fetch
+                        fetchUserAssign(role)
                       } catch (err) {
-                        
+                        toast.error("Error fetcing role")
                       }
                     }
+                  } else {
+                    setRoleAssign([])
                   }
                 }}
               >
@@ -1511,6 +1532,37 @@ export default function NewCaseForm() {
                   ))}
                 </SelectContent>
               </Select>
+
+              <CaseField
+                label="Assign To"
+                className="mt-2"
+                hide={!hideAssignTo}
+              >
+                {/* <Label>Assign To <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label> */}
+                <SearchCommandBlock
+                  value={caseAssign || null}
+                  onChange={(selectedID) => {
+                    if (!selectedID) {
+                      setCaseAssign(null)
+                      return
+                    }
+                    const selectedUser = roleAssign.find(
+                      (user) => user.IDUser === selectedID
+                    )
+                    if (selectedUser) {
+                      setCaseAssign(selectedUser.IDUser)
+                    }
+                  }}
+                  placeholder="--Select--"
+                  options={roleAssign.map((user) => ({
+                    label: user.Name,
+                    value: user.IDUser,
+                  }))}
+                  renderLabel={(opt) => opt.label}
+                  getValue={(opt) => opt.value}
+                  className="dark:bg-transparent dark:ring-1 dark:ring-gray-400"
+                />
+              </CaseField>
             
               <Label>Case Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>

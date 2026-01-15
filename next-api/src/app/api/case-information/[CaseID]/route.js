@@ -182,7 +182,7 @@ export async function PATCH(request, { params }) {
         });
 
         await deleteByPattern("case:list:*");
-        await redis.del(`case:detail:${caseID}`);
+        await redis.del(redisKey(`case:detail:${caseID}`));
 
         await notifySocket("case:updated", case_information);
     
@@ -241,7 +241,7 @@ export async function DELETE(request, { params }) {
     );
 
     await deleteByPattern("case:list:*");
-    await redis.del(`case:detail:${caseID}`);
+    await redis.del(redisKey(`case:detail:${caseID}`));
 
     return NextResponse.json({
         success: true,
