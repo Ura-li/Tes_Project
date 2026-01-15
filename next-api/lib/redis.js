@@ -2,7 +2,7 @@ import Redis from "ioredis";
 
 const globalForRedis = global;
 const ENV = process.env.NODE_ENV || "development";
-
+console.log("KONTOL",process.env);
 export function redisKey(key) {
   return `${ENV}:${key}`;
 }
