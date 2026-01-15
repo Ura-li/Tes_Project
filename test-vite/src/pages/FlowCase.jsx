@@ -379,7 +379,7 @@ export const FlowCaseData = (user) => {
                   <Card
                     key={c.CaseID}
                     className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700",
-                      c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600" :
+                      c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600 bg-gradient-to-r from-white via-emerald-100 to-emerald-300 " : 
                       (c.CaseStatus === "Close" || c.CaseStatus === "Cancel") ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
                         c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
                     )}

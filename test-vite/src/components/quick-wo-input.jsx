@@ -234,10 +234,10 @@ export function QuickWOInput ({
                 <CaseField label="Work Order Number" className={'col-span-2 '} lock span={4}>
                   <Input variant={'invisible'} className="" 
                     value={general.workOrderNumber}  /></CaseField>
-                <CaseField label="Work Order Type" className={'col-span-2'} span={4}>
+                <CaseField label="Work Order Type" className={'col-span-2'} lock span={4}>
                   <Input variant={'invisible'} className="" 
                     value={general.workOrderType} onChange={handleChangeGeneral('workOrderType')} /> </CaseField>
-                <CaseField label="System Status" className={'col-span-2'} span={4}>
+                <CaseField label="System Status" className={'col-span-2'} lock span={4}>
                   <Input variant={'invisible'} className="" 
                     value={general.systemStatus}  /> </CaseField>
                 <CaseField label="Sub Status" className={'col-span-2'} lock={KeyRound} span={4}>
@@ -319,7 +319,7 @@ export function QuickWOInput ({
                   ></DatePicker>
                 </CaseField>
                 <CaseField label="SLA Error Description" className={'row-span-2 items-start'} childClass={'row-span-2'} lock >
-                   <textarea value={SLA.slaErrorDescription} className='border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none'></textarea>
+                   <textarea value={SLA.slaErrorDescription || ""} className='border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none'></textarea>
                 </CaseField>
                 <CaseField label="Response" className={''}  > <Input className="" value={SLA.response} readOnly/> </CaseField>
                 <CaseField label="Latest Start Date Time (Customer)" className={''}  > 
@@ -353,13 +353,13 @@ export function QuickWOInput ({
                   <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.NMUItem?.itemName} />
                 </CaseField>
                 <CaseField label={"Defec desc"} lock>
-                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.DefectDesc}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.DefectDesc || ""}/>
                 </CaseField>
                 <CaseField label={"CE analysis"} lock>
-                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.CEAnalysis}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.CEAnalysis || ""}/>
                 </CaseField>
                 <CaseField label={"Repair Action"} lock>
-                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.RepairAction}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.RepairAction || ""}/>
                 </CaseField>
               </CardContent>
             </Card>
