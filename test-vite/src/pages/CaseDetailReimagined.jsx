@@ -221,7 +221,7 @@ const openSaveAll = () => {
       icon: Save,
       label: "Save",
       onClick: () => openSaveAll(),
-      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","apv"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"],
     },
     {
       icon: FileSymlink,
@@ -230,19 +230,19 @@ const openSaveAll = () => {
         handleSave().then((ok) => {
           if (ok) navigate(`/app/`);
         }),
-      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps","spv", "cm"],
     },
     {
       icon: CopyX,
       label: "Close Case",
       onClick: () => saveAndCloseCase(false),
-      roles: ["admin", "fd"],
+      roles: ["admin", "fd","spv",],
     },
     {
       icon: CopyX,
       label: "Cancel Case",
       onClick: () => saveAndCloseCase(true),
-      roles: ["admin", "fd"],
+      roles: ["admin", "fd","spv",],
     },
     {
       icon: RotateCw,
@@ -272,7 +272,7 @@ const openSaveAll = () => {
       icon: MessageSquareText,
       label: "Quotation",
       onClick: () => handleQuotationOpenChange(),
-      roles: ["admin", "cm"],
+      roles: ["admin", "cm","spv"],
     },
     {
       icon: StepBack,
@@ -380,7 +380,7 @@ const openSaveAll = () => {
       icon: StepBack,
       label: "Service Order",
       onClick: () => openServiceCatalog("serviceorder"),
-      roles: ["admin", "ce", "celead"],
+      roles: ["admin", "ce", "celead","spv",],
       hidden: caseDetails.workorder[0]?.SystemStatus == 'OPEN_UNSCHEDULED'  ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_SCHEDULED' ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_COMPLETED' ? true : false,
     },
     {
@@ -553,7 +553,7 @@ const openSaveAll = () => {
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
         },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
   ];
 
 
@@ -970,7 +970,7 @@ function fieldMO(caseDetails) {
       .filter(Boolean)
       .join(", ") || "-";
 
-    const isTechRole = ["ce", "celead", "apo", "admin"].includes(user?.role);
+    const isTechRole = ["ce", "celead", "apo", "spv","admin"].includes(user?.role);
 
   return (
     <>
@@ -1252,7 +1252,7 @@ const WarrantyConditionEnumToLabel = {
   OutWarranty: "Out of Warranty",
 };
 
-const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R","U","T"]
+const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R","S","T","U","V","W","Z"]
 const number  = [1,2,3,4,5]
 
 const OptionStorage = letters.flatMap(letter =>
@@ -1288,7 +1288,6 @@ export const ServiceCase = () => {
   const customerData = useServiceCaseStore((s) => s.customerData);
   const assetInformation = useServiceCaseStore((s) => s.assetInformation);
   const ownerUserData = useServiceCaseStore((s) => s.ownerUserData);
- // const notesList = useServiceCaseStore((s) => s.notesList);
   const workOrders = useServiceCaseStore((s) => s.workOrders);
   const materialOrders = useServiceCaseStore((s) => s.materialOrders);
   const actionLogs = useServiceCaseStore((s) => s.actionLogs);
@@ -1483,15 +1482,11 @@ useEffect(() => {
   let canEditWarranty = false;
 
   if (caseDetails?.CaseStatus !== "Close" && caseDetails?.CaseStatus !== "Cancel" ) {
-    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin";
-    canEditFd = user?.role === "fd" || user?.role === "admin";
-    canEditApo = user?.role === "apo" || user?.role === "admin";
-    canEditCe =
-      user?.role === "ce" || user?.role === "celead" || user?.role === "admin";
-    canEditWarranty =
-      user?.role === "fd" ||
-      user?.role === "admin" ||
-      user?.role === "apv";
+    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv";
+    canEditFd = user?.role === "fd" || user?.role === "admin" || user?.role === "spv";
+    canEditApo = user?.role === "apo" || user?.role === "admin" || user?.role === "spv";
+    canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === "admin" || user?.role === "spv";
+    canEditWarranty = user?.role === "fd" || user?.role === "admin" || user?.role === "apv" || user?.role === "spv";
   }
 
   // ------ file pick handlers (kept local) ------
@@ -1530,7 +1525,6 @@ useEffect(() => {
 
   const onChangeCsr = (field) => (value) =>
     setCsrFormField(field, value);
-
 
 
   // safety: if no caseDetails yet, don't render
@@ -1593,6 +1587,8 @@ useEffect(() => {
                       ? "Owner Cm"
                       : ownerUserData?.Role === "admin"
                       ? "Owner Admin"
+                      : ownerUserData?.Role === "spv"
+                      ? "Owner Supervisor"
                       : ownerUserData?.Role === "ps"
                       ? "Owner Ps"
                       : ownerUserData?.Role === "apv"
@@ -1791,8 +1787,7 @@ useEffect(() => {
                       />
                     </CaseField>
                   )}
-                  {caseDetails?.workorder[0]?.materialorder[0]?.owner
-                    ?.IDUser && (
+                  {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
                     <CaseField
                       label="APO name"
                       className={"mt-2"}
@@ -1897,7 +1892,7 @@ useEffect(() => {
                       value={caseForm?.CaseType}
                       onChange={onChangeCase("CaseType")}
                       placeholder="--Select--"
-                      options={["Depot Repair", "Onsite", "Bench", "DOA"]}
+                      options={["Depot Repair", "Onsite", "Bench", "DOA", "Express"]}
                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>

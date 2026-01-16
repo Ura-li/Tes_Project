@@ -255,7 +255,7 @@ export const ServiceWork = () => {
   };
 
   // permissions
-  const editRoles = ["apo", "admin", "ce", "celead"];
+  const editRoles = ["apo", "admin", "ce", "celead", "spv"];
   let canEdit = false;
   if (workOrder?.SystemStatus !== "CLOSED_POSTED") {
     canEdit = editRoles.includes(user?.role);

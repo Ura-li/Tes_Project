@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-
 import { generateID } from "@/utils/generateID";
 import { handleActionLogNotifications } from "../../../../../lib/actionLogDispatcher";
+
 const CASE_INFO_SELECT = {
     CaseID: true,
     CaseSubject: true,
@@ -316,13 +316,23 @@ export async function POST(request) {
                     },
                 });
             }
-   
-            const caseUpdateData = { CaseStatus: "PartRequest" };
-            if(isOutWarranty) caseUpdateData.CaseStatus = "Quote_Requested"
+
+            const hasPart = selectedPartCatalog.length > 0 ;
+            const caseUpdateData = {};
 
             if (assignApoId !== null) {
                 caseUpdateData.Owner = assignApoId;
             }   
+
+            if (!hasPart) {
+                caseUpdateData.CaseStatus = "RepairProgress";
+            } else  {
+                if (isOutWarranty) {
+                    caseUpdateData.CaseStatus = "Quote_Requested";
+                } else {
+                     caseUpdateData.CaseStatus = "PartRequest";
+                }
+            }
 
             await tx.caseinformation.update({
                 where: { CaseID },

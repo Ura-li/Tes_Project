@@ -200,7 +200,7 @@ import { useAuth } from "@/context/auth-context";
 // Constants (Business Rules)
 // ----------------------------
 
-const CASE_TYPES = ["Bench", "Onsite", "DOA"];
+const CASE_TYPES = ["Bench", "Onsite", "DOA","Express","Depot Repair"];
 const CASE_STATUS = [
   "NEW_AssignCE",
   "NEW_AssignPS",
@@ -1218,7 +1218,7 @@ export default function NewCaseForm() {
       };
 
       const confirmcreate = await Swal.fire({
-        title: "Apakah data tersebut sudah benar ?",
+        title: "Apakah data sudah benar ?",
         text: "Tolong check kembali data yang telah di input!",
         icon: "warning",
         showCancelButton: true,
@@ -1532,13 +1532,32 @@ export default function NewCaseForm() {
                   ))}
                 </SelectContent>
               </Select>
+            
+              <Label>Case Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+              <Select value={caseType} onValueChange={setCaseType}>
+                <SelectTrigger className={"ring-1 ring-gray-400  rounded-sm w-full  dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
+                  <SelectValue placeholder="Select Case Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CASE_TYPES.map((t) => (
+                    <SelectItem value={t} key={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {mustRerepair && (
+                <div>
+                  <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case akan berubah status menjadi re repair</p>
+                  <p>Last open case ID: {lastCase.caseinformation.CaseID}</p>
+                  <p>Case created at: {formatDate(lastCase.caseinformation.CreatedOn)}</p>
+                </div>
+              )}
+            </div>
 
               <CaseField
                 label="Assign To"
-                className="mt-2"
                 hide={!hideAssignTo}
+                span={2}
               >
-                {/* <Label>Assign To <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label> */}
                 <SearchCommandBlock
                   value={caseAssign || null}
                   onChange={(selectedID) => {
@@ -1563,27 +1582,6 @@ export default function NewCaseForm() {
                   className="dark:bg-transparent dark:ring-1 dark:ring-gray-400"
                 />
               </CaseField>
-            
-              <Label>Case Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Select value={caseType} onValueChange={setCaseType}>
-                <SelectTrigger className={"ring-1 ring-gray-400  rounded-sm w-full  dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
-                  <SelectValue placeholder="Select Case Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CASE_TYPES.map((t) => (
-                    <SelectItem value={t} key={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {mustRerepair && (
-                <div>
-                  <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case akan berubah status menjadi re repair</p>
-                  <p>Last open case ID: {lastCase.caseinformation.CaseID}</p>
-                  <p>Case created at: {formatDate(lastCase.caseinformation.CreatedOn)}</p>
-                </div>
-              )}
-
-            </div>
             
             <div className=" space-y-2">
               <Label>Case Subject <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>

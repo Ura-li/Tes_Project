@@ -207,23 +207,8 @@ const openSaveGate = (after) => {
       label: "Repair Action",
       onClick: () => setOpenRepairDialog(true),
     },
-    
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true },
+    { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
-    {
-      icon: UserPen,
-      label: "Create Material Order",
-      onClick: () => alert("not now"),
-      hidden: true,
-    },
-    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now"), hidden: true },
   ];
 
   const validate = async () => {
@@ -712,7 +697,8 @@ export const TabsServiceMO = ({
         currentRole !== "ce" &&
         currentRole !== "celead" &&
         currentRole !== "apo" &&
-        currentRole !== "admin",
+        currentRole !== "admin" && 
+        currentRole !== "spv",
     },
     {
       icon: CopyXIcon,
@@ -722,18 +708,10 @@ export const TabsServiceMO = ({
         currentRole !== "ce" &&
         currentRole !== "celead" &&
         currentRole !== "apo" &&
-        currentRole !== "admin",
+        currentRole !== "admin" && 
+        currentRole !== "spv",
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Cancel Order", hidden: true },
-    { icon: StepBack, label: "Add To Queue", hidden: true },
-    { icon: StepBack, label: "Add Parts", hidden: true },
-    { icon: StepBack, label: "Pick", hidden: true },
-    { icon: StepBack, label: "Place Order", hidden: true },
-    { icon: StepBack, label: "Tax", hidden: true },
-    { icon: StepBack, label: "CustID Search", hidden: true },
-    { icon: UserPen, label: "PUDO Search", hidden: true },
-    { icon: StepBack, label: "Audit", hidden: true },
   ];
 
   return (
