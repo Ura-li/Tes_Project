@@ -1003,7 +1003,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       icon: CopyXIcon,
       label: "Close MO",
       onClick: () => saveAndCloseMaterialOrder(),
-      hidden: currentRole !== 'ce' && currentRole !== 'celead' && currentRole !== 'admin',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead' && currentRole !== 'admin' && currentRole !== 'spv',
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},
@@ -1219,17 +1219,6 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
         )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
-      <div>
-        {/* <ServiceCase 
-      caseDetails={caseDetails}
-      formData={caseNoteFormData}
-      onChange={handleCaseNoteChange}
-      caseNotes={caseNotes}
-      setCaseNotes={setCaseNotes}
-      selectedSymptom={selectedSymptom}
-      setSelectedSymptom={setSelectedSymptom}
-      /> */}
-      </div>
     </>
   );
 };
@@ -1250,7 +1239,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       icon: CopyXIcon,
       label: "Close MO Line Items",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
-      hidden: currentRole !== 'ce' && currentRole !== 'celead',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead' && currentRole !== 'admin' && currentRole !== 'spv',
     },
     { icon: StepBack, label: "Cancel", hidden: true },
     { icon: StepBack, label: "Audit", hidden: true },
@@ -1264,8 +1253,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     { icon: StepBack, label: "Geo Code", hidden: true },
     { icon: StepBack, label: "Process",hidden: true },
     { icon: StepBack, label: "Reset RDT",hidden: true },
-    // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
-    // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -1472,17 +1459,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           </DropdownMenu>
         )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-      </div>
-      <div>
-        {/* <ServiceCase 
-      caseDetails={caseDetails}
-      formData={caseNoteFormData}
-      onChange={handleCaseNoteChange}
-      caseNotes={caseNotes}
-      setCaseNotes={setCaseNotes}
-      selectedSymptom={selectedSymptom}
-      setSelectedSymptom={setSelectedSymptom}
-      /> */}
       </div>
     </>
   );
@@ -1869,12 +1845,9 @@ export const ServiceCase = ({
   const navigate = useNavigate();
 
   const handleClick = async () => {
-    // await fetchOwnerUserData();
-    // await fetchCustomerData();
     {
       workOrders.map((work) => {
         navigate(`/app/work/${work.WOID}`, {
-          // state: { ownerUserData, dataFetchCustomerData }
         });
       });
     }

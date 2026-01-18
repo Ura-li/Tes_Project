@@ -44,11 +44,6 @@ export function AppSidebar({
     return null; 
   }
   const data = {
-    // user: {
-    //   name: "ME",
-    //   email: "m@example.com",
-    //   avatar: "/avatars/shadcn.jpg",
-    // },
     user: getUserFromToken(),
     teams: [
       {
@@ -304,6 +299,51 @@ export function AppSidebar({
         ],
       },
     ],
+    navMasterSPV: [
+      {
+        title: "MasterSPV",
+        url: "#",
+        icon: Bot,
+        isActive: true,
+        items: [
+          {
+            title: "Company",
+            url: "/app/master/Company_table",
+            icon: Building
+          },
+          {
+            title: "Assets",
+            url: "/app/master/Assets_table",
+            icon: Briefcase
+          },
+          {
+            title: "Contact",
+            url: "/app/master/Contact_table",
+            icon: Phone
+          },
+          {
+            title: "Product",
+            url: "/app/master/Product_table",
+            icon: Box
+          },
+            {
+            title: "Material Order",
+            url: "/app/master/Mo_table",
+            icon: ShoppingCart
+          },  
+          {
+            title: "Work Order",
+            url: "/app/master/Wo_table",
+            icon: Wrench
+          },
+          {
+            title: "Parts",
+            url: "/app/master/Part_table",
+            icon: Hammer
+          },  
+        ],
+      },
+    ],
     projects: [
       {
         name: "Home",
@@ -377,6 +417,20 @@ export function AppSidebar({
         icon: FolderInput
       }
     ],
+    spv : [
+        {
+        name: "Home",
+        title: "Home",
+        url: "/app",
+        icon: Home,
+      },
+      {
+        name: "View Case",
+        title: "View Case",
+        url: "/app/viewcase",
+        icon: Pin
+      },
+    ],
     default :[
        {
         name: "Home",
@@ -416,9 +470,17 @@ export function AppSidebar({
     );
   } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'cm' || data.user.role === 'ps' ||  data.user?.role === 'apv' ){
     navrole = data.apo;
-  } else if (data.user.role === 'lg' ){
+  } else if (data.user.role === 'lg'){
     navrole = data.lg;
-    DropNav = '';
+  } else if (data.user.role === 'spv'){
+    navrole = data.spv;
+    DropNav = (
+      <NavMain
+          className="bg-cyan-700"
+          items={data.navMasterSPV}
+          activeClassName="bg-cyan-800 text-white"
+        />
+    )
   } else {
     navrole = data.default;
   }

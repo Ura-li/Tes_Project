@@ -5499,9 +5499,6 @@ export function BtnModalsServiceCatalog({
       )
     }
   }
-
-
-  
   useEffect(() => {
     handlerPriceConfirmServices();
   }, [selectedPartCatalog]);
@@ -5592,14 +5589,12 @@ export function BtnModalsServiceCatalog({
     }
 
   }
-
-
   
   //createorder
   const createOrder = async () => {
-
-    if (!assignApo) {
-      toast.warning("APO IS NOT ASSIGN YET", {
+    const hasPart = selectedPartCatalog.length > 0;
+    if (hasPart && !assignApo) {
+       toast.warning("APO IS NOT ASSIGN YET", {
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
@@ -5628,7 +5623,7 @@ export function BtnModalsServiceCatalog({
         });
         return;
       }
-
+      
       try {
         Swal.fire({
           title: "Creating Order...",
@@ -5639,7 +5634,6 @@ export function BtnModalsServiceCatalog({
         const data = {
           user: getUserFromToken()
         }
-
 
         // If WOID present or special mode, create only MO for existing WO
         const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
@@ -5670,7 +5664,6 @@ export function BtnModalsServiceCatalog({
               assignApo: assignApo,
             });
         Swal.close(); 
-      
         // Close loading after success
         await Swal.fire({
           title: "Success!",
@@ -5696,19 +5689,15 @@ export function BtnModalsServiceCatalog({
               case "CSR":
                 if (manyCreate) {
                   // Open the last created MO or keep on WO page as desired
-                  // window.open(`/app/material-order/${res.data.MOIDs.slice(-1)[0]}`, '_blank');
                 } else if (MOID) {
                   window.open(`/app/material-order/${MOID}`, '_blank');
                 }
                 break;
-
               case "serviceorder":
                 window.open(`/app/work/${WOIDRes}`, '_blank');  
                 break;
-  
               default:
                 break;
-  
             }
           }
         });
@@ -6493,31 +6482,34 @@ export function BtnModalsServiceCatalog({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT {isOutWarranty ? "CM" : "APO"} : </Label>
-              <SearchCommandBlock 
-                value={assignApo}
-                onChange={(selectedID) =>{
-                  if(!selectedID) {
-                    setAssignApo(null);
-                    return;
-                  }
-                  const selectedUser = filteredUserAssign.find(
-                    (user) => user.IDUser === selectedID
-                  );
-                  if (selectedUser) {
-                    setAssignApo(selectedUser.IDUser);
-                  }
-                }}
-                placeholder="--Select--"
-                options={filteredUserAssign.map((user) =>({
-                  label: user.Name,
-                  value: user.IDUser,
-                }))}
-                renderLabel={(opt) => opt.label}
-                getValue={(opt) => opt.value}
-                className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
-              />
-              
+              {selectedPartCatalog.length > 0 && (
+              <div className={"flex gap-2"}>
+                <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT {isOutWarranty ? "CM" : "APO"} : </Label>
+                <SearchCommandBlock
+                  value={assignApo}
+                  onChange={(selectedID) =>{
+                    if(!selectedID) {
+                      setAssignApo(null);
+                      return;
+                    }
+                    const selectedUser = filteredUserAssign.find(
+                      (user) => user.IDUser === selectedID
+                    );
+                    if (selectedUser) {
+                      setAssignApo(selectedUser.IDUser);
+                    }
+                  }}
+                  placeholder="--Select--"
+                  options={filteredUserAssign.map((user) =>({
+                    label: user.Name,
+                    value: user.IDUser,
+                  }))}
+                  renderLabel={(opt) => opt.label}
+                  getValue={(opt) => opt.value}
+                  className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
+                />
+              </div>
+              )}
             </DialogFooter>
           </DialogContent>
         );

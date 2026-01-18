@@ -8,6 +8,7 @@ const ProductStorageLanding = lazy(() => import("../layout/Ps_Page"));
 const LogistikLanding = lazy(() => import("../layout/Logistic_Page"))
 const CashMLanding = lazy(() => import ("../layout/Cm_Page"))
 const ApprovelLanding = lazy(() => import ("../layout/Apv_page"));
+const SpvLanding = lazy(() => import ("../layout/SupervisorLanding"));
 // const UserLanding = lazy(() => import("../pages/user/Dashboard"));
 // const CeLeadLanding = lazy(() => import("../layout/CeLead_Page") )
 // const CeLanding = lazy(() => import("../layout/Ce_Page"))
@@ -24,6 +25,7 @@ export default function Landing() {
       {user?.role === "lg" && <LogistikLanding/>}
       {user?.role === "cm" && <CashMLanding/>}
       {user?.role === "apv" && <ApprovelLanding/>}
+      {user?.role === "spv" && <SpvLanding/>}
       {/* {user?.role === "manager" && <ManagerLanding />} */}
       {/* {user?.role === "fd" && <WorkerLanding />} */}
       {/* {user?.role === "ce" && <WorkerLanding/>} */}

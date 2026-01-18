@@ -1214,7 +1214,7 @@ export const Case_table = () => {
      * I TRY ANOTHER METHOD WHEN THIS IS DONE
      *  -miku21
      */
-    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm';
+    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
     const savedTeamId = localStorage.getItem("activeTeamId");
     const baseurl = `/api/case-information`;
     const params = new URLSearchParams();
@@ -1747,7 +1747,7 @@ const sortedData = useMemo(() => {
           >
             Reset Filters
           </Button>
-           {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ? 
+           {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
           <ExportExcel caseData={caseData} />
           : null}
         </div>
