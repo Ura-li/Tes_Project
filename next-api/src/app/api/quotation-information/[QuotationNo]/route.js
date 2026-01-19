@@ -6,6 +6,7 @@ import {
   normalizeLineItemPayload,
   parseDate,
 } from "../helpers";
+import redis, { redisKey } from "../../../../../lib/redis";
 
 export async function GET(_request, { params }) {
   const { QuotationNo } = params;
@@ -473,6 +474,8 @@ export async function PATCH(request, { params }) {
         },
       });
     },{timeout: 60000});
+    
+    await redis.del(redisKey(`case:detail:${caseId}`));
 
     return NextResponse.json({
       success: true,

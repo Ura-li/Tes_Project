@@ -120,7 +120,7 @@ export async function GET(request, { params }) {
         data: case_information,
     };
 
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
 
     return NextResponse.json(response, { status: 200 });
 }
