@@ -237,7 +237,9 @@ export const FlowCaseData = (user) => {
     { status: "RepairProgress", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartAvailable", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
+    { status: "Quote_Approved", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
     { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
+    { status: "PartOrder", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
     { status: "Close", data: { ...emptyData }, hide: filterClose }
   ];
 

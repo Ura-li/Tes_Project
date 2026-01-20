@@ -278,7 +278,7 @@ export async function GET(request) {
   //   },
   // });
 
-  await redis.set(cacheKey, JSON.stringify(response), "EX", 300);
+  await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
 
 
 
