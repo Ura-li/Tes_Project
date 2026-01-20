@@ -1144,7 +1144,7 @@ export const ServiceWork = () => {
                     const reviewPhoto = resolvedPhotoSrc(mo)
                     return (
                     <div key={mo.moid}>
-                    <span className="italic font-semibold">Sparepart {index + 1}</span>
+                    <span className="italic font-semibold">Sparepart {index + 1} - {mo.Description} / {mo.PartNumber}</span>
                     <div className="grid grid-cols-4 gap-4 border-2 mt-2 rounded-sm p-4">
 
                     <CaseField label="CT Validation" star={editRoles} lock={!editRoles}>
