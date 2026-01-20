@@ -1181,7 +1181,7 @@ export const Case_table = () => {
   // 🔹 Sort state
   const [sortConfig, setSortConfig] = useState({
     key: "CaseID",
-    direction: "asc",
+    direction: "desc",
   });
 
   // 🔹 Debounce search

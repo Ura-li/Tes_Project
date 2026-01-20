@@ -56,7 +56,7 @@ const TARGET_UPDATE_MAPPING = {
   InOutCE: (row) => ({
     RMANumber: row["RMA No."]?.toString().trim() || null,
     RemovedSerialNumber: row["CT Code New"]?.toString().trim() || null,
-    AWB_InCode: row["AWB No."]?.toString().trim() || null,
+    AWB_InCode: row["AWB In No."]?.toString().trim() || null,
   }),
 
   ReturnDHL: (row) => ({
@@ -83,7 +83,7 @@ export async function GET(request) {
     const targetStatus = searchParams.get("targetStatus");
 
     const HEADER_MAP = {
-      InOutCE: ["SO No.", "RMA No.", "CT Code New", "AWB No."],
+      InOutCE: ["SO No.", "RMA No.", "CT Code New", "AWB In No."],
 
       ReturnDHL: ["SO No.", "RMA No.", "CT Code Bad / Part SN", "AWB Out No."],
 

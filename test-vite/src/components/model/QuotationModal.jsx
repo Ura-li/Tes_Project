@@ -778,6 +778,7 @@ const QuotationDialog = ({
                                   type="number"
                                   min="0"
                                   placeholder="Harga"
+                                  step="0.01"
                                   required
                                 />
                                 {errors.price && (
