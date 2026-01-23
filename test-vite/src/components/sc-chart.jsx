@@ -362,3 +362,108 @@ export function ChartRadialText({
     </Card>
   );
 }
+
+const chartData2 = [
+  { date: "2024-07-15", running: 450, swimming: 300 },
+  { date: "2024-07-16", running: 380, swimming: 420 },
+  { date: "2024-07-17", running: 520, swimming: 120 },
+  { date: "2024-07-18", running: 140, swimming: 550 },
+  { date: "2024-07-19", running: 600, swimming: 350 },
+  { date: "2024-07-20", running: 480, swimming: 400 },
+]
+
+const chartConfig2 = {
+  bench: {
+    label: "Bench",
+    color: "var(--chart-1)",
+  },
+  onsite: {
+    label: "Onsite",
+    color: "var(--chart-2)",
+  },
+} 
+
+export function ChartTooltipAdvanced({datachart}) {
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Daily Case type Chart</CardTitle>
+        <CardDescription>
+         Total case for Bench and Onsite in one days 
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig2}>
+          <BarChart accessibilityLayer data={datachart}>
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => {
+                return new Date(value).toLocaleDateString("id-ID", {
+                  weekday: "short",
+                })
+              }}
+            />
+            <Bar
+              dataKey="bench"
+              stackId="a"
+              fill="var(--chart-1)"
+              radius={[0, 0, 4, 4]}
+            />
+            <Bar
+              dataKey="onsite"
+              stackId="a"
+              fill="var(--chart-2)"
+              radius={[4, 4, 0, 0]}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  className="w-[180px]"
+                  formatter={(value, name, item, index) => (
+                    <>
+                      <div
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-(--color-bg)"
+                        style={
+                          {
+                            "--color-bg": `var(--color-${name})`,
+                          } 
+                        }
+                      />
+                      {chartConfig2?.label ||
+                        name}
+                      <div className="text-foreground ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums">
+                        {value}
+                        <span className="text-muted-foreground font-normal">
+                          case
+                        </span>
+                      </div>
+                      {/* Add this after the last item */}
+                      {index === 1 && (
+                        <div className="text-foreground mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium">
+                          Total
+                          <div className="text-foreground ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums">
+                            {item.payload.bench + item.payload.onsite}
+                            <span className="text-muted-foreground font-normal">
+                              case
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                />
+              }
+              cursor={false}
+              defaultIndex={1}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}

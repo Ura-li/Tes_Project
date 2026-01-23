@@ -1,6 +1,6 @@
 import ApiCustomer from '@/api';
 import { NotificationCard } from '@/components/NotificationCard';
-import { ChartRadialText } from '@/components/sc-chart';
+import { ChartRadialText, ChartTooltipAdvanced } from '@/components/sc-chart';
 import ToastTester from '@/components/ToastComponent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
 import { useSocket } from '@/hooks/useSocket';
-import { cn } from '@/lib/utils';
+import { buildBusinessDayCaseTypeSeries, buildWeeklyCaseTypeSeries, cn } from '@/lib/utils';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
@@ -22,6 +22,7 @@ export default function FrontDesk_Page() {
   const { user } = useAuth();
   const [userData, setUserData] = useState([]);
   const [caseData, setCaseData] = useState([]);
+  console.log("CHECK cASe DAtA",caseData)
   const [loading, setLoading] = useState(false);
   const [casevaluedata, setCasevaluedata] = useState([])
   const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
@@ -30,7 +31,7 @@ export default function FrontDesk_Page() {
       ProfilePhoto: null,
       Signature: null,
   });
-
+  const [weeklyChartData, setWeeklyChartData] = useState([]);
   const [notfilog, setNotfilog] = useState([])
 
   const radialchartdata = [
@@ -58,6 +59,9 @@ export default function FrontDesk_Page() {
       const response = await ApiCustomer.get('/api/case-information');
       const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`);
       const resFetchUserData = fecthUserData.data.data;
+      const series = buildBusinessDayCaseTypeSeries(response.data.data,user, { days: 6 });
+      setWeeklyChartData(series);
+
       setUserData({
         ...userData,
         Username: resFetchUserData.Username,
@@ -110,8 +114,16 @@ export default function FrontDesk_Page() {
   }, []);
  
   const navigate = useNavigate();
+function getMetricKeys(data, excludedKeys = ["date"]) {
+  if (!Array.isArray(data) || data.length === 0) return [];
 
+  return Object.keys(data[0]).filter(
+    key => !excludedKeys.includes(key)
+  );
+}
 
+const checkdata =  getMetricKeys(weeklyChartData);
+console.log("CHECK matric data",checkdata)
   return (
     <div className="min-h-[calc(100vh-64px)]  h-full w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id="dashboard">
       {/* Left Column - Profile */}
@@ -154,20 +166,21 @@ export default function FrontDesk_Page() {
 
       {/* Center Column - Chart */}
       <div className="col-span-1 md:col-span-2">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6  dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-80% from-20%" id="cases-overview">
-          <CardHeader>
-            <CardTitle>Cases Overview</CardTitle>
-            <CardDescription>Today’s activity</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 flex items-center justify-center">
-            <ChartRadialText radialchartdata={radialchartdata} />
-          </CardContent>
-        </Card>
+        {/* <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6  dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-80% from-20%" id="cases-overview"> */}
+        {/*   <CardHeader> */}
+        {/*     <CardTitle>Cases Overview</CardTitle> */}
+        {/*     <CardDescription>Today’s activity</CardDescription> */}
+        {/*   </CardHeader> */}
+        {/*   <CardContent className="flex-1 flex items-center justify-center"> */}
+        {/*     <ChartRadialText radialchartdata={radialchartdata} /> */}
+        {/*   </CardContent> */}
+        {/* </Card> */}
+<ChartTooltipAdvanced datachart={weeklyChartData}/>
       </div>
 
       {/* Right Column - Notifications */}
       <div className="col-span-1">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-90% from-30%" id="notifications">
+        <Card className="rounded-xl shadow-lg py-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-90% from-30%" id="notifications">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
           </CardHeader>
@@ -194,7 +207,7 @@ export default function FrontDesk_Page() {
                   className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400  dark:border-l-4 dark:border-slate-600 cursor-pointer dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-20% via-80% from-50%"
                   onClick={() => navigate(`/app/case/${c.CaseID}`)}
                 >
-                  <div className="flex flex-wrap items-center gap-2 ">
+                  <div className="flex flex-wrap items-center gap-2  ">
                     <Badge
                       className={`px-2 py-1 rounded-md text-xs font-medium
                       ${c.caseinformation.CasePriority === "High"
@@ -211,7 +224,7 @@ export default function FrontDesk_Page() {
                     </Badge>
                     <p className='ml-auto text-xs text-gray-500 dark:text-slate-400'>{c.CreatedOn}</p>
                   </div>
-                  <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
+                  <p className={cn("text-xs truncate ", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                   <div className=" text-gray-500 mt-1 flex justify-between">
                     <p className='text-md dark:text-slate-400'>{c.CaseID}</p>
                     <p className='text-md  font-semibold dark:text-slate-400'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>

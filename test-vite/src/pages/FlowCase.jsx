@@ -372,8 +372,20 @@ export const FlowCaseData = (user) => {
             <div className="space-y-3 p-5" >
               {renderer ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
-                    <Skeleton className="h-6 w-32" />
+                  <Card key={i} className="flex-row p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
+                    <div>
+                    <Skeleton className="h-6 w-122" />
+                    <Skeleton className="h-6 w-122" />
+                    </div>
+                    <div className="flex flex-col items-center gap-2 align-middle" id='case-badge'>  
+                        <div className="space-x-2 justify-center inline-flex">
+                    <Skeleton className="h-6 w-10" />
+                    <Skeleton className="h-6 w-10" />
+                    <Skeleton className="h-6 w-10" />
+                    <Skeleton className="h-6 w-10" />
+                        </div>
+                    <Skeleton className="h-6 w-20" />
+                    </div>
                   </Card>
                 ))
               ) : (
@@ -486,8 +498,8 @@ export const FlowCaseData = (user) => {
                   </PaginationItem>
                   <div className="flex gap-3 p-1 items-center">
                     Total Page
-                    <span className='border-2 p-1 rounded-md shadow-2xl dark:border-slate-500 '>
-                      {totalPages}
+                    <span className='border-2 p-1 rounded-md shadow-2xl dark:border-slate-500 text-center'>
+                      {totalPages} For {caseData.length} Cases
                     </span>
                   </div>
 		
