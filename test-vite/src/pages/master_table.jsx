@@ -1749,7 +1749,7 @@ const sortedData = useMemo(() => {
             Reset Filters
           </Button>
            {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ? 
-          <ExportExcel caseData={caseData} />
+          <ExportExcel caseData={caseData} resource={user?.resource} isAdmin={user?.role === 'admin'}  />
           : null}
         </div>
       </div>
