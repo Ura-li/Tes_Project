@@ -132,6 +132,7 @@ export const STATUS_ENUM_TO_LABEL = {
   Open: "Open",
   InActive: "Inactive",
   Close: "Closed",
+  Cancel: "Cancel",
   Active: "Active",
   Monitor: "Monitor",
   Pending_Customer_Action: "Pending Customer Action",
@@ -156,7 +157,10 @@ export const STATUS_ENUM_TO_LABEL = {
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
   CancelRepair: "Cancel Repair",
-  Cancel: "Cancel",
+  Void: "Void",
+  Reschedule: "Reschedule",
+  DOAPartReturn: "DOA Part Return",
+  Customer_Delay: "Customer Delay"
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);

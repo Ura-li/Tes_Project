@@ -1,6 +1,6 @@
 // services/service-materialApo.tsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/accordion";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { useMaterialOrderStore } from "@/hooks/useMaterialOrderStore";
 import { TabsServiceMO } from "./TabsServiceReimagined";
 import { CardDescription } from "../../components/ui/card";
@@ -202,9 +202,14 @@ export const ServiceMaterialApo = () => {
                 <CardContent className="grid items-center grid-cols-2 md:grid-cols-4 gap-5">
                   <CaseField label={"Case ID"} lock>
                     <Input
-                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      className={"dark:text-white cursor-pointer hover:text-blue-400 dark:hover:text-blue-400 dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialOrder?.workorder?.CaseID || ""}
+                      onClick={()=>{
+                        if(materialOrder?.workorder?.CaseID){
+                           navigate(`/app/case/${materialOrder?.workorder?.CaseID}`);
+                        }
+                      }}
                       readOnly
                     />
                   </CaseField>
