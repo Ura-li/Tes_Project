@@ -20,12 +20,14 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export async function deleteByPattern(pattern) {
+  const namespacedPattern = redisKey(pattern);
+
   let cursor = "0";
   do {
     const [nextCursor, keys] = await redis.scan(
       cursor,
       "MATCH",
-      pattern,
+      namespacedPattern,
       "COUNT",
       100
     );

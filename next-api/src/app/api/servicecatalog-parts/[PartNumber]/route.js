@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
     }
 
     const response = { success: true, message: "Part detail fetched", data: part };
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 300);
 
     return NextResponse.json(response, { status: 200 });
 }
@@ -88,7 +88,7 @@ export async function PATCH(request, { params }) {
         });
 
         await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
+        await redis.del(redisKey(`servicecatalog-parts:detail:${partNumber}`));
 
         return NextResponse.json(
             {
@@ -121,7 +121,7 @@ export async function DELETE(request, { params }) {
         });
 
         await deleteByPattern("servicecatalog-parts:list:*");
-        await redis.del(`servicecatalog-parts:detail:${partNumber}`);
+        await redis.del(redisKey(`servicecatalog-parts:detail:${partNumber}`));
 
         return NextResponse.json(
             { success: true, message: "Part deleted successfully!" },

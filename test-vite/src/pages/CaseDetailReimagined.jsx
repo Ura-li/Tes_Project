@@ -97,6 +97,22 @@ export const TabsServiceCaseDetails = () => {
   const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
   const [cancelState, setCancelState] = useState(false);
   const [logNoteOpen, setLogNoteOpen] = useState(false)
+const quickLogOpen = useServiceCaseStore((s) => s.quickLogOpen);
+const setQuickLogOpen = useServiceCaseStore((s) => s.setQuickLogOpen);
+const requestSaveAll = useServiceCaseStore((s) => s.requestSaveAll);
+const continueSaveAllAfterNote = useServiceCaseStore((s) => s.continueSaveAllAfterNote);
+
+const [quickLogMode, setQuickLogMode] = useState("noteOnly");
+
+const openNoteOnly = () => {
+  setQuickLogMode("noteOnly");
+  setQuickLogOpen(true);
+};
+
+const openSaveAll = () => {
+  setQuickLogMode("saveAll");
+  requestSaveAll({ redirect: true, onClose: false });
+};
 
 //QR CODE
   const [qrCodeImg,setQrCodeImg]= useState("");
@@ -204,8 +220,8 @@ export const TabsServiceCaseDetails = () => {
     {
       icon: Save,
       label: "Save",
-      onClick: () => handleSave(),
-      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","apv"],
+      onClick: () => openSaveAll(),
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"],
     },
     {
       icon: FileSymlink,
@@ -214,19 +230,19 @@ export const TabsServiceCaseDetails = () => {
         handleSave().then((ok) => {
           if (ok) navigate(`/app/`);
         }),
-      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps","spv", "cm"],
     },
     {
       icon: CopyX,
       label: "Close Case",
       onClick: () => saveAndCloseCase(false),
-      roles: ["admin", "fd"],
+      roles: ["admin", "fd","spv",],
     },
     {
       icon: CopyX,
       label: "Cancel Case",
       onClick: () => saveAndCloseCase(true),
-      roles: ["admin", "fd"],
+      roles: ["admin", "fd","spv",],
     },
     {
       icon: RotateCw,
@@ -256,7 +272,7 @@ export const TabsServiceCaseDetails = () => {
       icon: MessageSquareText,
       label: "Quotation",
       onClick: () => handleQuotationOpenChange(),
-      roles: ["admin", "cm"],
+      roles: ["admin", "cm","spv"],
     },
     {
       icon: StepBack,
@@ -364,7 +380,7 @@ export const TabsServiceCaseDetails = () => {
       icon: StepBack,
       label: "Service Order",
       onClick: () => openServiceCatalog("serviceorder"),
-      roles: ["admin", "ce", "celead"],
+      roles: ["admin", "ce", "celead","spv",],
       hidden: caseDetails.workorder[0]?.SystemStatus == 'OPEN_UNSCHEDULED'  ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_SCHEDULED' ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_COMPLETED' ? true : false,
     },
     {
@@ -537,7 +553,7 @@ export const TabsServiceCaseDetails = () => {
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
         },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
   ];
 
 
@@ -954,7 +970,7 @@ function fieldMO(caseDetails) {
       .filter(Boolean)
       .join(", ") || "-";
 
-    const isTechRole = ["ce", "celead", "apo", "admin"].includes(user?.role);
+    const isTechRole = ["ce", "celead", "apo", "spv","admin"].includes(user?.role);
 
   return (
     <>
@@ -1026,8 +1042,12 @@ function fieldMO(caseDetails) {
         <InvoiceDialog />
         <ServiceCase /> 
         <QuickLogNote 
-          open={logNoteOpen}
-          onOpenChange={setLogNoteOpen}
+          open={quickLogOpen}
+          onOpenChange={setQuickLogOpen}
+          caseId={caseDetails.CaseID}
+    createdBy={user?.id}
+    mode={quickLogMode}
+    onAfterSaveAll={continueSaveAllAfterNote}
         />
       </div>
     </div>
@@ -1087,6 +1107,7 @@ import { mapMaterialOrdersToQuotationItems } from "../lib/mappers/fieldMO";
 import { QuickLogNote } from "../components/model/QuickLogNote";
 import Approvel from "../layout/Apv_page";
 import { DatePickertoDateOrNull, formatDateForInput } from "../lib/utils";
+import { EMPTY_DRAFT, EMPTY_NOTES, useCaseNotesStore } from "@/hooks/useCaseNoteStore";
 
 const suffixToRoleMap = {
   CE: "ce",
@@ -1136,6 +1157,8 @@ export const STATUS_ENUM_TO_LABEL = {
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
   CancelRepair: "Cancel Repair",
+  Closed: "Closed",
+  Cancelled: "Cancelled"
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
@@ -1229,7 +1252,7 @@ const WarrantyConditionEnumToLabel = {
   OutWarranty: "Out of Warranty",
 };
 
-const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R","U","T"]
+const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R","S","T","U","V","W","Z"]
 const number  = [1,2,3,4,5]
 
 const OptionStorage = letters.flatMap(letter =>
@@ -1243,17 +1266,28 @@ export const ServiceCase = () => {
 
   // ------ pull state from zustand ------
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
-
+  const caseId = caseDetails?.CaseID;
   const caseForm = useServiceCaseStore((s) => s.caseForm);
   const setCaseFormField = useServiceCaseStore((s) => s.setCaseFormField);
 
   const caseNoteFormData = useServiceCaseStore((s) => s.caseNoteFormData);
   const setCaseNoteField = useServiceCaseStore((s) => s.setCaseNoteField);
 
+
+  const setDraftField = useCaseNotesStore((s) => s.setDraftField);
+
+  const notesList = useCaseNotesStore(
+    (s) => (caseId ? s.notesByCaseId[caseId] : EMPTY_NOTES) ?? EMPTY_NOTES
+  );
+
+  const draft = useCaseNotesStore(
+    (s) => (caseId ? s.draftByCaseId[caseId] : EMPTY_DRAFT) ?? EMPTY_DRAFT
+  );
+
+
   const customerData = useServiceCaseStore((s) => s.customerData);
   const assetInformation = useServiceCaseStore((s) => s.assetInformation);
   const ownerUserData = useServiceCaseStore((s) => s.ownerUserData);
-  const notesList = useServiceCaseStore((s) => s.notesList);
   const workOrders = useServiceCaseStore((s) => s.workOrders);
   const materialOrders = useServiceCaseStore((s) => s.materialOrders);
   const actionLogs = useServiceCaseStore((s) => s.actionLogs);
@@ -1430,6 +1464,7 @@ useEffect(() => {
       const FilterAllUserByRole = FetchAllUserByRole.filter(u => u.ResourceId === user.resource)
       setRoleAssign(FilterAllUserByRole);      
     } catch (err) {
+      console.error(err)
       toast.error("Error fetching role");
     }
   };
@@ -1447,15 +1482,11 @@ useEffect(() => {
   let canEditWarranty = false;
 
   if (caseDetails?.CaseStatus !== "Close" && caseDetails?.CaseStatus !== "Cancel" ) {
-    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin";
-    canEditFd = user?.role === "fd" || user?.role === "admin";
-    canEditApo = user?.role === "apo" || user?.role === "admin";
-    canEditCe =
-      user?.role === "ce" || user?.role === "celead" || user?.role === "admin";
-    canEditWarranty =
-      user?.role === "fd" ||
-      user?.role === "admin" ||
-      user?.role === "apv";
+    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv";
+    canEditFd = user?.role === "fd" || user?.role === "admin" || user?.role === "spv";
+    canEditApo = user?.role === "apo" || user?.role === "admin" || user?.role === "spv";
+    canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === "admin" || user?.role === "spv";
+    canEditWarranty = user?.role === "fd" || user?.role === "admin" || user?.role === "apv" || user?.role === "spv";
   }
 
   // ------ file pick handlers (kept local) ------
@@ -1494,7 +1525,6 @@ useEffect(() => {
 
   const onChangeCsr = (field) => (value) =>
     setCsrFormField(field, value);
-
 
 
   // safety: if no caseDetails yet, don't render
@@ -1557,6 +1587,8 @@ useEffect(() => {
                       ? "Owner Cm"
                       : ownerUserData?.Role === "admin"
                       ? "Owner Admin"
+                      : ownerUserData?.Role === "spv"
+                      ? "Owner Supervisor"
                       : ownerUserData?.Role === "ps"
                       ? "Owner Ps"
                       : ownerUserData?.Role === "apv"
@@ -1694,6 +1726,14 @@ useEffect(() => {
                     />
                   </CaseField>
 
+                  <CaseField label={"Reference Case"} lock span={2}>
+                    <Input
+                      value={caseDetails.ReferenceCase}
+                      readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                    />
+                  </CaseField>
+
                   {/* detail owner */}
                   <CaseField
                     label="Created By"
@@ -1747,8 +1787,7 @@ useEffect(() => {
                       />
                     </CaseField>
                   )}
-                  {caseDetails?.workorder[0]?.materialorder[0]?.owner
-                    ?.IDUser && (
+                  {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
                     <CaseField
                       label="APO name"
                       className={"mt-2"}
@@ -1795,6 +1834,7 @@ useEffect(() => {
                             try {
                               fetchUserAssign(role);
                             } catch (err) {
+                              console.error(err)
                               toast.error("Error fetching role");
                             }
                           }
@@ -1852,7 +1892,7 @@ useEffect(() => {
                       value={caseForm?.CaseType}
                       onChange={onChangeCase("CaseType")}
                       placeholder="--Select--"
-                      options={["Depot Repair", "Onsite", "Bench", "DOA"]}
+                      options={["Depot Repair", "Onsite", "Bench", "DOA", "Express"]}
                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
@@ -2284,8 +2324,8 @@ useEffect(() => {
 
                       <SearchCommandBlock
                         id="log-type"
-                        value={caseNoteFormData?.LogType}
-                        onChange={(val) => onChangeCaseNote("LogType", val)}
+                        value={draft?.LogType}
+                        onChange={(val) => setDraftField(caseId,"LogType", val)}
                         options={["Notes Log", "Phone Log"]}
                         placeholder="--Select--"
                         className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
@@ -2295,8 +2335,8 @@ useEffect(() => {
                     <CaseField label="Action Type">
                       <SearchCommandBlock
                         id="action-type"
-                        value={caseNoteFormData?.ActionType}
-                        onChange={(val) => onChangeCaseNote("ActionType", val)}
+                        value={draft?.ActionType}
+                        onChange={(val) => setDraftField(caseId,"ActionType", val)}
                         placeholder="--Select--"
                         options={[
                           "Inbound Customer call",
@@ -2313,9 +2353,9 @@ useEffect(() => {
                       <textarea
                         id="notes"
                         className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm dark:bg-gray-500/10 dark:border-gray-400"
-                        value={caseNoteFormData?.Note || ""}
+                        value={draft?.Note || ""}
                         onChange={(e) =>
-                          onChangeCaseNote("Note", e.target.value)
+                          setDraftField(caseId,"Note", e.target.value)
                         }
                         placeholder="Write your note"
                       />

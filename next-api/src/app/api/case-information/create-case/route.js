@@ -379,6 +379,8 @@ export async function POST(request) {
         throw new HttpError(400, "CreatedBy is required in caseData.");
       }
 
+      const ownerAssign = caseData.Owner ? parseInt(caseData.Owner, 10) : createdBy;
+
       
       const caseId = await generateID(resourceDataCode, "caseinformation", "CaseID", tx);
 
@@ -398,7 +400,7 @@ export async function POST(request) {
         CaseNote: caseData.CaseNote ?? null,
         SymptomCode: caseData.SymptomCode ?? null,
         CaseResolution: caseData.CaseResolution ?? null,
-        Owner: createdBy,
+        Owner: ownerAssign,
         CreatedBy: createdBy,
         ProblemDescription: caseData.ProblemDescription ?? "",
         CaseProductNote: caseData.CaseNoteProduct ?? null,

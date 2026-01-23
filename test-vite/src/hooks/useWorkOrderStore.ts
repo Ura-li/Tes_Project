@@ -52,6 +52,8 @@ type MOLineGeneralState = {
 	PartReturnDOA : boolean;
 	isQuantityUsedDisabled: boolean;
 	PartReturnStatusName: string;
+  Description: string;
+  PartNumber: string;
 }
 
 type FailureOptions = {
@@ -355,7 +357,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 
 			await Promise.all([
 				get().fetchFailureOptions(),
-				get().fetchPartReturnStatusOptions()
+				get().fetchPartReturnStatusOptions(),
 			])
 
 			let caseInformation: any = null;
@@ -463,6 +465,8 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 					PhotoPartUnit: mo.materialorderlineitems[0]?.PhotoPartUnit || null,
 					GoodReturnReason: mo.materialorderlineitems[0]?.GoodReturnReason || "",
 					PartReturnDOA : mo.materialorderlineitems[0]?.partReturnStatus?.DOA || false,
+					Description : mo.materialorderlineitems[0]?.Description || "",
+					PartNumber : mo.materialorderlineitems[0]?.PartNumber || "",
 				}
 			})
 

@@ -66,7 +66,7 @@ export const ServiceMaterialApo = () => {
     (s) => s.setLineItemStatus
   );
   // ----- permissions -----
-  const allowedRoles = ["apo", "lg", "admin"];
+  const allowedRoles = ["apo", "lg", "admin", "spv"];
   let canEditapo = false;
 
   if (

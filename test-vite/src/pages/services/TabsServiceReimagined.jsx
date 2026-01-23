@@ -55,6 +55,7 @@ import {
   CircleArrowLeft,
   CircleChevronLeft,
   Clock10,
+  ClipboardPenLine,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -88,6 +89,7 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
 import RepairActionDialog from "@/components/model/RepairActionModal";
+import { useCaseNotesStore, EMPTY_DRAFT } from "@/hooks/useCaseNoteStore";
 
 export const TabsServiceWO = () => {
   const navigate = useNavigate();
@@ -95,12 +97,32 @@ export const TabsServiceWO = () => {
   const saveWorkOrder = useWorkOrderStore((s) => s.saveWorkOrder);
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
 
+  const { user } = useAuth();
   if (!workOrders) {
     return null;
   }
 
   const WOID = workOrders.WOID;
+const [logNoteOpen, setLogNoteOpen] = useState(false);
+const [quickLogMode, setQuickLogMode] = useState("noteOnly");
+const [pendingAfterNote, setPendingAfterNote] = useState(null);
 
+const caseId = workOrders?.CaseID;
+const openSaveGate = (after) => {
+  if (!caseId) return;
+
+  const notesState = useCaseNotesStore.getState();
+  const draft = notesState.draftByCaseId[caseId] ?? EMPTY_DRAFT;
+  const note = (draft.Note ?? "").toString().trim();
+
+  setPendingAfterNote(() => after);
+
+  setQuickLogMode("saveAll");
+  setLogNoteOpen(true);
+
+  // If you want: if note already typed, you can still open modal
+  // to force explicit "save note" before saving changes.
+};
   const handleSave = async () => {
     try {
       Swal.fire({
@@ -121,13 +143,19 @@ export const TabsServiceWO = () => {
           icon: "error",
           title: "Update Failed",
           text: result.message || "Unknown error",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false ,
         });
       }
 
       return Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Work Order updated successfully!",
+        text: "Work Order updated successfully!", 
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false ,
       });
     } catch (error) {
       Swal.close();
@@ -145,7 +173,7 @@ export const TabsServiceWO = () => {
       label: "",
       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
-    { icon: Save, label: "Save", onClick: () => handleSave() },
+    { icon: Save, label: "Save", onClick: () => openSaveGate(handleSave) },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -179,21 +207,8 @@ export const TabsServiceWO = () => {
       label: "Repair Action",
       onClick: () => setOpenRepairDialog(true),
     },
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true },
+    { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
-    {
-      icon: UserPen,
-      label: "Create Material Order",
-      onClick: () => alert("not now"),
-      hidden: true,
-    },
-    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now"), hidden: true },
   ];
 
   const validate = async () => {
@@ -461,6 +476,19 @@ export const TabsServiceWO = () => {
         canEdit={true}
         workOrders={workOrders}
       />
+    <QuickLogNote
+    open={logNoteOpen}
+    onOpenChange={setLogNoteOpen}
+    caseId={workOrders?.CaseID}
+    createdBy={user?.id}
+mode={quickLogMode}
+  onAfterSaveAll={async () => {
+    if (quickLogMode === "saveAll" && pendingAfterNote) {
+      await pendingAfterNote();
+      setPendingAfterNote(null);
+    }
+  }}
+    />
     </>
   );
 };
@@ -469,6 +497,8 @@ export const TabsServiceWO = () => {
 
 import { useMaterialOrderStore } from "@/hooks/useMaterialOrderStore";
 import { toast } from "sonner";
+import { isCancel } from "axios";
+import { QuickLogNote } from "@/components/model/QuickLogNote";
 // ...other imports...
 
 export const TabsServiceMO = ({
@@ -535,7 +565,7 @@ export const TabsServiceMO = ({
   };
 
   // close logic stays as your original saveAndCloseMaterialOrder for now
-  const saveAndCloseMaterialOrder = async () => {
+  const saveAndCloseMaterialOrder = async ({IsCancel}) => {
     // unchanged logic from your code: role guard, validate all line items closed,
     // patch OrderStatus: "Closed", log action, navigate back to WO
     // ...\
@@ -594,10 +624,13 @@ export const TabsServiceMO = ({
               text: "Unable to verify line items status. Try again.",
             });
           }
+
+          const statusMO = IsCancel ? "Cancelled" : "Closed";
+
           const res = await ApiCustomer.patch(
             `/api/material-order/${materialOrder.MOID}`,
             {
-              OrderStatus: "Closed",
+              OrderStatus: statusMO,
             }
           );
           if (res.data.success) {
@@ -613,6 +646,7 @@ export const TabsServiceMO = ({
               changedBy: token.user.id,
               logDescription: `Edit : Changed Material Order ${materialOrder.MOID} from ${materialOrder.OrderStatus} to ${res.data.data.OrderStatus}`,
             });
+
             Swal.fire({
               icon: "success",
               title: "Updated!",
@@ -644,7 +678,6 @@ export const TabsServiceMO = ({
       label: "",
       onClick: () => navigate(`/app/work/${materialOrder.WOID}`),
     },
-    // { icon: SquareArrowOutUpRight, label: "" },
     {
       icon: Save,
       label: "Save",
@@ -659,23 +692,26 @@ export const TabsServiceMO = ({
     {
       icon: CopyXIcon,
       label: "Close MO",
-      onClick: () => saveAndCloseMaterialOrder(),
+      onClick: () => saveAndCloseMaterialOrder({IsCancel: false}),
       hidden:
         currentRole !== "ce" &&
         currentRole !== "celead" &&
         currentRole !== "apo" &&
-        currentRole !== "admin",
+        currentRole !== "admin" && 
+        currentRole !== "spv",
+    },
+    {
+      icon: CopyXIcon,
+      label: "Cancel MO",
+      onClick: () => saveAndCloseMaterialOrder({IsCancel: true}),
+      hidden:
+        currentRole !== "ce" &&
+        currentRole !== "celead" &&
+        currentRole !== "apo" &&
+        currentRole !== "admin" && 
+        currentRole !== "spv",
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Cancel Order", hidden: true },
-    { icon: StepBack, label: "Add To Queue", hidden: true },
-    { icon: StepBack, label: "Add Parts", hidden: true },
-    { icon: StepBack, label: "Pick", hidden: true },
-    { icon: StepBack, label: "Place Order", hidden: true },
-    { icon: StepBack, label: "Tax", hidden: true },
-    { icon: StepBack, label: "CustID Search", hidden: true },
-    { icon: UserPen, label: "PUDO Search", hidden: true },
-    { icon: StepBack, label: "Audit", hidden: true },
   ];
 
   return (

@@ -49,7 +49,7 @@ export async function GET(request, { params }) {
         data: asset_information
     };
 
-    await redis.set(cacheKey, JSON.stringify(response), "EX", 60);
+    await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
 
     return NextResponse.json(response, { status: 200 });
 }
@@ -214,7 +214,7 @@ export async function PATCH(request, { params }) {
             return updatedAsset;
         },{timeout: 50000});
         await deleteByPattern("asset:list:*");
-        await redis.del(`asset:detail:${assetId}`);
+        await redis.del(redisKey(`asset:detail:${assetId}`));
 
         return NextResponse.json(
             {
@@ -252,7 +252,7 @@ export async function DELETE(request, { params }) {
         });
 
         await deleteByPattern("asset:list:*");
-        await redis.del(`asset:detail:${assetID}`);
+       await redis.del(redisKey(`asset:detail:${assetID}`));
 
         return NextResponse.json({
             success: true,

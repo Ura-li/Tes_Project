@@ -550,9 +550,9 @@ useEffect(() => {
 
   let canEdit;
   let canEditCE;
-  const allowedRoles = ["apo","lg","admin"]
+  const allowedRoles = ["apo","lg","admin","spv"]
   if (moLineItems?.Status !== "Closed" && moLineItems?.Status !== "Cancelled") {
-    canEditCE = user?.role  === "ce" || user?.role === "celead" || user?.role === "admin"
+    canEditCE = user?.role  === "ce" || user?.role === "celead" || user?.role === "admin" || user?.role === "spv"
     canEdit = allowedRoles.includes(user?.role)
   } else {
     canEdit = false

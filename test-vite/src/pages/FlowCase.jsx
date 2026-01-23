@@ -14,7 +14,7 @@ import { se } from 'date-fns/locale'
 import { filter, set } from 'lodash'
 import { PanelRight } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
-import { data, useNavigate } from 'react-router'
+import { data, Link, useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 import { STATUS_ENUM_TO_LABEL } from './CaseDetail'
 import { Label } from '@/components/ui/label'
@@ -237,7 +237,9 @@ export const FlowCaseData = (user) => {
     { status: "RepairProgress", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartAvailable", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
+    { status: "Quote_Approved", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
     { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
+    { status: "PartOrder", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
     { status: "Close", data: { ...emptyData }, hide: filterClose }
   ];
 
@@ -369,21 +371,22 @@ export const FlowCaseData = (user) => {
 
             <div className="space-y-3 p-5" >
               {renderer ? (
-                Array.from({ length: 6 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <Card key={i} className="p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
                     <Skeleton className="h-6 w-32" />
                   </Card>
                 ))
               ) : (
                 currentPageData.map((c) => (
+                  <Link to={`/app/case/${c.CaseID}`}>
                   <Card
                     key={c.CaseID}
-                    className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700",
-                      c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600" :
+                    className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700 mt-3",
+                      c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600 bg-gradient-to-r from-white via-emerald-100 to-emerald-300 " : 
                       (c.CaseStatus === "Close" || c.CaseStatus === "Cancel") ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
                         c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
                     )}
-                    onClick={() => navigate(`/app/case/${c.CaseID}`)} id='case-card'
+                  id='case-card'
                   >
                     <div>
                       <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
@@ -416,6 +419,7 @@ export const FlowCaseData = (user) => {
                         {c.EstimedTimeFromUpdate}
                     </div>
                   </Card>
+                  </Link>
                 ))
               )
             }

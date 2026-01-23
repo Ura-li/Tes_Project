@@ -7,6 +7,7 @@ import {
   normalizeLineItemPayload,
   parseDate,
 } from "./helpers";
+import redis, { redisKey } from "../../../../lib/redis";
 
 export async function GET(request) {
   try {
@@ -424,6 +425,9 @@ export async function POST(request) {
         },
       });
     });
+
+    
+    await redis.del(redisKey(`case:detail:${caseId}`));
 
     return NextResponse.json(
       {

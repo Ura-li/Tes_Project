@@ -1000,6 +1000,7 @@ enum CaseStatus {
   Quote_Approved
   Quote_Rejected
   Pending_Quote
+  NEW_AssignFD
   NEW_AssignCE
   NEW_AssignAPO
   NEW_AssignLeader
@@ -1017,6 +1018,10 @@ enum CaseStatus {
   RepairProgress
   FinishRepair
   CancelRepair
+  Void
+  Reschedule
+  DOAPartReturn
+  Customer_Delay
 }
 
 enum ShippingPriority {

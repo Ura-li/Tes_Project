@@ -55,11 +55,16 @@ export default function ProductStorage() {
     { prefix: "Q", range: [4,5], label: "Small Printer"},
     { prefix: "R", range: [1,2], label: "New Incoming Laptop"},
     { prefix: "R", range: [3,4,5], label: "Unit Temporarily"},
+    { prefix: "S", range: [1,2,3,4,5], label: "Printer Laser"},
     { prefix: "T", range: [1,2,3,4,5], label: "Finish Repair Laptop"},
     { prefix: "U", range: [1,2,3,4,5], label: "Finish Repair Laptop"},
+    { prefix: "V", range: [1,2,3,4,5], label: "Printer Tonner"},
+    { prefix: "W", range: [1,2], label: "Laptop OOW"},
+    { prefix: "W", range: [3,4,5], label: "Quotation Pending"},
+    { prefix: "Z", range: [1,2,3,4,5], label: "Printer"},
   ]
 
-  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q","R", "U", "T"]
+  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q","R","S","T","U","V","W","Z"]
   const maxNumber = 5;
   const storageList = []
 
