@@ -7,12 +7,13 @@ import * as XLSX from "xlsx";
 import { Button } from "./ui/button";
 import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
-export const ExportExcel = ({ caseData }) => {
+export const ExportExcel = ({ caseData, resource, isAdmin }) => {
   const [cases, setCases] = useState([]);
 
   useEffect(() => {
     const fetchCases = async () => {
-      const res = await ApiCustomer.get("/api/case-information");
+      const url = "/api/case-information"+ (!isAdmin ? `?resource=${resource}` : '')
+      const res = await ApiCustomer.get(url);
       const json = res.data
       const transformed = json.data.map((c) => {
         // Get accessories string

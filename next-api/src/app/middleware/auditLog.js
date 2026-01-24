@@ -1,3 +1,4 @@
+import { requestContext } from "../../../lib/requestContext";
 import prisma from "../../../prisma/client";
 
 export function auditMiddleware(getCurrentUserId) {
@@ -11,7 +12,8 @@ export function auditMiddleware(getCurrentUserId) {
       return next(params);
     }
 
-    const userId = getCurrentUserId();
+    const store = requestContext.getStore()
+    const userId = store?.userId ?? null
 
     let oldData = null;
     if (params.action === "update" || params.action === "delete") {

@@ -239,6 +239,7 @@ export async function POST(req) {
               ...baseMOTarget,
               ReadyForClosureDate: dateRMA,
             },
+            MOLITarget: null,
           }),
         };
 
@@ -303,18 +304,14 @@ export async function POST(req) {
            * CHANGED TIS LATER IF THE CONFIRMATION ABOUT 1 SO Many RMA Correct
            */
           for (const item of moli) {
-            const updatedMoli = await tx.materialorderlineitems.updateMany({
-              where: {
-                LineItemID: item.LineItemID,
-              },
-              data: updatedFieldMOLITarget,
-            });
-            /**
-             * TODO FOR SLAMET
-             * MAPPING TARGET RMA STATUS
-             * (NB : Miku21 Mager bikin ginian)
-             * --miku21
-             */
+            if(updatedFieldMOLITarget){
+              const updatedMoli = await tx.materialorderlineitems.updateMany({
+                where: {
+                  LineItemID: item.LineItemID,
+                },
+                data: updatedFieldMOLITarget,
+              });
+            }
             await tx.casenotes.create({
               data: {
                 CaseID: wo.caseinformation.CaseID,

@@ -740,10 +740,14 @@ export default function NewCaseForm() {
   // Function to check rerepair count in the last 90 days
   const getReRepairCount = async (assetID) => {
     try {
+      /**
+       * TODO SLAMET :C
+       * 
+       */
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
-          CaseStatus: "New", // atau ambil semua status, tergantung kebutuhan
+          excludeStatuses: ['Close', 'FinishRepair'], // atau ambil semua status, tergantung kebutuhan
         },
       });
 

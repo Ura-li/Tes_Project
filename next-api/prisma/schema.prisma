@@ -64,6 +64,7 @@ model caseinformation {
   KCI_Flag                                      Boolean?             @default(false)
   IncomingChannel                               String?              @db.VarChar(100)
   CaseStatus                                    CaseStatus           @default(Open)
+  VoidReason                                    String?              @db.Text
   CasePriority                                  String?              @db.VarChar(50)
   CustomerSeverity                              String?              @db.VarChar(50)
   CreatedOn                                     DateTime?            @default(now()) @db.DateTime(0)

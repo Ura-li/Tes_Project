@@ -2,11 +2,12 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Navigate } from 'react-router'
+import { useAuth } from '@/context/auth-context'
 
 export const Auditwindows = () => {
-      const token = localStorage.getItem('token');
+      const user = useAuth();
   
-      if(!token) {
+      if(!user) {
           return <Navigate to="/lorem" replace />
       }
   return (
@@ -27,7 +28,7 @@ export const Auditwindows = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* {actionLogs?.length > 0 ? (
+                {actionLogs?.length > 0 ? (
                   actionLogs.map((log, index) => (
                     <TableRow key={log.id || index}>
                       <TableCell>{index + 1}</TableCell>
@@ -37,12 +38,13 @@ export const Auditwindows = () => {
                       <TableCell>{new Date(log.changedAt).toLocaleString()}</TableCell>
                     </TableRow>
                   ))
-                ) : ( */}
+                ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center italic">
                       No action logs available.
                     </TableCell>
                   </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
