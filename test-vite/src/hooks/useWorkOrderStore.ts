@@ -50,10 +50,9 @@ type MOLineGeneralState = {
 	PhotoPartUnit: string | null;
 	GoodReturnReason: string;
 	PartReturnDOA : boolean;
-	isQuantityUsedDisabled: boolean;
 	PartReturnStatusName: string;
-  Description: string;
-  PartNumber: string;
+	Description: string;
+	PartNumber: string;
 }
 
 type FailureOptions = {
@@ -65,7 +64,7 @@ type FailureOptions = {
 type PartReturnStatusOptions = {
 	ReturnStatusId: number,
 	StatusName: string,
-	Doa: boolean
+	DOA: boolean
 }
 
 type CustomerDataState = { MainAccount: any | null; SiteAccount: any | null; Type: string | null };
@@ -460,7 +459,6 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 					removedSerialNumber: mo.materialorderlineitems[0]?.RemovedSerialNumber || "",
 					CTValidation: mo.materialorderlineitems[0]?.CTValidation ?? true,
 					QuantityUsed: mo.materialorderlineitems[0]?.QuantityUsed ?? true,
-					isQuantityUsedDisabled: false,
 					DOAReason: mo.materialorderlineitems[0]?.DOAReason || "",
 					PhotoPartUnit: mo.materialorderlineitems[0]?.PhotoPartUnit || null,
 					GoodReturnReason: mo.materialorderlineitems[0]?.GoodReturnReason || "",

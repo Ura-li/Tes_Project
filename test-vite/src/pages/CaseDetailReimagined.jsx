@@ -1182,6 +1182,7 @@ const BASE_STATUS_KEYS = [
   "Quote_Approved",
   "Quote_Rejected",
   "Pending_Quote",
+  "Void",
 ];
 
 const ROLE_STATUS_EXTRAS = {
@@ -1195,6 +1196,7 @@ const ROLE_STATUS_EXTRAS = {
     "NEW_Warranty",
     "Close",
     "New",
+    "Void",
   ],
   ce: [
     "PartRequest",
@@ -1695,6 +1697,17 @@ useEffect(() => {
                       />
                     </div>
                   </CaseField>
+                  
+                  {caseDetails.CaseStatus === "Void" && (
+                    <CaseField label={"Void Reason"} span={2} star lock={!canEditFd}>
+                      <Input
+                        value={caseForm?.VoidReason}
+                        onChange={(e) =>
+                          onChangeCase("VoidReason")(e.target.value)
+                        }
+                      />
+                    </CaseField>
+                  )}
 
                   <CaseField
                     label="Case ID manual"
