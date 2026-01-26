@@ -410,27 +410,27 @@ export const ServiceMaterialApo = () => {
                     collapsible
                   >
                     <AccordionItem value="more-detail">
-                      <AccordionTrigger>More Detail . . .</AccordionTrigger>
-                      <AccordionContent className="p-2">
+                      <AccordionTrigger className={"border-1 cursor-pointer decoration-transparent p-2"}>More Detail . . .</AccordionTrigger>
+                      <AccordionContent className="mt-2">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                          <CaseField label={"Notification Number"} icon>
+                          <CaseField label={"Notification Number"} icon lock>
                             <Input
                               type="text"
                               value={materialOrder?.NotificationNumber || "---"}
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label={"Shipping Priority"} icon>
+                          <CaseField label={"Shipping Priority"} icon lock>
                             <Input
                               type="text"
                               value={materialOrder?.ShippingPriority || "---"}
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label={"Promo Code"} icon>
+                          <CaseField label={"Promo Code"} icon lock>
                             <Input type="text" value={"---"} readOnly />
                           </CaseField>
-                          <CaseField label={"Parent MO"} icon>
+                          <CaseField label={"Parent MO"} icon lock>
                             <Input
                               type="text"
                               value={materialInfo.parentMO || "---"}
@@ -438,7 +438,7 @@ export const ServiceMaterialApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Customer Induced Damage"} icon>
+                          <CaseField label={"Customer Induced Damage"} icon lock>
                             <Input
                               type="text"
                               value={
@@ -449,7 +449,7 @@ export const ServiceMaterialApo = () => {
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label={"BCP Order"} icon>
+                          <CaseField label={"BCP Order"} icon lock>
                             <Input
                               type="text"
                               value={materialInfo.isBCPOrder ? "Yes" : "No"}
@@ -459,6 +459,7 @@ export const ServiceMaterialApo = () => {
                           <CaseField
                             label={"Accidental Damage Protection"}
                             icon
+                            lock
                           >
                             <Input
                               type="text"
@@ -470,14 +471,14 @@ export const ServiceMaterialApo = () => {
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label={"Material Order Type"} icon>
+                          <CaseField label={"Material Order Type"} icon lock>
                             <Input
                               type="text"
                               value={materialOrder?.MaterialOrderType || "---"}
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label={"Defective Media Retention"} icon>
+                          <CaseField label={"Defective Media Retention"} icon lock>
                             <Input
                               type="text"
                               value={

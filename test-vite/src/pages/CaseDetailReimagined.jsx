@@ -2510,9 +2510,10 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label="SNIC - Count" lock>
+                  <CaseField label="SNIC - Count" lock hide>
                     <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
+
                   <CaseField label="Product Name" lock>
                     <Input
                       value={assetInformation?.product_information?.ProductName}
@@ -2532,14 +2533,14 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label="HW Profit Center" lock>
+                  <CaseField label="HW Profit Center" lock hide>
                     <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
-                  <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
-                    <CaseField label="Device Properties" lock>
+
+                    <CaseField label="Device Properties" lock hide>
                       <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
-                  </div>
+
                   <CaseField
                     label="Warranty Status"
                     span={3}
@@ -2562,6 +2563,7 @@ useEffect(() => {
                       getValue={(opt) => opt.OTCCode}
                     />
                   </CaseField>
+
                   <CaseField
                     lock={
                       !canEditWarranty
@@ -2603,6 +2605,7 @@ useEffect(() => {
                       className={"cursor-pointer dark:bg-transparent dark:ring-2 dark:ring-gray-400 dark:rounded-md dark:text-white"}
                     />
                   </CaseField>
+
                   <CaseField
                     hide={!entitlementStatus.needWarrantyApproval}
                     label="Warranty Approval Status"
@@ -2624,6 +2627,7 @@ useEffect(() => {
                       className={"dark:bg-transparent dark:ring-2 dark:ring-gray-400 dark:rounded-md dark:text-white"}
                     />
                   </CaseField>
+
                   <CaseField
                     label="Warranty Expiration Date"
                     className={"col-span-1"}
@@ -2968,14 +2972,14 @@ useEffect(() => {
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-5 p-3 ">
-                  {/* <div className="grid grid-cols-4 gap-5" hidden>
+                  <div className="grid grid-cols-4 gap-5" hidden>
                     <CaseField label="Incident Type" span={3}>
                       <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
                     <CaseField label="Work Order Description" span={3}>
                       <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
-                  </div> */}
+                  </div>
 
                   <Table className={"max-w-100 "}>
                     <TableHeader >
