@@ -17,6 +17,7 @@ import { debounce } from "lodash";
 import { SearchCommandBlock } from "../sc-select";
 import ApiCustomer from "@/api";
 import { toast } from "sonner";
+import { useWorkOrderStore } from "@/hooks/useWorkOrderStore";
 
 export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, IsCancel, workOrders }) => {
   const [step, setStep] = useState("form");
@@ -43,6 +44,34 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, IsCa
     cancelReason: "",
   });
 
+const [delayToggle, setDelayToggle] = useState(false);
+  const caseInformation = useWorkOrderStore((s) => s.caseInformation);
+const checkTimeDelay = () => {
+  
+  const currentDateObj = new Date(); 
+  const numberOfMlSeconds = currentDateObj.getTime();
+
+  const createdOn = caseInformation?.CreatedOn
+    ? new Date(caseInformation.CreatedOn)
+    : null;
+  const createdOninsec = createdOn.getTime();
+
+const TimeDelay = () => {
+  switch (caseInformation?.CasePriority) {
+    case "Same Businnes Day (SBD)":
+      return 24 * 60 * 60 * 1000 ;
+    case "Next Businnes Days (NBD)" :
+      return 48 * 60 * 60 * 1000 ;
+    case "3 Businnes Days (3BD)":
+      return 92 * 60 * 60 * 1000 ;
+    default:
+      break;
+  }
+}
+
+const delaytime = createdOninsec + TimeDelay();
+ (currentDateObj >= delaytime) &&  setDelayToggle(true) 
+}
   // const isOutWarranty = workOrders?.serviceCatalog?.asset_information?.Warranty_Status === "01T"
 
   const selectedServiceType = useMemo(() => {
@@ -90,6 +119,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, IsCa
   useEffect(()=>{
     // isOutWarranty ? setProblemCategory('Hardware') : '';
     fetchNMU();
+    checkTimeDelay();
   },[])
 
   useEffect(()=>{
@@ -327,7 +357,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, IsCa
                 />
               </CaseField>
                 
-              <CaseField label="Delay code" star={canEdit} lock={!canEdit} hide={!showDelayCode}>
+              <CaseField label="Delay code" star={canEdit} lock={!canEdit}  hide={!delayToggle}>
                 <SearchCommandBlock
                   value={delayCodeEnumToLabel[formData.delayCode] || "Search Delay Code"}
                   onChange={(selectedValue)=>{

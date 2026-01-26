@@ -45,7 +45,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button";
 import { cn, formatDate } from "@/lib/utils";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, File } from "lucide-react";
 import { ExportExcel } from "@/components/Export-Excel";
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/auth-context";
@@ -231,10 +231,21 @@ export const Contact_table = () => {
   // Filtering (search + dropdown)
   const filteredData = useMemo(() => {
     return contacts.filter((contact) => {
-      const matchesSearch = Object.values(contact).some((val) =>
+      if (!debouncedSearchTerm) return true; 
+
+      const searchLower = debouncedSearchTerm.toLowerCase();
+      const searchTerms = searchLower.split(/\s+/).filter(Boolean); 
+
+      const firstName = (contact.FirstName || "").toLowerCase();
+      const lastName = (contact.LastName || "").toLowerCase();
+      
+      const matchesName = searchTerms.every(term => 
+        firstName.includes(term) || lastName.includes(term)
+      );
+      const matchesSearchDefault = Object.values(contact).some((val) =>
         val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
-
+      const matchesSearch = matchesName || matchesSearchDefault;
       return (
         matchesSearch &&
         (!selectedCompany?.name || contact.Company === selectedCompany.name) &&
@@ -1771,6 +1782,9 @@ const sortedData = useMemo(() => {
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
                 Case ID MANUAL {getSortSymbol("CaseID_Manual")}
               </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" >
+                ERF
+              </TableHead>
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseSubject")}>
                 Case Subject {getSortSymbol("CaseSubject")}
               </TableHead>
@@ -1832,6 +1846,13 @@ const sortedData = useMemo(() => {
               </Link>
                 </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual}</TableCell>
+                <TableCell className="p-2 border">
+                 {caseItem.caseinformation?.ErfDoc && (
+                            <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${caseItem.caseinformation?.ErfDoc}`)}>
+                   <File/>
+                            </Button>
+                 )}
+                </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CaseSubject}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CustomerAccount}</TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.SerialNumber}</TableCell>
