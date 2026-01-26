@@ -8,7 +8,7 @@ import { useSocket } from '@/hooks/useSocket';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 import { Skeleton } from "@/components/ui/skeleton";
-import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
+import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 
 export default function ApoLanding() {
     const { user } = useAuth();

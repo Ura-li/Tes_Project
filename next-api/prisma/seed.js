@@ -18,6 +18,8 @@ async function main() {
     },
   });
 
+   console.log('✅ Admin user created  ');
+
 
   const statuses = [
     { StatusName: 'Defective', StatusQuantityType: true, DOA: false },
@@ -31,6 +33,8 @@ async function main() {
 
   await prisma.partReturnStatus.deleteMany() // kosongkan dulu
   await prisma.partReturnStatus.createMany({ data: statuses })
+
+  console.log('✅ PartReturnStatus seeded.')
 
 
   const NMU = [
@@ -57,6 +61,7 @@ async function main() {
     });
   }
   
+  console.log('✅ NMU & NMUItem seeded successfully');
 
   const ProblemDesc = [
     {ServiceTypeName: 'Health Check', ProblemCategory: 'Software' },
@@ -65,6 +70,8 @@ async function main() {
   
   await prisma.ServiceType.deleteMany();
   await prisma.ServiceType.createMany({data: ProblemDesc});
+
+  console.log('✅ Service Type seeded successfully');
   
 }
 

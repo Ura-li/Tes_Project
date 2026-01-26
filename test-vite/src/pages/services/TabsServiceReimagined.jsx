@@ -81,7 +81,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { STATUS_ENUM_TO_LABEL,statusEnumToLabelWO } from "../CaseDetailReimagined";
+import { STATUS_ENUM_TO_LABEL, STATUS_ENUM_TO_LABEL_WO } from "@/hooks/useCaseStatus";
 import { BtnModalsServiceCatalog } from '../../components/model/sc-modal'
 import DatePicker from '../../components/date-picker'
 import { SearchCommandBlock } from "../../components/sc-select";
@@ -324,7 +324,7 @@ const openSaveGate = (after) => {
           dataOld: workOrders.SystemStatus,
           dataNew: res.data.data.SystemStatus,
           changedBy: token.user.id,
-          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${statusEnumToLabelWO[workOrders.SystemStatus]} to ${statusEnumToLabelWO[res.data.data.SystemStatus]}`,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${STATUS_ENUM_TO_LABEL_WO[workOrders.SystemStatus]} to ${STATUS_ENUM_TO_LABEL_WO[res.data.data.SystemStatus]}`,
         });
 
        const caseChangeStatus = await ApiCustomer.patch(
@@ -392,7 +392,7 @@ const openSaveGate = (after) => {
           dataOld: workOrders.SystemStatus,
           dataNew: res.data.data.SystemStatus,
           changedBy: token.user.id,
-          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${statusEnumToLabelWO[workOrders.SystemStatus]} to ${statusEnumToLabelWO[res.data.data.SystemStatus]}`,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${STATUS_ENUM_TO_LABEL_WO[workOrders.SystemStatus]} to ${STATUS_ENUM_TO_LABEL_WO[res.data.data.SystemStatus]}`,
         });
 
         const isCancelRepairr = repairFormData.isCancelRepair === true ? 'CancelRepair' : 'FinishRepair'; 

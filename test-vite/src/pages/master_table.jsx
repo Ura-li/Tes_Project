@@ -60,7 +60,7 @@ import {
 import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 import { toast } from "sonner";
-import { STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
+import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 

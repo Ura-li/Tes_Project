@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 import ApiCustomer from "../api";
 import { getUserFromToken } from "../lib/utils/auth";
-import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetailReimagined";
+import { STATUS_ENUM_TO_LABEL } from "./useCaseStatus";
 import { useCaseNotesStore, EMPTY_DRAFT } from "@/hooks/useCaseNoteStore";
 // --- small helper ---
 const hasAnyNonEmptyValue = (obj: any = {}) =>
