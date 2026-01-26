@@ -494,7 +494,10 @@ export const ServiceWork = () => {
             <div className="flex flex-col md:flex-row gap-4">
               <Card className="rounded-md flex-1/3 dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
+                  <div className="flex justify-between">
                   <CardTitle className="text-lg ">General</CardTitle>
+                    <TATDuration WOData={workOrder}/>
+                  </div>
                   <hr className="dark:bg-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-2 lg:grid-cols-4 gap-6">
@@ -582,67 +585,65 @@ export const ServiceWork = () => {
                       value={workOrder.CancelReason || "---"}
                     />
                   </CaseField>
-
-                  <CaseField label="Priority" lock>
-                    <Input
-                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
-                      value={WOGeneral.Priority || "---"}
-                      onChange={handleWOGeneral("Priority")}
-                    />
-                  </CaseField>
-
-                  <CaseField label="Patner Case Id" lock>
-                    <Input
-                      
-                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
-                      value={"---"}
-                      readOnly
-                    />
-                  </CaseField>
-
-                  <CaseField label="Recommended Resource" lock>
-                    <Input
-                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                      value={WOGeneral.RecommendedResource}
-                      onChange={handleWOGeneral("RecommendedResource")}
-                      placeholder="---"
-                      readOnly
-                    />
-                  </CaseField>
-
-                  <CaseField label="Patner Status" lock>
-                    <Input
-                      
-                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
-                      value={"---"}
-                      readOnly
-                    />
-                  </CaseField>
-
-                  <CaseField label="Sub-Status" lock={KeyRound}>
-                    <Input
-                      
-                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
-                      value={WOGeneral.SubStatus}
-                      onChange={handleWOGeneral("SubStatus")}
-                      placeholder="---"
-                    />
-                  </CaseField>
-                  <CaseField label="Work Order Instruction" lock>
-                    <Input  placeholder="---" readOnly className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
-                  </CaseField>
-
                   <Accordion
                     type="single"
                     collapsible
                     className="w-full col-span-2 lg:col-span-4"
                   >
                     <AccordionItem value="more-details" className="pl-5">
-                      <AccordionTrigger className="cursor-pointer p-2">
+                      <AccordionTrigger className="cursor-pointer p-2 border-1 decoration-transparent">
                         More Details . . .
                       </AccordionTrigger>
-                      <AccordionContent className={"m-2"}>
+                      <AccordionContent className={"mt-2"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <CaseField label="Priority" lock>
+                        <Input
+                          className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
+                          value={WOGeneral.Priority || "---"}
+                          onChange={handleWOGeneral("Priority")}
+                        />
+                      </CaseField>
+
+                      <CaseField label="Patner Case Id" lock>
+                        <Input
+                          
+                          className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
+                          value={"---"}
+                          readOnly
+                        />
+                      </CaseField>
+
+                      <CaseField label="Recommended Resource" lock>
+                        <Input
+                          className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                          value={WOGeneral.RecommendedResource}
+                          onChange={handleWOGeneral("RecommendedResource")}
+                          placeholder="---"
+                          readOnly
+                        />
+                      </CaseField>
+
+                      <CaseField label="Patner Status" lock>
+                        <Input
+                          
+                          className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
+                          value={"---"}
+                          readOnly
+                        />
+                      </CaseField>
+
+                      <CaseField label="Sub-Status" lock={KeyRound}>
+                        <Input
+                          
+                          className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
+                          value={WOGeneral.SubStatus}
+                          onChange={handleWOGeneral("SubStatus")}
+                          placeholder="---"
+                        />
+                      </CaseField>
+                      <CaseField label="Work Order Instruction" lock>
+                        <Input  placeholder="---" readOnly className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                      </CaseField>
                           <CaseField label="Bookable Resource Booking" lock>
                             <Input
                               
@@ -691,10 +692,9 @@ export const ServiceWork = () => {
                 </CardContent>
               </Card>
 
-              <div className="flex flex-col flex-1 gap-4">
+              <div className="flex flex-col flex-1 gap-4" hidden>
                 <Card className="rounded-sm dark:bg-gradient-to-t dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                   <CardContent className="grid items-center grid-cols-2">
-                    <TATDuration WOData={workOrder}/>
                     <CaseField
                       label="Currently Worked By"
                       className={"col-span-3 hidden"}
@@ -711,7 +711,7 @@ export const ServiceWork = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="rounded-md dark:bg-gradient-to-tr dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
+                <Card className="rounded-md dark:bg-gradient-to-tr dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4" hidden>
                   <CardHeader>
                     <CardTitle className="text-lg ">
                       Entitlement and Modifier
@@ -809,6 +809,7 @@ export const ServiceWork = () => {
                     </Accordion>
                   </CardContent>
                 </Card>
+
               </div>
             </div>
             <Card className="flex-col mt-5 dark:bg-gradient-to-bl dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">

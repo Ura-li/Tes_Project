@@ -701,7 +701,7 @@ useEffect(() => {
 
                   <Accordion type="Single" collapsible className="col-span-4">
                     <AccordionItem value="more-details">
-                      <AccordionTrigger className={"decoration-transparent cursor-pointer pl-6"}>More Details . . .</AccordionTrigger>
+                      <AccordionTrigger className={"decoration-transparent cursor-pointer p-2 border-2"}>More Details . . .</AccordionTrigger>
                       <AccordionContent>
                         <div className="grid grid-cols-6 gap-4 p-4">
                           <CaseField label={"Media Handling Part"} lock>
