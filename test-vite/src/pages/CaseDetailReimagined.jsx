@@ -1149,7 +1149,7 @@ export const STATUS_ENUM_TO_LABEL = {
   NEW_AssignAPO: "New Assign To APO",
   NEW_AssignPS: "New Assign To PS",
   NEW_POPDoc: "New Needed POP Document",
-  NEW_Warranty: "New Warranty Approval",
+  NEW_Warranty: "New Warranty (Warranty Proses)",
   PartRequest: "Part Request",
   PartRequestLog: "Part Request Logistic",
   PartOrder: "Part Order",

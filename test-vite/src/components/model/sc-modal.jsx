@@ -1711,7 +1711,7 @@ export function ContactEdit({ contactID, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl w-full">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Edit Contact Information</DialogTitle>
           <DialogDescription>
@@ -1720,57 +1720,56 @@ export function ContactEdit({ contactID, onUpdate }) {
         </DialogHeader>
 
         {/* Scrollable + Responsive Grid */}
-        <div className="max-h-[70vh] overflow-y-auto p-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Salutation</Label>
               <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">First Name <Label className="text-red-600">*</Label></Label>
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Last Name <Label className="text-red-600">*</Label></Label>
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Email <Label className="text-red-600">*</Label></Label>
               <Input value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Preferred Language</Label>
               <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Phone <Label className="text-red-600">*</Label></Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Mobile</Label>
               <Input value={mobile} onChange={(e) => setMobile(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Work Phone</Label>
               <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Work Extension</Label>
               <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Address Line 1</Label>
               <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Address Line 2</Label>
               <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
             </div>
-        <div>
+          <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Country <Label className="text-red-600">*</Label></Label>
               <Input value={country} onChange={(e) => setCountry(e.target.value)} />
             </div>
-          <div>
+           <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
               {/* TODO FOR PERID :
               DESAIN NIH BIAR GA TERLALU ILANG GARISNYA */}
@@ -1780,7 +1779,7 @@ export function ContactEdit({ contactID, onUpdate }) {
                 <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
               )}
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">City <Label className="text-red-600">*</Label></Label>
               {isIndonesia ? (
                 <SelectBar className="p-1 border-b-black" value={city} options={cities} onChange={(e) => setCity(e.target.value)} />
@@ -1788,25 +1787,24 @@ export function ContactEdit({ contactID, onUpdate }) {
               <Input value={city} onChange={(e) => setCity(e.target.value)} />
               )}
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium">Zip / Postal Code <Label className="text-red-600">*</Label></Label>
               <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">PIC Name</label>
               <Input value={picName} onChange={(e) => setPicName(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">PIC Email</label>
               <Input value={picEmail} onChange={(e) => setPicEmail(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">PIC Phone</label>
               <Input value={picPhone} onChange={(e) => setPicPhone(e.target.value)} />
             </div>
           </div>
-        </div>
-
+     
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>
