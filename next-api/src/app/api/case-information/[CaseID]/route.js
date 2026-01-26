@@ -157,10 +157,9 @@ export async function PATCH(request, { params }) {
             'CaseID_Manual_Date',
             'CaseProductNote',
             'StorageLocationStore',
+            'VoidReason',
         ];
         
-        
-
         const dataToUpdate = {};
     
         const existing = await prisma.caseinformation.findUnique({ where: { CaseID: caseID } });

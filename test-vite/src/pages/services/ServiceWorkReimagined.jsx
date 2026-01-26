@@ -95,12 +95,12 @@ export const ServiceWork = () => {
           ? value.toISOString()
           : value ?? "";
       setSLAField(field, normalized);
-    };
+  };
 
   const handleWOGeneral = (field) => (eOrValue) => {
       const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
       setWOGeneralField(field, value);
-    };
+  };
 
   const openServiceCatalog = () => {
     if (!caseInformation) return;
@@ -134,10 +134,7 @@ export const ServiceWork = () => {
         data: status,
       }));
 
-       const selectedId =
-        mo.PartReturnStatusId !== null
-          ? mo.PartReturnStatusId.toString()
-          : null;
+      const selectedId = mo.PartReturnStatusId !== null ? mo.PartReturnStatusId.toString(): null;
   
       if (selectedId && !baseOptions.some((option) => option.value === selectedId)) {
             const selectedFromSource = partReturnStatusOptions.find(
@@ -158,7 +155,6 @@ export const ServiceWork = () => {
           });
         }
       }
-
       return baseOptions;
   }
 
@@ -177,7 +173,7 @@ export const ServiceWork = () => {
     setMoLineGeneralField(index, "failureId", value);
 
     if (failureId === 6){
-      setMoLineGeneralField(index, "isQuantityUsedDisabled", true)
+      setMoLineGeneralField(index, "QuantityUsed", false)
     }else if (failureId === 7){
       setMoLineGeneralField(index, "QuantityUsed", false)
     } else if (failureId === 8){
@@ -207,17 +203,18 @@ export const ServiceWork = () => {
 
     setMoLineGeneralField(index, "PartReturnStatusId", selectedStatus.ReturnStatusId);
     setMoLineGeneralField(index, "PartReturnStatusName", selectedStatus.StatusName);
-    setMoLineGeneralField(index, "PartReturnDOA", selectedStatus.Doa);
-    setMoLineGeneralField(index, "DOAReason", selectedStatus.Doa ? "" : "");
+    setMoLineGeneralField(index, "PartReturnDOA", selectedStatus.DOA);
+    setMoLineGeneralField(index, "DOAReason", selectedStatus.DOA ? "" : "");
   };
 
   const selectedPartReturnStatus = (mo) => {
     return (
-      partReturnStatusOptions.find((status) => status.ReturnStatusId === mo.PartReturnStatusId) || null
+      partReturnStatusOptions.find((status) => status.ReturnStatusId === mo.PartReturnStatusId) || null    
     )
+
   }
   
- const handlePhotoUpload = async (index, event) => {
+  const handlePhotoUpload = async (index, event) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -228,7 +225,7 @@ export const ServiceWork = () => {
     setPhotoUploadLoading(false);
     event.target.value = "";
   }
-};
+  };
     
   const handleRemovePhoto = async (index) => {
     await removeFotoMoLine(index);
@@ -1203,7 +1200,7 @@ export const ServiceWork = () => {
                       <Switch
                           checked={!!mo.QuantityUsed}
                           onCheckedChange={(checked) => setMoLineGeneralField(index, "QuantityUsed", checked)}
-                          disabled={!editRoles || mo.isQuantityUsedDisabled}
+                          disabled={!editRoles || mo.QuantityUsed || mo.QuantityUsed == false}
                       />
                       <span>{mo.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>

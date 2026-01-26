@@ -173,6 +173,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     CaseID_Manual_Date: null,
     CaseProductNote: "",
     StorageLocationStore: "",
+    VoidReason:"",
   },
   gtcForm: {
     global_trade_status: "",
@@ -346,6 +347,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
         CaseID_Manual_Date: caseDetails.CaseID_Manual_Date,
         CaseProductNote: caseDetails.CaseProductNote,
         StorageLocationStore: caseDetails.StorageLocationStore,
+        VoidReason: caseDetails.VoidReason,
       },
       productForm: {
         ...state.productForm,
@@ -763,6 +765,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
         CaseID_Manual: caseForm.CaseID_Manual,
         CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
         StorageLocationStore: caseForm.StorageLocationStore,
+        VoidReason: caseForm.VoidReason,
       });
 
       const entitlementEdited = hasAnyNonEmptyValue(entitlementStatus);
@@ -1048,6 +1051,10 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
                 if (caseForm.StorageLocationStore?.trim()) {
                   caseUpdates.StorageLocationStore =
                     caseForm.StorageLocationStore;
+                }
+                if (caseForm.VoidReason?.trim()) {
+                  caseUpdates.VoidReason =
+                    caseForm.VoidReason;
                 }
 
                 await ApiCustomer.patch(

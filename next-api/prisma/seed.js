@@ -17,16 +17,13 @@ async function main() {
       ProfilePhoto: 'https://example.com/profile.png',
     },
   });
-  console.log('✅ Admin user created  ');
 
-  
 
   const statuses = [
     { StatusName: 'Defective', StatusQuantityType: true, DOA: false },
-    { StatusName: 'DOAFunctional', StatusQuantityType: true, DOA: true },
-    { StatusName: 'DOAPhysical', StatusQuantityType: true, DOA: true },
     { StatusName: 'NoPartReturn', StatusQuantityType: true, DOA: false },
-
+    { StatusName: 'DOAFunctional', StatusQuantityType: false, DOA: true },
+    { StatusName: 'DOAPhysical', StatusQuantityType: false, DOA: true },
     { StatusName: 'GoodSealed', StatusQuantityType: false, DOA: false },
     { StatusName: 'GoodUnsealed', StatusQuantityType: false, DOA: false },
     { StatusName: 'WPIB', StatusQuantityType: false, DOA: false },
@@ -34,7 +31,6 @@ async function main() {
 
   await prisma.partReturnStatus.deleteMany() // kosongkan dulu
   await prisma.partReturnStatus.createMany({ data: statuses })
-  console.log('✅ PartReturnStatus seeded.')
 
 
   const NMU = [
@@ -61,9 +57,7 @@ async function main() {
     });
   }
   
-  console.log('✅ NMU & NMUItem seeded successfully');
 
-  
   const ProblemDesc = [
     {ServiceTypeName: 'Health Check', ProblemCategory: 'Software' },
     {ServiceTypeName: 'Rebuild Hardware', ProblemCategory: 'Hardware' },
@@ -71,8 +65,6 @@ async function main() {
   
   await prisma.ServiceType.deleteMany();
   await prisma.ServiceType.createMany({data: ProblemDesc});
-
-  console.log('✅ Service Type seeded successfully');
   
 }
 
