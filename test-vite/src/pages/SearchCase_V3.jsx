@@ -30,10 +30,9 @@ import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/s
 import { toast } from "sonner";
 import { formatDateForInput,formatDate } from "@/lib/utils";
 import Swal from "sweetalert2";
-import { extractRoleFromStatus, STATUS_ENUM_TO_LABEL } from "./CaseDetailReimagined";
+import { extractRoleFromStatus, STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
-
 /**
  * @fileoverview Create Case page (SearchCase_V3)
  * A single-page flow to create a Case with auto-fill from Asset, Contact, Company, and Product.

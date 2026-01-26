@@ -10,8 +10,7 @@ import { cn } from "@/lib/utils";
 import QuotationDialog from "@/components/model/QuotationModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
-
+import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 
 export default function CashManagement() {
     const { user } = useAuth();

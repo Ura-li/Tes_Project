@@ -16,11 +16,10 @@ import { PanelRight } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { data, Link, useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
-import { STATUS_ENUM_TO_LABEL } from './CaseDetail'
 import { Label } from '@/components/ui/label'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
-
+import { STATUS_ENUM_TO_LABEL } from '@/hooks/useCaseStatus'
 
 
 export const FlowCase = () => {

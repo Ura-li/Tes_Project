@@ -5,7 +5,7 @@ import { autoTable } from "jspdf-autotable";
 import ApiCustomer from "@/api";
 import * as XLSX from "xlsx";
 import { Button } from "./ui/button";
-import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
+import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 
 export const ExportExcel = ({ caseData, resource, isAdmin }) => {
   const [cases, setCases] = useState([]);

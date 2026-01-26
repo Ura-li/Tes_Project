@@ -27,10 +27,10 @@ import { Home, Inbox, Calendar, Search, Settings, User2, ChevronRight } from "lu
 import { cn } from "@/lib/utils"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
-import { STATUS_ENUM_TO_LABEL, STATUS_LABELS } from "@/pages/CaseDetail"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import DatePicker from "../date-picker"
+import { STATUS_ENUM_TO_LABEL, STATUS_LABELS } from "@/hooks/useCaseStatus"
 
 export function SearchBar({ filters, setFilters, className, caseData, filterClose, dataTime }) {
     const items = [
