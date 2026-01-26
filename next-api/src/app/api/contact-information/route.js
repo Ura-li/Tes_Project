@@ -48,14 +48,31 @@ export async function GET(request) {
          }
 
          if(search){
+             const searchTerms = search.trim().split(/\s+/);
+             const nameSearchCondition = {
+                AND: searchTerms.map((term) => ({
+                    OR: [
+                        { FirstName: { contains: term  } },
+                        { LastName: { contains: term  } }
+                    ]
+                }))
+            };
+
             andConditions.push({
                 OR: [
-                    { FirstName: { contains: search } },
-                    { LastName: { contains: search } },
+                    nameSearchCondition, // The smart name search
                     { Email: { contains: search } },
-                    { City: { contains: search } }
+                    { City: { contains: search  } }
                 ]
-            })
+            });
+            // andConditions.push({
+            //     OR: [
+            //         { FirstName: { contains: search } },
+            //         { LastName: { contains: search } },
+            //         { Email: { contains: search } },
+            //         { City: { contains: search } }
+            //     ]
+            // })
          }
 
          if(contactID) andConditions.push({OR:[{ContactID: parseInt(contactID)}]})
@@ -96,7 +113,7 @@ export async function GET(request) {
         });
         
     } catch (error) {
-        console.error("🔥 ERROR in GET API:", error);
+        console.error(" ERROR in GET API:", error);
 
         return NextResponse.json({
             success: false,
