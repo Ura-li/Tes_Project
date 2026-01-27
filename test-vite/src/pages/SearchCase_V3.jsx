@@ -1464,7 +1464,7 @@ export default function NewCaseForm() {
                   </div>
                 </div>
               ) : contactNotFound ? (
-                <div className="mt-2 text-sm text-muted-foreground">
+                <div className="mt-2 text-sm text-muted-foreground dark:text-white">
                   ❌ Customer / Company tidak ditemukan
                 </div>
               ) : null}
@@ -1582,7 +1582,7 @@ export default function NewCaseForm() {
                   }))}
                   renderLabel={(opt) => opt.label}
                   getValue={(opt) => opt.value}
-                  className="dark:bg-transparent dark:ring-1 dark:ring-gray-400"
+                  className="dark:bg-transparent dark:ring-1 dark:ring-gray-400 ring-1"
                 />
               </CaseField>
             
@@ -1934,6 +1934,11 @@ export default function NewCaseForm() {
                   }}
                   className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                 />
+                {productResults.length == 0 && (
+                   <div className="mt-2 text-sm text-muted-foreground dark:text-white">
+                    ❌ Product Number Tidak Ditemukan
+                </div>
+                )}
                 <div className="mt-2 flex items-center gap-2">
                   <Checkbox
                     id="isNewProduct"
