@@ -324,7 +324,7 @@ export const FlowCaseData = (user) => {
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"} id='your-case'>
+      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% min-h-0"} id='your-case'>
         <SidebarInset className={"dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
           <div className="flex flex-col w-full ">
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">

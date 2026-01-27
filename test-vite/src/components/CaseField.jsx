@@ -13,7 +13,7 @@ const spanMap = {
     6: "lg:col-span-6",
 };
 
-const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide, labelId, fieldId }) => {
+const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide, labelId, fieldId, indent = false }) => {
     if (hide) return null;
     
     // Determine which lock to use
@@ -31,9 +31,11 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
             )}  id={labelId}>
                 {IconComponent ? (
                     <IconComponent className="size-4 shrink-0" />
+                ) : indent ? (
+                   "" 
                 ) : (
                     <div className="w-5" />
-                )}
+                ) }
                 {label}
                 {star ? <span className="text-red-400 dark:text-[#FF8A80]">*</span> : ""}
             </Label>
