@@ -62,6 +62,7 @@ import { Cancel } from "@radix-ui/react-alert-dialog";
 import { toast } from "sonner";
 import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -481,9 +482,9 @@ export const Contact_table = () => {
         <button
           onClick={handleResetFilters}
           className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md
-                       bg-slate-500 hover:bg-slate-600
-                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
+            bg-slate-500 hover:bg-slate-600
+            focus:outline-none focus:ring-2 focus:ring-sky-400
+            dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
         >
           Reset Filters
         </button>
@@ -2236,7 +2237,7 @@ export const Assets_table = () => {
 
       {/* Search + Reset */}
       <div className="flex items-center gap-2 ">
-        <input
+        <Input
           type="text"
           placeholder="🔍 Search asset..."
           className="p-2 text-sm border rounded min-w-[280px]
@@ -2296,10 +2297,10 @@ export const Assets_table = () => {
       {error && <p className="mb-2 text-red-500 dark:text-red-400">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh]
+      <div className="relative w-full overflow-auto max-h-[75vh]
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className="w-full border-collapse text-xs sm:text-sm">
+        <Table className="w-full border-collapse text-xs">
           <TableHeader className="sticky top-0 z-10 bg-gray-100/95 dark:bg-slate-800/95">
             <TableRow className="text-slate-800 dark:text-slate-100">
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 text-center">No</TableHead>

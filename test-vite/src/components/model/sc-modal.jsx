@@ -1806,7 +1806,7 @@ export function ContactEdit({ contactID, onUpdate }) {
             </div>
           </div>
         </div>
-
+     
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>

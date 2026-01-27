@@ -953,6 +953,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
                     `/api/case-information/${caseDetails.CaseID}`,
                     {
                       Owner: newOwner,
+                      CaseStatus: 'NEW_Warranty'
                     },
                   );
                 }
