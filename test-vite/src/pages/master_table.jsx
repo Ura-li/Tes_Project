@@ -498,9 +498,9 @@ export const Contact_table = () => {
           <TableHeader className="sticky z-10 top-0 bg-gray-200/95 dark:bg-slate-900 text-[10px] leading-tight">
             <TableRow className="text-slate-800 dark:text-slate-100">
               <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border">No</TableHead>
-              {/* <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
+              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {getSortIcon("ContactID")}
-              </TableHead> */}
+              </TableHead>
               <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Company")}>
                 Company {getSortIcon("Company")}
               </TableHead>
@@ -575,7 +575,7 @@ export const Contact_table = () => {
               currentData.map((contact, index) => (
                 <TableRow key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
                   <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  {/* <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ContactID}</TableCell> */}
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ContactID}</TableCell>
                   <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Company}</TableCell>
                   <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Salutation}</TableCell>
                   <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.FirstName}</TableCell>
@@ -882,12 +882,12 @@ export const Company_table = () => {
 
   return (
     <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
-      <h2 className="mb-2 text-2xl font-bold">📊 Company Management</h2>
+      <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
 
       {/* Kontainer Flexbox untuk pencarian dan tombol reset */}
-      <div>
+      <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Search Input */}
-        <Input
+        <input
           type="text"
           placeholder="🔍 Search companies..."
           className="w-full p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
@@ -971,14 +971,14 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[75vh] overflow-auto 
+      <div className="relative w-full max-h-[600px] overflow-auto overscroll-contain
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className="w-full border-collapse text-xs">
+        <Table className="min-w-full border-collapse text-[10.5px] leading-[1.15]">
           <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
             <TableRow className="text-slate-800 dark:text-slate-100">
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
+              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
                 Company  {getSortIcon("Company")}
               </TableHead>
