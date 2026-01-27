@@ -15,14 +15,12 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
-import { STATUS_ENUM_TO_LABEL } from '@/pages/CaseDetailReimagined';
-
+import { STATUS_ENUM_TO_LABEL } from '@/hooks/useCaseStatus';
 
 export default function FrontDesk_Page() {
   const { user } = useAuth();
   const [userData, setUserData] = useState([]);
   const [caseData, setCaseData] = useState([]);
-  
   const [loading, setLoading] = useState(false);
   const [casevaluedata, setCasevaluedata] = useState([])
   const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
@@ -123,7 +121,6 @@ function getMetricKeys(data, excludedKeys = ["date"]) {
 }
 
 const checkdata =  getMetricKeys(weeklyChartData);
-
   return (
     <div className="min-h-[calc(100vh-64px)]  h-full w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id="dashboard">
       {/* Left Column - Profile */}
