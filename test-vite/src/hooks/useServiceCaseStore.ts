@@ -922,7 +922,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
 
               if (
                 entitlementStatus.needWarrantyApproval === true &&
-                caseDetails.CaseStatus === "NEW_POPDoc"
+                (caseDetails.CaseStatus === "NEW_POPDoc" || caseDetails.CaseStatus === "NEW_Warranty")
               ) {
                 const getAsset = await ApiCustomer.get(
                   `/api/asset-information/${caseDetails.AssetID}`,
@@ -940,6 +940,7 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
 
                   case "Add Info By WA":
                   case "New":
+                    
                   default:
                     const userTarget =
                       await ApiCustomer.get(`/api/user?role=apv`);
@@ -947,8 +948,8 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
                     newOwner = OwnerApv?.IDUser;
                     break;
                 }
-
                 if (newOwner) {
+                  caseForm.CaseStatus = 'NEW_Warranty'
                   await ApiCustomer.patch(
                     `/api/case-information/${caseDetails.CaseID}`,
                     {
