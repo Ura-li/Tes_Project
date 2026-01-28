@@ -357,12 +357,12 @@ export async function POST(req) {
           if(targetCaseStatus === "PartAvailable"){
             caseOwnerId = wo?.OwnerID ?? null
           }
-          // return {caseOwnerId, targetCaseStatus}
 
           if(
             targetCaseStatus && 
             targetCaseStatus !== currentCaseStatus && 
-            wo?.caseinformation?.CaseID
+            targetStatus === "InOutCE" &&
+            wo?.caseinformation?.CaseID 
           ) {
             await tx.caseinformation.update({
               where: { CaseID: wo.caseinformation.CaseID },
