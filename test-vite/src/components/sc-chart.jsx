@@ -386,7 +386,7 @@ const chartConfig2 = {
 export function ChartTooltipAdvanced({datachart}) {
   
   return (
-    <Card>
+    <Card className={"h-full shadow-md"}>
       <CardHeader>
         <CardTitle>Daily Case type Chart</CardTitle>
         <CardDescription>

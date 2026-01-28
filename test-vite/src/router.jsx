@@ -48,6 +48,11 @@ const UserProfile = lazy(() =>
 
 const Forbidden = lazy(() => import("./pages/forbidden"));
 const FrontDesk_Page = lazy(() => import("./layout/FrontDesk_Page"));
+const ContactTable = lazy(() =>
+  import("./components/table-data/ContactTable")
+    .then(m => ({ default: m.ContactTable }))
+);
+
 import { ViewCase } from "./pages/ViewCase";
 import { UploadRma } from "./pages/uploadRMA";
 import ErrorPage from "./lib/error/Errorpage";
@@ -259,7 +264,7 @@ export const router = createBrowserRouter([
         path: "master/Contact_table",
         element: (
           <MasterGateKeeping allow={["admin", "fd"]}>
-            <Contact_table />
+            <ContactTable />
           </MasterGateKeeping>
         ),
       },

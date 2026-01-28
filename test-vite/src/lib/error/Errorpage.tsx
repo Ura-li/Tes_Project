@@ -30,8 +30,9 @@ const ErrorPage = () => {
       <p className="bg-fuchsia-200 rounded-2xl p-2 font-black italic text-xl">
         <i>{errorMessage}</i>
       </p>
-      <p>I think i dont why, Better luck next time</p>
-<p>Here is a teapot icon: <span>🫖</span></p>
+      <p>I dont Know why,But better luck next time</p>
+<p>Here is a teapot icon </p>
+<button className="text-9xl active:text-7xl">🫖</button>
 
     </div>
   );

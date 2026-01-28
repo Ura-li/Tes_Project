@@ -574,30 +574,30 @@ export const Contact_table = () => {
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
                 <TableRow key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ContactID}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Company}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Salutation}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.FirstName}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.LastName}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Email}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PreferredLanguage}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Phone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Mobile}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.WorkPhone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.WorkExtension}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.OtherPhone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.OtherExtension}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Fax}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.AddressLine1}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.AddressLine2}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.City}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.StateProvince}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.Country}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.ZipPostalCode}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Name}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Email}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap border">{contact.PIC_Phone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.ContactID}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Company}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Salutation}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.FirstName}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.LastName}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Email}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PreferredLanguage}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Phone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Mobile}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.WorkPhone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.WorkExtension}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.OtherPhone}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.OtherExtension}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Fax}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.AddressLine1}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.AddressLine2}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.City}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.StateProvince}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Country}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.ZipPostalCode}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Name}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Email}</TableCell>
+                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Phone}</TableCell>
                   <TableCell className="p-1 border">
                     <div className="flex justify-center gap-1 scale">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
@@ -4943,13 +4943,17 @@ const sortedData = useMemo(() => {
   };
 
   return (
-    <div className="p-6">
+    <div className="max-h-[100dvh] overflow-hidden p-6 flex flex-col">
       <h2 className="mb-6 text-2xl font-bold">📊 User Table</h2>
+      <div className="flex flex-warp items-center gap-2 mb-2 ">
+        {/* Add User Button */}
+        <UserAdd />
+
       <UserImport />
       <UserTemplateButton/>
-
-      {/* Flexbox container for search input and Add button */}
-      <div className="flex flex-warp items-center gap-2 mb-4 ">
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mb-2">
+    
         {/* Search Input */}
         <input
           type="text"
@@ -4958,10 +4962,6 @@ const sortedData = useMemo(() => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {/* Add User Button */}
-        <UserAdd />
-      </div>
-      <div className="flex flex-wrap items-center gap-2 mb-4">
         <ComboboxDemo
           id="role-filter"
           value={selectedRole}
