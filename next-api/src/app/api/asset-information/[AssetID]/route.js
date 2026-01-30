@@ -109,36 +109,42 @@ export async function PATCH(request, { params }) {
             EndUserPhone,
             EndUserAddress,
             PurchaseDate,
+            CaseID,
         } = body;
 
         // --- 3. Save files if any ---
         const uploadDir = path.join(process.cwd(), "public", "uploads","warranty");
         if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-        const saveFile = async (file) => {
+        const saveFile = async (file, doctype) => {
             if (!file || typeof file === "string") return null;
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
-            const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+
+            //file name
+            const ext = path.extname(file.name);
+            const uniqueId = Date.now();
+
+            const filename = `${CaseID}-${doctype}-${uniqueId}${ext}`;
             const filepath = path.join(uploadDir, filename);
             fs.writeFileSync(filepath, buffer);
             return `/uploads/warranty/${filename}`; // URL path
         };
 
         const popPath = files.POPDocument?.[0]
-            ? await saveFile(files.POPDocument[0])
+            ? await saveFile(files.POPDocument[0], "pop")
             : body.POPDocument && typeof body.POPDocument === "string"
                 ? body.POPDocument
                 : "";
 
         const warrantyPath = files.WarrantyCard?.[0]
-            ? await saveFile(files.WarrantyCard[0])
+            ? await saveFile(files.WarrantyCard[0], "warranty-card")
             : body.WarrantyCard && typeof body.WarrantyCard === "string"
                 ? body.WarrantyCard
                 : "";
 
         const photoPath = files.PhotoUnit?.[0]
-            ? await saveFile(files.PhotoUnit[0])
+            ? await saveFile(files.PhotoUnit[0], "unit")
             : body.PhotoUnit && typeof body.PhotoUnit === "string"
                 ? body.PhotoUnit
                 : "";

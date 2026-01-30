@@ -10,6 +10,8 @@ export async function POST(request) {
     try {
         const formData = await request.formData();
         const files = formData.getAll("files"); // multiple file inputs with same name
+        const userId = formData.getAll("user");
+        console.log(userId);
 
         if (!files || files.length === 0) {
             return NextResponse.json(
@@ -84,6 +86,20 @@ export async function POST(request) {
                         : relativePath,
                 },
             });
+
+            // 6. update case note
+            await prisma.casenotes.create({
+                data: {
+                    CaseID : caseId,
+                    LogType: "Notice ERF Upload",
+                    ActionType: "System Log",
+                    Template: "",
+                    VisibleExternally: true,
+                    MinutesSpent: 0,
+                    Note: noteText,
+                    CreatedBy: ownerIdNumber,
+                },
+            })
 
             results.push({
                 file: originalName,
