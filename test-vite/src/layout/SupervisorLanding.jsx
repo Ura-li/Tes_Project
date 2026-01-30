@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { ChartArea, ChartBar, ChartPie } from "../components/sc-chart";
-import { Case_table } from "../pages/master_table";
+import { CaseTable } from "@/components/table-data/CaseTable";
 import ApiCustomer from "@/api"
 import { parse } from "date-fns";
 import { Week } from "react-day-picker";
@@ -85,7 +85,7 @@ export default function Landing() {
                 </div>
             </div>
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" >
-                <Case_table></Case_table>
+                <CaseTable/>
             </div>
         </div>
     );

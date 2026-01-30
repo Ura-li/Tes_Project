@@ -1,0 +1,258 @@
+"use client"
+
+import * as React from "react"
+import Swal from "sweetalert2"
+import { toast } from "sonner"
+import ApiCustomer from "@/api"
+import { DataTableToolbar } from "./config/data-table-toolbar"
+import { DataTableColumnHeader } from "./config/data-table-column-header"
+import { DataTablePagination } from "./config/data-table-pagination"
+import { DataTableFacetedFilter } from "./config/data-table-faceted-filter"
+import { DataTable } from "./config/data-table"
+import { Button } from "../ui/button"
+import { useAuth } from "@/context/auth-context"
+import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus"
+import { formatDate } from "@/lib/utils"
+import { get } from "react-hook-form"
+import { File } from "lucide-react"
+
+function caseColums() {
+    return [
+        {
+            id: "no",
+            header: () => <div className="text-center">No</div>,
+            cell: ({ row, table }) => {
+                const pageIndex = table.getState().pagination.pageIndex
+                const pageSize  = table.getState().pagination.pageSize
+                return (
+                    <div className="text-center">
+                        {pageIndex * pageSize + row.index + 1}
+                    </div>
+                )
+            },
+        }, 
+        {
+            accessorKey: "CaseID",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case ID"}/>
+            ),
+        },
+        {
+            accessorKey: "caseinformation.CaseID_Manual",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case ID Manual"}/>
+            ),
+        },
+        {
+            accessorKey: "caseinformation.ErfDoc",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"ERF"}/>
+            ),
+            cell: ({ getValue }) => getValue() && <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)}><File/></Button>
+        },
+        {
+            accessorKey: "CaseSubject",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case Subject"}/>
+            ),
+        },
+        {
+            accessorKey: "CustomerAccount",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Customer Company"}/>
+            ),
+        },
+        {
+            accessorKey: "SerialNumber",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Serial No"}/>
+            ),
+        },
+        {
+            accessorKey: "ProductNumber",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Product No"}/>
+            ),
+        },
+        {
+            accessorKey: "ProductName",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Product Name"}/>
+            ),
+        },
+        {
+            accessorKey: "caseinformation.asset_information.WarrantyOTCCode.WarrantyCondition",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Warranty Type"}/>
+            ),
+        },
+        {
+            accessorKey: "caseinformation.CaseType",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case Type"}/>
+            ),
+        },
+        {
+            accessorKey: "CreatedOn",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Created On"}/>
+            ),
+        },
+        {
+            accessorKey: "caseinformation.CaseID_Manual_Date",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case ID Manual Date"}/>
+            ),
+            cell: ({ getValue }) => formatDate(getValue())
+        },
+        {
+            accessorKey: "Primary",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Customer Name"}/>
+            ),
+        },
+        {
+            accessorKey: "CreatedName",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Created Name"}/>
+            ),
+        },
+        {
+            accessorKey: "Owner",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Owner"}/>
+            ),
+        },
+        {
+            accessorKey: "CaseStatus",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Case Status"}/>
+            ),
+            cell: ({ getValue }) => {
+                const rawStatus = getValue()
+                const color = {
+                    Close: "bg-red-300/80 ",
+                    Cancel: "bg-amber-300/80 ",
+                }[rawStatus] ?? "bg-emerald-300/80"
+                return  (
+                    <div className={`h-full w-full flex justify-center items-center ${color}`}>
+                        {STATUS_ENUM_TO_LABEL[rawStatus] ?? rawStatus}
+                    </div>
+                )
+            } 
+        },
+    ]
+}
+
+const getToday = () => {
+const today = new Date();
+return today.toISOString().split("T")[0];
+};
+
+const getOneYearAgo = () => {
+const d = new Date();
+d.setFullYear(d.getFullYear() - 1);
+return d.toISOString().split("T")[0];
+};
+
+export function CaseTable() {
+    const [data, setData] = React.useState([])
+    const [loading, setLoading] = React.useState(false)
+    const [error, setError] = React.useState(null)
+    const [openClose, setOpenClose] = React.useState("All");
+    const [startDate, setStartDate] = React.useState(getOneYearAgo);
+    const [endDate, setEndDate] = React.useState(getToday);
+    const { user } = useAuth();
+    const [Sorting, setSorting] = React.useState([
+        {
+            id: "CreatedOn", 
+            desc: true
+        }])
+    const fetchCase = React.useCallback(async () => {
+        const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
+        const savedTeamId = localStorage.getItem("activeTeamId");
+        const baseurl = `/api/case-information`;
+        const params = new URLSearchParams();
+        if (openClose !== "All") {
+        params.append("CaseStatus", openClose);
+        }
+
+        if (!isAgreeAllResource) {
+        params.append("resource", savedTeamId);
+        }
+
+        if (startDate) {
+        params.append("startDate", startDate);
+        }
+
+        if (endDate) {
+        params.append("endDate", endDate);
+        }
+
+        const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
+        setLoading(true)
+        setError(null)
+
+        try {
+        const res = await ApiCustomer.get(url);
+        setData(res.data.data)
+        } catch (error) {
+            toast.error("Failed to fetch Case data")
+            setError("Failed to fetch data")
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    React.useEffect(() => {
+        fetchCase()
+    }, [fetchCase])
+
+    const columns = React.useMemo(
+            () => caseColums(),
+        [fetchCase]
+     )
+
+    return (
+        <div className="p-4 grid grid-cols-1 w-full rounded-2xl">
+            <DataTable
+                title={<h2 className="text-xl sm:text-2xl font-bold">View All The Case</h2>}
+                data={data}
+                columns={columns}
+                cellName={"h-9"}
+                loading={loading}
+                sorting={Sorting}
+                setSorting={setSorting}
+                error={error}
+                toolbar={(table) => (
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case...">
+                        <DataTableFacetedFilter
+                            title="All Prdocut Name"
+                            column={table.getColumn("SerialNumber")}
+                        />
+                        <DataTableFacetedFilter
+                            title="All Prdocut Number"
+                            column={table.getColumn("ProductNumber")}
+                        />
+                        <DataTableFacetedFilter
+                            title="All Serial Number"
+                            column={table.getColumn("SerialNumber")}
+                        />
+                        <DataTableFacetedFilter
+                            title="All Created Name"
+                            column={table.getColumn("CreatedName")}
+                        />
+                        <DataTableFacetedFilter
+                            title="All Owner"
+                            column={table.getColumn("Owner")}
+                        />
+                        <DataTableFacetedFilter
+                            title="All Case Status"
+                            column={table.getColumn("CaseStatus")}
+                        />
+                    </DataTableToolbar>
+                )}
+            />
+        </div>
+    )
+}

@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { twMerge } from "tailwind-merge"
 
 import { DataTableToolbar } from "./data-table-toolbar"
 import { DataTablePagination } from "./data-table-pagination"
@@ -32,11 +33,11 @@ export function DataTable({
   title,
   toolbar,
   className,
+  cellName,
+  sorting,
+  setSorting,
 }) {
-  const [sorting, setSorting] = React.useState([])
-  const [columnFilters, setColumnFilters] = React.useState(
-    []
-  )
+  const [columnFilters, setColumnFilters] = React.useState([])
   const [globalFilter, setGlobalFilter] = React.useState("")
 
   const table = useReactTable({
@@ -102,7 +103,7 @@ export function DataTable({
                   className={idx % 2 === 0 ? "bg-background" : "bg-muted/30"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="whitespace-nowrap py-0">
+                    <TableCell key={cell.id} className={twMerge("whitespace-nowrap py-0", cellName)}>
                       {cell.column.columnDef.cell
                         ? cell.column.columnDef.cell(cell.getContext())
                         : null}

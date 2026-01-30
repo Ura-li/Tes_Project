@@ -323,7 +323,7 @@ const openSaveAll = () => {
 
          newWindow.document.body.appendChild(iframe);
       },
-      roles: ["admin", "fd", "user", "spv", "ce", "celead"],
+      roles: ["admin", "fd", "user", "spv", "ce", "celead","cm","apo"],
     },
     {
       icon: StepBack,

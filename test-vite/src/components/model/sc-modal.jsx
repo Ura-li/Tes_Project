@@ -1122,7 +1122,7 @@ export function AssetEdit({ assetId, onUpdate }) {
             Update the details of the asset. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <Label className="text-sm font-medium text-gray-700">Serial Number<Label className="text-red-600">*</Label></Label>
             <Input
@@ -1413,51 +1413,40 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         </DialogHeader>
 
         {/* Form Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-          <div>
-            <Label htmlFor="Company">Company Name <Label className="text-red-600">*</Label></Label>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 py-4">
+          <CaseField label={"Companny Name"} star indent>
             <Input id="Company" autoComplete="organization" value={formData.Company} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="Email">Email <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"Email"} star indent>
             <Input id="Email" type="email" autoComplete="email" value={formData.Email} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="PrimaryPhone">Primary Phone <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"Primary Phone"} star indent>
             <Input id="PrimaryPhone" type="tel" autoComplete="tel" value={formData.PrimaryPhone} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="WhatsappNo">Whatsapp No</Label>
+          </CaseField>
+          <CaseField label={"Whatsapp No"} indent>
             <Input id="WhatsappNo" type="tel" value={formData.WhatsappNo} onChange={handleChange} />
-          </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="AddressLine1">Address Line 1 <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"Address Line 1"} star indent>
             <Input id="AddressLine1" value={formData.AddressLine1} onChange={handleChange} />
-          </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="AddressLine2">Address Line 2</Label>
+          </CaseField>
+          <CaseField label={"Address Line 2"} indent>
             <Input id="AddressLine2" value={formData.AddressLine2} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="City">City <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"City"} star indent>
             <Input id="City" value={formData.City} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="StateProvince">State/Province <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"State/Province"} star indent>
             <Input id="StateProvince" value={formData.StateProvince} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="Country">Country <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"Country"} star indent>
             <Input id="Country" value={formData.Country} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="ZipPostalCode">Zip/Postal Code <Label className="text-red-600">*</Label></Label>
+          </CaseField>
+          <CaseField label={"Zip/Postal Code"} star indent>
             <Input id="ZipPostalCode" value={formData.ZipPostalCode} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="NPWP"> NPWP </Label>
+          </CaseField>
+          <CaseField label={"NPWP"} indent>
             <Input id="NPWP" value={formData.NPWP} onChange={handleChange} autoComplete="off"/>
-          </div>
+          </CaseField>
         </div>
 
         <DialogFooter className="flex justify-end gap-2">
@@ -1925,7 +1914,7 @@ export function ContactDelete ({ contactID }) {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" className="ml-2 rounded-sm h-11">Product Add</Button>
+          <Button variant="outline" className="rounded-sm">Product Add</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
