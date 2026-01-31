@@ -361,11 +361,11 @@ export const Contact_table = () => {
   };
 
   return (
-    <div className="grid p-6 grid-cols-1 w-full  rounded-2xl">
-      <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
+    <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
+      <h2 className=" text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
-      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
         <input
           type="text"
           placeholder="🔍 Search contacts..."
@@ -375,7 +375,7 @@ export const Contact_table = () => {
         />
       </div>
         {/* Dropdown filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 w-full">
        <ComboboxDemo
           id="company"
           value={selectedCompany}
@@ -493,111 +493,107 @@ export const Contact_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[85vh] overflow-auto rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className=" min-w-full border-collapse text-[10px] leading-tight">
-          <TableHeader className="sticky z-10 top-0 bg-gray-200/95 dark:bg-slate-900 text-[10px] leading-tight">
+      <div className="w-full max-h-[36vh] overflow-auto rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+        <Table className=" min-w-full  text-[12px] leading-[1.15]">
+          <TableHeader className=" bg-gray-200/95 dark:bg-slate-900">
             <TableRow className="text-slate-800 dark:text-slate-100">
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border">No</TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
-                Contact ID {getSortIcon("ContactID")}
-              </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Company")}>
+              <TableHead className="px-2 py-1 text-[11px] font-semiblod text-center border">No</TableHead>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Company")}>
                 Company {getSortIcon("Company")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Salutation")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Salutation")}>
                 Salutation {getSortIcon("Salutation")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("FirstName")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("FirstName")}>
                 First Name {getSortIcon("FirstName")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("LastName")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("LastName")}>
                 Last Name {getSortIcon("LastName")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Email")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
                 Preferred Language {getSortIcon("PreferredLanguage")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Phone")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Phone")}>
                 Phone {getSortIcon("Phone")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Mobile")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Mobile")}>
                 Mobile {getSortIcon("Mobile")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
                 Work Phone {getSortIcon("WorkPhone")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
                 Work Extension {getSortIcon("WorkExtension")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
                 Other Phone {getSortIcon("OtherPhone")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
                 Other Extension {getSortIcon("OtherExtension")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Fax")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Fax")}>
                 Fax {getSortIcon("Fax")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("City")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("StateProvince")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Country")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
                 PIC Name {getSortIcon("PIC_Name")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
                 PIC Email {getSortIcon("PIC_Email")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
                 PIC Phone {getSortIcon("PIC_Phone")}
               </TableHead>
-              <TableHead className="px-1 py-1 text-[10px] font-semiblod text-center ">Actions</TableHead>
+              <TableHead className="px2 py-1 text-[11px] font-semiblod text-center ">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="overflow-auto max-h-[65vh]">
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
                 <TableRow key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.ContactID}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Company}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Salutation}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.FirstName}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.LastName}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Email}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PreferredLanguage}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Phone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Mobile}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.WorkPhone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.WorkExtension}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.OtherPhone}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.OtherExtension}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Fax}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.AddressLine1}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.AddressLine2}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.City}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.StateProvince}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.Country}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.ZipPostalCode}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Name}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Email}</TableCell>
-                  <TableCell className="px-1 py-1 text-[10px] border whitespace-nowrap ">{contact.PIC_Phone}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>                  
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Company}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Salutation}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.FirstName}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.LastName}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Email}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.PreferredLanguage}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Phone}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Mobile}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.WorkPhone}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.WorkExtension}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.OtherPhone}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.OtherExtension}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Fax}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.AddressLine1}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.AddressLine2}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.City}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.StateProvince}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.Country}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.ZipPostalCode}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.PIC_Name}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.PIC_Email}</TableCell>
+                  <TableCell className="px-2 py-1 text-[11px] text-center border whitespace-nowrap ">{contact.PIC_Phone}</TableCell>
                   <TableCell className="p-1 border">
                     <div className="flex justify-center gap-1 scale">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
@@ -882,15 +878,12 @@ export const Company_table = () => {
 
   return (
     <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
-      <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
-
-      {/* Kontainer Flexbox untuk pencarian dan tombol reset */}
-      <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Search Input */}
-        <input
+      <h2 className="text-2xl font-bold">📊 Company Management</h2>
+      {/* Kontainer Flexbox untuk pencarian dan tombol reset */}{/* Search Input */}
+        <Input
           type="text"
           placeholder="🔍 Search companies..."
-          className="w-full p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
+          className=" p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
                      bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                      focus:outline-none focus:ring-2 focus:ring-sky-400
                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
@@ -900,10 +893,9 @@ export const Company_table = () => {
             setCurrentPage(1);
           }}
         />
-      </div>
       
       {/* Filters */}
-      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4  sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <ComboboxDemo
           id="country"
           value={selectedCountry}
@@ -971,54 +963,54 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[600px] overflow-auto overscroll-contain
+      <div className="w-full max-h-[50vh] overflow-auto
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className="min-w-full border-collapse text-[10.5px] leading-[1.15]">
-          <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
-            <TableRow className="text-slate-800 dark:text-slate-100">
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+        <Table className="min-w-full text-[12px] leading-[1.15]">
+          <TableHeader className="bg-gray-100/95 dark:bg-slate-800/95">
+            <TableRow className="text-slate-800 dark:text-slate-100 align-center">
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
                 Company  {getSortIcon("Company")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("PrimaryPhone")}>
                 Primary Phone {getSortIcon("PrimaryPhone")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("WhatsappNo")}>
                 Whatsapp {getSortIcon("WhatsappNo")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
-              <TableHead className="px-2 py-1 text-[11px] font-semibold text center border border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+              <TableHead className="text-center px-2 py-1 text-[11px] font-semibold text center  border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("NPWP")}>
                 NPWP {getSortIcon("NPWP")}
               </TableHead>
@@ -1037,7 +1029,7 @@ export const Company_table = () => {
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</TableCell>
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</TableCell>
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</TableCell>
-                  <TableCell className="px-2 py-[3px] text-[10.5px] border border-slate-200 dark:border-800 align-center"> <div className=" whitespace-normal break-words w-100 max-h-[8.4em] leading-[1.2] oferflow-hidden cursor-help" title={c.AddressLine1}>{c.AddressLine1}</div></TableCell>
+                  <TableCell className="px-2 py-[3px] border border-slate-200 dark:border-800 align-center"> <div className=" whitespace-normal break-words w-100 cursor-help" title={c.AddressLine1}>{c.AddressLine1}</div></TableCell>
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</TableCell>
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</TableCell>
                   <TableCell className="px-2 py-[3px] text-center border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
@@ -1583,9 +1575,11 @@ const sortedData = useMemo(() => {
                     bg-slate-50 text-slate-800
                     dark:bg-slate-900/60 dark:text-slate-100">  
       <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
+      
 
       {/* Search */}
-      <input
+      <div className="flex justify-between">
+      <Input
         type="text" id='search-case'
         placeholder="Search..."
         className="w-full sm:w-1/3 p-2 mb-4 text-sm border rounded-lg
@@ -1595,9 +1589,23 @@ const sortedData = useMemo(() => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+       {/* Reset */}
+        <div className="flex gap-2" id='case-actionbuttons'>
+          <Button id='case-reset-filters'
+            onClick={resetFilters}
+            className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-400"}
+          >
+            Reset Filters
+          </Button>
+           {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
+          <ExportExcel caseData={caseData} resource={user?.resource} isAdmin={user?.role === 'admin'}  />
+          : null}
+        </div>
+
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-6 mb-4 items-end" id='filter-case'>
+      <div className="grid grid-cols-6 gap-4 mb-4 items-end" id='filter-case'>
         {/* HW */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by HW</label>
@@ -1752,80 +1760,69 @@ const sortedData = useMemo(() => {
           </SelectContent>
         </Select>
       </div>
-  {/* Reset */}
-        <div className="flex  gap-2" id='case-actionbuttons'>
-          <Button id='case-reset-filters'
-            onClick={resetFilters}
-            className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-400"}
-          >
-            Reset Filters
-          </Button>
-           {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
-          <ExportExcel caseData={caseData} resource={user?.resource} isAdmin={user?.role === 'admin'}  />
-          : null}
-        </div>
       </div>
+ 
 
       {/* Loading & Error */}
       {loading && <p className="mb-2 text-sm text-gray-700 dark:text-slate-300">Loading cases...</p>}
       {error && <p className="mb-2 text-sm text-red-500 dark:text-red-400">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto max-h-[500px] overflow-y-auto
+      <div className="overflow-x-auto max-h-[40vh] overflow-y-auto
                       rounded-2xl border border-slate-200 shadow-md
                       bg-white/95 dark:bg-slate-900/90 dark:border-slate-700">
-        <Table className="min-w-full border-collapse text-xs sm:text-sm" id='case-table'>
-          <TableHeader className="sticky top-0 bg-gray-200/95 dark:bg-slate-800/95">
+        <Table className="min-w-full text-[12px] leading=[1.15]" id='case-table'>
+          <TableHeader className="bg-gray-200/95 dark:bg-slate-800/95">
             <TableRow className="text-sm text-gray-700 uppercase bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID")}>
                 Case ID {getSortSymbol("CaseID")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
                 Case ID MANUAL {getSortSymbol("CaseID_Manual")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" >
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" >
                 ERF
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseSubject")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseSubject")}>
                 Case Subject {getSortSymbol("CaseSubject")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
                 Customer Company {getSortSymbol("CustomerAccount")}
               </TableHead>
-               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("SerialNumber")}>
+               <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("SerialNumber")}>
                 Serial No {getSortSymbol("SerialNumber")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductNumber")}>
                 Product No {getSortSymbol("ProductNumber")}
               </TableHead>
-                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductName")}>
+                <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductName")}>
                 Product Name {getSortSymbol("ProductName")}
               </TableHead>
-                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyType")}>
+                <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyType")}>
                 Warranty Type {getSortSymbol("WarrantyType")}
               </TableHead>
-                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyStatus")}>
+                <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyStatus")}>
                 Warranty Status {getSortSymbol("WarrantyStatus")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseType")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseType")}>
                 Case Type {getSortSymbol("CaseType")}
               </TableHead>
-                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedOn")}>
+                <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 Created On {getSortSymbol("CreatedOn")}
               </TableHead>
-                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual_Date")}>
+                <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual_Date")}>
                 Case ID Manual Date {getSortSymbol("CaseID_Manual_Date")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Primary")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Primary")}>
                 Customer Name {getSortSymbol("Primary")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedName")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedName")}>
                 Created Name {getSortSymbol("CreatedName")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Owner")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Owner")}>
                 Owner {getSortSymbol("Owner")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseStatus")}>
+              <TableHead className="p-2 border text-center border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseStatus")}>
                 Case Status {getSortSymbol("CaseStatus")}
               </TableHead>
             </TableRow>
@@ -1849,9 +1846,9 @@ const sortedData = useMemo(() => {
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual}</TableCell>
                 <TableCell className="p-2 border">
                  {caseItem.caseinformation?.ErfDoc && (
-                            <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${caseItem.caseinformation?.ErfDoc}`)}>
+                  <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${caseItem.caseinformation?.ErfDoc}`)}>
                    <File/>
-                            </Button>
+                  </Button>
                  )}
                 </TableCell>
                 <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CaseSubject}</TableCell>
@@ -1882,7 +1879,7 @@ const sortedData = useMemo(() => {
                   className={cn(
                     "p-2 border border-slate-200 dark:border-slate-800",
                     "text-xs font-semibold text-slate-800 dark:text-slate-900",
-                    "rounded-full text-center",
+                    "text-center",
                     "bg-emerald-300/80 border-emerald-400",
                     caseItem.CaseStatus === "Close" &&
                       "bg-red-300/80 border-red-400",
@@ -2233,14 +2230,14 @@ export const Assets_table = () => {
 
   return (
     <div className="grid p-6 grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
-      <h2 className="mb-2 text-2xl font-bold">📦 Asset Information</h2>
+      <h2 className="text-2xl font-bold">📦 Asset Information</h2>
 
       {/* Search + Reset */}
-      <div className="flex items-center gap-2 ">
+      <div className="flex gap-3">
         <Input
           type="text"
           placeholder="🔍 Search asset..."
-          className="p-2 text-sm border rounded min-w-[280px]
+          className="p-2 text-sm sm:w-1/3
                      bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                      focus:outline-none focus:ring-2 focus:ring-sky-400
                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
@@ -2297,16 +2294,13 @@ export const Assets_table = () => {
       {error && <p className="mb-2 text-red-500 dark:text-red-400">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full overflow-auto max-h-[75vh]
+      <div className="relative w-full overflow-auto max-h-[50vh]
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
-        <Table className="w-full border-collapse text-xs">
+        <Table className="w-full border-collapse text-[12px] leading-[1.15]">
           <TableHeader className="sticky top-0 z-10 bg-gray-100/95 dark:bg-slate-800/95">
             <TableRow className="text-slate-800 dark:text-slate-100">
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 text-center">No</TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("AssetID")}>
-                Asset ID {renderSortIcon("AssetID")}
-              </TableHead>
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("SerialNumber")}>
                 Serial Number {renderSortIcon("SerialNumber")}
               </TableHead>
@@ -2341,7 +2335,6 @@ export const Assets_table = () => {
               currentData.map((a, idx) => (
                 <TableRow key={a.AssetID} className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-gray-50 dark:bg-slate-800/80"}`}>
                   <TableCell className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</TableCell>
-                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a.AssetID}</TableCell>
                   <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a.SerialNumber}</TableCell>
                   <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.product_information?.ProductName}</TableCell>
                   <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.ProductNumber}</TableCell>
@@ -2682,22 +2675,25 @@ export const Product_table = () => {
   const endIndex = totalCount > 0 ? Math.min(currentPage * itemsPerPage, totalCount) : 0;
 
   return (
-    <div className="p-6 grid grid-flow-row">
-      <h2 className="mb-6 text-2xl font-bold">📊 Product Management</h2>
+    <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
+      <h2 className="text-2xl font-bold">📊 Product Management</h2>
 
-      {/* search + add */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <input
+<div className="flex justify-between gap-3">
+        <Input
           type="text"
           placeholder="🔍 Search products..."
-          className=" p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className=" p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <ProductAdd onAdded={() => fetchProducts(currentPage)} />
+
+      <ProductAdd onAdded={() => fetchProducts(currentPage)} />
         <ProductImport/>
         <ProductTemplateButton/>
-    </div>
+</div>
 
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -2740,7 +2736,9 @@ export const Product_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh] bg-white rounded-2xl shadow-md border">
+      <div className="w-full max-h-[50vh] overflow-auto
+                      bg-white/95 dark:bg-slate-900/90
+                      rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
         <Table className="min-w-full border-collapse">
           <TableHeader className="sticky z-10 top-0 bg-gray-100">
             <TableRow>
@@ -2812,13 +2810,13 @@ export const Product_table = () => {
                   <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + idx + 1}
                   </TableCell>
-                  <TableCell className="p-3 border">{p.ProductNumber}</TableCell>
-                  <TableCell className="p-3 border">{p.ProductLine}</TableCell>
-                  <TableCell className="p-3 border">{p.ProductName}</TableCell>
-                  <TableCell className="p-3 border">{p.product_type?.ProductType}</TableCell>
-                  <TableCell className="p-3 border">{p.product_type?.ProductGroup}</TableCell>
-                  <TableCell className="p-3 border">{p.product_type?.ProductTower}</TableCell>
-                  <TableCell className="p-3 border">{p.HWPC}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.ProductNumber}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.ProductLine}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.ProductName}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.product_type?.ProductType}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.product_type?.ProductGroup}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.product_type?.ProductTower}</TableCell>
+                  <TableCell className="p-3 border text-center">{p.HWPC}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <ProductEdit ProductNumber={p.ProductNumber} onUpdate={() => fetchProducts(currentPage)} />
                     <ProductDelete
@@ -3031,13 +3029,16 @@ export const ProductType_table = () => {
   };
 
   return (
-    <div className="p-6 grid grid-flow-row">
+    <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
       <h2 className="mb-4 text-xl font-bold">Product Type Table</h2>
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <Input
+         type="text"
+          placeholder="🔍 Search Product Type..."
+          className=" p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -3050,7 +3051,7 @@ export const ProductType_table = () => {
       {error && <p className="text-red-500">{error}</p>}
 
       {/* ✅ MODIFIED: Table wrapper for scrolling */}
-      <div className="relative w-full overflow-x-auto max-h-[60vh] bg-white rounded-2xl shadow-md border">
+      <div className="relative w-full overflow-x-auto max-h-[50vh] bg-white rounded-2xl shadow-md border">
         <Table className="w-full border-collapse">
           {/* ✅ MODIFIED: Sticky header */}
           <TableHeader className="sticky top-0 z-10">
@@ -3094,14 +3095,14 @@ export const ProductType_table = () => {
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </TableCell>
                   <TableCell
-                    className="p-3 text-blue-500 border cursor-pointer hover:underline"
+                    className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/case/${item.ProductTypeID}`)}
                   >
                     {item.ProductTypeID}
                   </TableCell>
-                  <TableCell className="p-3 border">{item.ProductTower}</TableCell>
-                  <TableCell className="p-3 border">{item.ProductGroup}</TableCell>
-                  <TableCell className="p-3 border">{item.ProductType}</TableCell>
+                  <TableCell className="p-3 text-center border">{item.ProductTower}</TableCell>
+                  <TableCell className="p-3 text-center border">{item.ProductGroup}</TableCell>
+                  <TableCell className="p-3 text-center border">{item.ProductType}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <ProductTypeEdit
                       ProductTypeID={item.ProductTypeID}
@@ -3362,11 +3363,11 @@ export const WarrantyService_table = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📊 Warranty Service Table</h2>
+    <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
+      <h2 className="text-2xl font-bold">📊 Warranty Service Table</h2>
 
       {/* Search and Add Button */}
-      <div className="flex flex-warp items-center gap-2 mb-4"> {/* Mengubah mb-6 di sini */}
+      <div className="flex flex-warp items-center gap-2 "> 
         <input
           type="text"
           placeholder="🔍 Search..."
@@ -6064,7 +6065,7 @@ export const Resource_table = () => {
   );
 };
 
-export const ResourceAccountTable = () => {
+export const ResourceAccount_Table = () => {
   const [resourceAccounts, setResourceAccounts] = useState([]);
   const [resources, setResources] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -6743,7 +6744,7 @@ export const SubkTechnician_table = () => {
   );
 };
 
-export const SymptomCodeTable = () => {
+export const SymptomCode_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -7062,7 +7063,7 @@ export const SymptomCodeTable = () => {
   );
 };
 
-export const BookingsTable = () => {
+export const Bookings_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -7478,7 +7479,7 @@ export const BookingsTable = () => {
   );
 };
 
-export const BookingDetailsTable = () => {
+export const BookingDetails_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -7956,7 +7957,7 @@ export const BookingDetailsTable = () => {
   );
 };
 
-export const BookingStatusTable = () => {
+export const BookingStatus_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -8249,7 +8250,7 @@ export const BookingStatusTable = () => {
   );
 };
 
-export const RepairClassCodeTable = () => {
+export const RepairClassCode_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   // State untuk menunda pencarian (debounce)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
@@ -8564,7 +8565,7 @@ export const RepairClassCodeTable = () => {
   );
 };
 
-export const ServiceCatalogTable = () => {
+export const ServiceCatalog_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   // State untuk menunda pencarian (debounce)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
@@ -8875,7 +8876,7 @@ export const ServiceCatalogTable = () => {
   );
 };
 
-export const ServiceTypeTable = () => {
+export const ServiceType_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -9186,7 +9187,7 @@ export const ServiceTypeTable = () => {
   );
 };
 
-export const OTCCodeTable = () => {
+export const OTCCode_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -9503,7 +9504,7 @@ export const OTCCodeTable = () => {
   );
 };
 
-export const CrsTable = () => {
+export const Crs_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Menambahkan itemsPerPage
@@ -9819,7 +9820,7 @@ export const CrsTable = () => {
   );
 };
 
-export const NmuTable = () => {
+export const Nmu_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -10138,7 +10139,7 @@ export const NmuTable = () => {
   );
 };
 
-export const NmuItemTable = () => {
+export const NmuItem_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -10447,7 +10448,7 @@ export const NmuItemTable = () => {
   );
 };
 
-export const FailureTable = () => {
+export const Failure_Table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Mengubah default itemsPerPage menjadi 10

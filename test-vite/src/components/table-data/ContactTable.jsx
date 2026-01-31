@@ -81,7 +81,6 @@ import { Button } from "../ui/button"
     { accessorKey: "Fax", header: ({ column }) => <DataTableColumnHeader column={column} title="Fax" /> },
     { accessorKey: "AddressLine1", header: ({ column }) => <DataTableColumnHeader column={column} title="Address 1" /> },
     { accessorKey: "AddressLine2", header: ({ column }) => <DataTableColumnHeader column={column} title="Address 2" /> },
-
     {
       accessorKey: "Country",
       header: ({ column }) => (
