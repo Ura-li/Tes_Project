@@ -135,7 +135,7 @@ export function ContactTable() {
   const [data, setData] = React.useState([])
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState(null)
-
+  const [sorting, setSorting] = React.useState([])
   const fetchContacts = React.useCallback(async () => {
 
     setLoading(true)
@@ -171,10 +171,13 @@ function check() {
     <div className="p-4 grid  grid-cols-1 w-full rounded-2xl">
     {/* <Button onClick={setRefetchData(check())}/> */}
       <DataTable
+        contact
         title={<h2 className="text-xl sm:text-2xl font-bold">📊 Contact Management</h2>}
         data={data}
         columns={columns}
         loading={loading}
+        sorting={sorting}
+        setSorting={setSorting}
         error={error}
         toolbar={(table) => (
           <DataTableToolbar table={table} searchPlaceholder="🔍 Search contacts...">

@@ -11,6 +11,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { twMerge } from "tailwind-merge";
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 function uniqSorted(values) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b))
 }
@@ -21,6 +33,7 @@ export function DataTableFacetedFilter({
   title,
   getLabel,
   disabled,
+  className,
 }) {
   const current = (column.getFilterValue() ) ?? ""
 
@@ -35,32 +48,45 @@ export function DataTableFacetedFilter({
   }, [faceted, getLabel])
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled}>
-          {current ? `${title}: ${current}` : title}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="max-h-[280px] overflow-auto">
-        <DropdownMenuLabel>{title}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => column.setFilterValue(undefined)}
-          className={!current ? "font-semibold" : ""}
+    <Popover >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={twMerge(` justify-between overflow-hidden ${className}`)}
+          disabled={disabled}
         >
-          All
-        </DropdownMenuItem>
-        {options.map((opt) => (
-          <DropdownMenuItem
-            key={opt}
-            onClick={() => column.setFilterValue(opt)}
-            className={current === opt ? "font-semibold" : ""}
-          >
-            {opt}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+         {current ? `${title}: ${current}` : title}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[19em] p-0">
+        <Command>
+          <CommandInput placeholder={title} className="h-9" />
+          <CommandList>
+            <CommandEmpty>No state found.</CommandEmpty>
+            <CommandGroup>
+              {options?.map((data) => (
+                <CommandItem
+                  key={data}
+                  value={data}
+                  onSelect={() => { column.setFilterValue(data)
+                  }}
+                >
+                  {data}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      current === data ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 

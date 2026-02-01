@@ -15,6 +15,7 @@ import { STATUS_ENUM_TO_LABEL } from "@/hooks/useCaseStatus"
 import { formatDate } from "@/lib/utils"
 import { get } from "react-hook-form"
 import { File } from "lucide-react"
+import { Link } from "react-router"
 
 function caseColums() {
     return [
@@ -36,6 +37,18 @@ function caseColums() {
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Case ID"}/>
             ),
+            cell: ({ row, getValue }) => {
+            const caseId = getValue();
+            const href = `/app/case/${caseId}`
+        
+            return (
+              <Link to={href} className="block w-full py-1">
+                <span className="text-sky-500 underline underline-offset-2 hover:opacity-80">
+                  {caseId}
+                </span>
+              </Link>
+            )
+          },
         },
         {
             accessorKey: "caseinformation.CaseID_Manual",
@@ -227,11 +240,11 @@ export function CaseTable() {
                 toolbar={(table) => (
                     <DataTableToolbar table={table} searchPlaceholder="🔍 Search case...">
                         <DataTableFacetedFilter
-                            title="All Prdocut Name"
+                            title="All Product Name"
                             column={table.getColumn("SerialNumber")}
                         />
                         <DataTableFacetedFilter
-                            title="All Prdocut Number"
+                            title="All Product Number"
                             column={table.getColumn("ProductNumber")}
                         />
                         <DataTableFacetedFilter
