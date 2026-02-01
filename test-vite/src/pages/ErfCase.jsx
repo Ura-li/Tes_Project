@@ -10,8 +10,10 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { useAuth } from '@/context/auth-context'
 
 export const ErfCase = () => {
+  const {user} = useAuth();
   const [caseData, setCaseData] = useState([])  
   const [selectedFiles, setSelectedFiles] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -58,6 +60,7 @@ export const ErfCase = () => {
     for (let file of validFiles) {
       formData.append("files", file);
     }
+    formData.append("user", user.id)
 
     const res = await ApiCustomer.post("/api/case-information/erf", formData, {
       headers: { "Content-Type": "multipart/form-data" },

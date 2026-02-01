@@ -911,6 +911,9 @@ setQuickLogOpen: (open) => set({ quickLogOpen: open }),
               if (card) formData.append("WarrantyCard", card);
               const photo = maybeFile(entitlementStatus.PhotoUnit);
               if (photo) formData.append("PhotoUnit", photo);
+              
+              //insert case id
+              formData.append("CaseID", caseDetails.CaseID);
 
               await ApiCustomer.patch(
                 `/api/asset-information/${caseDetails.AssetID}`,
