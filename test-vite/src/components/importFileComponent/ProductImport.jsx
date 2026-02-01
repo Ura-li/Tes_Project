@@ -49,8 +49,8 @@ export function ProductImport() {
         }
     }
     return (
-        <div className="flex flex-col items-start space-y-3">
-            <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+        <div className="flex items-center gap-3">
+            <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="border-2 rounded-sm p-1"/>
             <Button onClick={handleImport}>Import Product Data</Button>
         </div>
     );

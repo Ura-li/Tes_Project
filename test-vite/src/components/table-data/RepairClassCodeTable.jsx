@@ -1,0 +1,138 @@
+"use client"
+
+import * as React from "react"
+import Swal from "sweetalert2"
+import { toast } from "sonner"
+import ApiCustomer from "@/api"
+import { DataTableToolbar } from "./config/data-table-toolbar"
+import { DataTableColumnHeader } from "./config/data-table-column-header"
+import { DataTablePagination } from "./config/data-table-pagination"
+import { DataTableFacetedFilter } from "./config/data-table-faceted-filter"
+import { DataTable } from "./config/data-table"
+import { Button } from "../ui/button"
+import { formatDate } from "@/lib/utils"
+import { Link } from "react-router"
+import { RepairClassCodeAdd, RepairClassCodeDelete, RepairClassCodeEdit } from "../model/sc-modal"
+
+function repairClassCodeColums(opts) {
+    return [
+        {
+            id: "no",
+            header: () => <div className="text-center">No</div>,
+            cell: ({ row, table }) => {
+                const pageIndex = table.getState().pagination.pageIndex
+                const pageSize  = table.getState().pagination.pageSize
+                return (
+                    <div className="text-center">
+                        {pageIndex * pageSize + row.index + 1}
+                    </div>
+                )
+            },
+        }, 
+        {
+            accessorKey: "Code",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Code"}/>
+            ),
+            cell: ({ getValue }) => {
+                const rowCode = getValue()
+                return (
+                <Link to={`/app/repair-class-code/${rowCode}`}>
+                    {rowCode}
+                </Link>
+                )
+            }
+        },
+        {
+            accessorKey: "Description",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Description"}/>
+            ),
+        },
+        {
+            accessorKey: "Definition",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Definition"}/>
+            ),
+        },
+        {
+            accessorKey: "PaymentEligibility",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"Payment Eligibility"}/>
+            ),
+        },
+        {
+            accessorKey: "CreatedOn",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title={"CreatedOn"}/>
+            ),
+            cell: ({ getValue }) => formatDate(getValue())
+        },
+        {
+            id: "actions",
+            header: () => <div className="text-center">Actions</div>,
+            cell: ({ row }) => {
+                const id = row.original.Code
+            return (
+                <div className="flex justify-center gap-2">
+                    {opts.onEdit(id)}
+                    {opts.onDelete(id)}
+                </div>
+            )
+            },
+        },
+    ]
+}
+
+export function RepairClassCodeTable() {
+    const [data, setData] = React.useState([])
+    const [loading, setLoading] = React.useState(false)
+    const [error, setError] = React.useState(null)
+
+    const fetchRepairClassCode = React.useCallback(async () => {
+        setLoading(true)
+        setError(null)
+        try {
+        const res = await ApiCustomer.get(`/api/repairClassCode`)
+        setData(res.data.data)
+        } catch (error) {
+            toast.error("Failed to fetch Repair Class Code data")
+            setError("Failed to fetch data")
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    React.useEffect(() => {
+        fetchRepairClassCode()
+    }, [fetchRepairClassCode])
+
+    const columns = React.useMemo(
+        () => 
+            repairClassCodeColums({
+                onEdit: (id) => <RepairClassCodeEdit Code={id}  onUpdate={fetchRepairClassCode}/>,
+                onDelete: (id) => <RepairClassCodeDelete Code={id}/>
+            }),
+        [fetchRepairClassCode]
+    )
+    return (
+        <div className="p-4 grid grid-cols-1 w-full rounded-2xl">
+            <DataTable
+                title={<h2 className="text-xl sm:text-2xl font-bold">📊 Repair Class Code Management</h2>}
+                data={data}
+                columns={columns}
+                loading={loading}
+                error={error}
+                toolbar={(table) => (
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search repair class code...">
+                        <DataTableFacetedFilter
+                            title={"All Code"}
+                            column={table.getColumn("Code")}
+                        />
+                        <RepairClassCodeAdd/>
+                    </DataTableToolbar>
+                )}
+            />
+        </div>
+    )
+}
