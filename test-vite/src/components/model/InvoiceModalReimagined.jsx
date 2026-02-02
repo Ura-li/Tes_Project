@@ -325,8 +325,7 @@ const InvoiceDialog = () => {
             <Input value={formatAccountingRupiah(Math.abs(form.amountDiff))} readOnly />
           </CaseField>
 
-          {/* {Number(form.amountDiff) !== 0 && (
-          )} */}
+          {(Number(form.amountDiff) !== 0 || form.paymentType === 'Free') && (
             <CaseField label="Alasan Amount Difference">
               <div className="space-y-1">
                 <SearchCommandBlock
@@ -338,13 +337,14 @@ const InvoiceDialog = () => {
                     value: reason,
                   }))}
                 />
-                {/* {errors.amountDiffReason && (
+                {errors.amountDiffReason && (
                   <p className="text-xs text-red-500">
                     {errors.amountDiffReason}
                   </p>
-                )} */}
+                )}
               </div>
             </CaseField>
+          )}
 
           <CaseField label="Catatan">
             <Textarea
@@ -437,11 +437,11 @@ const InvoiceDialog = () => {
           <strong>Amount Difference:</strong>{" "}
           {formatAccountingRupiah(Math.abs(form.amountDiff))}
         </p>
-        {/* {Number(form.amountDiff || 0) !== 0 && (
-        )} */}
-        <p>
-          <strong>Alasan Selisih:</strong> {form.amountDiffReason || "-"}
-        </p>
+        {(Number(form.amountDiff || 0) !== 0 || form.paymentType === "Free") && (
+          <p>
+            <strong>Alasan Selisih:</strong> {form.amountDiffReason || "-"}
+          </p>
+        )}
         <p>
           <strong>Payment Type:</strong> {form.paymentType || "-"}
         </p>
