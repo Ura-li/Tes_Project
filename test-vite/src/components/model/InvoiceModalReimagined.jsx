@@ -307,6 +307,7 @@ const InvoiceDialog = () => {
                 "Qris",
                 "Credit Card",
                 "Transfer",
+                "Free",
               ]}
             />
           </CaseField>
