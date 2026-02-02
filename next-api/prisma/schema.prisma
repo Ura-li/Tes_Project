@@ -269,8 +269,8 @@ model down_payment_table {
 model invoicetable {
   InvoiceNo         String         @id 
   INV_No            Int?    @db.Int
-  QuotationNo       String         
-  quotation         quotationtable @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
+  QuotationNo       String?         
+  quotation         quotationtable? @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
   AmountReceive     Decimal        @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
   AmountDiff        Decimal        @default(0) @db.Decimal(12, 2)
   AmountDiffReason  String?        @db.Text
@@ -1006,12 +1006,15 @@ enum CaseStatus {
   NEW_AssignAPO
   NEW_AssignLeader
   NEW_AssignPS
+  NEW_AssignCM
   NEW_POPDoc
   NEW_Warranty
+  AssignFD
   AssignCE
   AssignAPO
   AssignLeader
   AssignPS
+  AssignCM
   PartOrder
   PartRequest
   PartRequestLog
