@@ -80,7 +80,7 @@ function usersColums(opts) {
             cell: ({ getValue }) => {
                 const rowSignature = getValue()
                 return rowSignature ? (
-                    <img src={`data:image/png;base64,${rowSignature}`} alt="Signature" className="w-10 h-10"/>
+                    <img src={rowSignature} alt="Signature" className="w-10 h-10"/>
                 ) : (
                     "No Signature"
                 ) 
