@@ -3,13 +3,20 @@ import prisma from "../../../../../prisma/client";
 import fs from "fs";
 import path from "path";
 
-// ✅ Max file size limit (in bytes) — here 10 MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_MIME = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "application/octet-stream",
+]);
 
 export async function POST(request) {
     try {
         const formData = await request.formData();
         const files = formData.getAll("files"); // multiple file inputs with same name
+        const userId = formData.getAll("user");
+        console.log(userId);
 
         if (!files || files.length === 0) {
             return NextResponse.json(
@@ -18,7 +25,6 @@ export async function POST(request) {
             );
         }
 
-        // ✅ Ensure upload directory exists
         const uploadDir = path.join(process.cwd(), "public", "uploads", "erf");
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -28,33 +34,49 @@ export async function POST(request) {
 
         for (const file of files) {
             const originalName = file.name;
-            const caseId = path.parse(originalName).name; // filename without extension
-            
-            // ✅ 1. Validate CaseID format (must not be empty, must be alphanumeric)
-            if (!/^[Cc]-\d+$/.test(caseId)) {
+            const caseId = path.parse(originalName).name; 
+           const noteText = `Uploding ERF document To This Case "${caseId}"`;   // Your forget this shit IN YOUR PR
+          const ownerIdNumber = Number.parseInt(userId, 10); // And this one
+            if  (!(/^([Cc]-\d+|\d+)$/.test(caseId))){
                 results.push({
                     file: originalName,
+                    caseId,                
                     status: "failed",
+                    code: "INVALID_CASEID",
                     message: `Invalid filename: ${originalName}. Must match a valid CaseID (C-[CaseID]).`,
                 });
                 continue;
             }
 
             
-            // ✅ 2. Check if CaseID exists in DB
+
+            if (file.type && !ALLOWED_MIME.has(file.type)) {
+              results.push({
+                file: originalName,
+                caseId,
+                status: "failed",
+                code: "INVALID_MIME",
+                message: `File type "${file.type}" is not allowed.`,
+                details: { allowed: Array.from(ALLOWED_MIME) },
+              });
+              continue;
+            }
+
             const caseExists = await prisma.caseinformation.findUnique({
                 where: { CaseID: caseId },
+                select: { ErfDoc: true },
             });
             
             if (!caseExists) {
                 results.push({
                     file: originalName,
+                    caseId,
                     status: "failed",
+                    code: "CASE_NOT_FOUND",
                     message: `No case found with ID: ${caseId}`,
                 });
                 continue;
             }
-            // ✅ 3. Check file size before saving
             const arrayBuffer = await file.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
             const fileSize = buffer.byteLength;
@@ -63,6 +85,7 @@ export async function POST(request) {
                 results.push({
                     file: originalName,
                     status: "failed",
+                    code: "FILE_TOO_LARGE",
                     message: `File too large (${(fileSize / 1024 / 1024).toFixed(
                         2
                     )} MB). Max allowed is ${MAX_FILE_SIZE / 1024 / 1024} MB.`,
@@ -70,34 +93,48 @@ export async function POST(request) {
                 continue;
             }
 
-            // ✅ 4. Save file to disk
             const savePath = path.join(uploadDir, originalName);
             fs.writeFileSync(savePath, buffer);
             const relativePath = `/uploads/erf/${originalName}`;
-
-            // ✅ 5. Update ErfDoc (append if already has files)
             await prisma.caseinformation.update({
                 where: { CaseID: caseId },
                 data: {
-                    ErfDoc: caseExists.ErfDoc
-                        ? `${caseExists.ErfDoc},${relativePath}`
-                        : relativePath,
+                    ErfDoc: relativePath,
                 },
             });
+
+            // 6. update case note
+            await prisma.casenotes.create({
+                data: {
+                    CaseID : caseId,
+                    LogType: "Notice ERF Upload",
+                    ActionType: "System Log",
+                    Template: "",
+                    VisibleExternally: true,
+                    MinutesSpent: 0,
+                    Note: noteText,
+                    CreatedBy: ownerIdNumber,
+                },
+            })
 
             results.push({
                 file: originalName,
                 status: "success",
+                code: "UPLOADED",
                 message: `File uploaded and linked to case ${caseId}`,
                 path: relativePath,
             });
         }
 
-        return NextResponse.json({
-            success: true,
-            message: "Upload process completed",
-            results,
-        });
+    const failed = results.filter(r => r.status === "failed");
+    const success = results.filter(r => r.status === "success");
+
+    return NextResponse.json({
+      success: failed.length === 0,
+      uploaded: success.length,
+      failed: failed.length,
+      results,
+    });
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json(

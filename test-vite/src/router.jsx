@@ -48,10 +48,111 @@ const UserProfile = lazy(() =>
 
 const Forbidden = lazy(() => import("./pages/forbidden"));
 const FrontDesk_Page = lazy(() => import("./layout/FrontDesk_Page"));
+// Master Table 
 const ContactTable = lazy(() =>
   import("./components/table-data/ContactTable")
     .then(m => ({ default: m.ContactTable }))
 );
+const CompanyTable = lazy(() =>
+  import("./components/table-data/CompanyTable")
+    .then(m => ({ default: m.CompanyTable}))
+)
+const AssetTable = lazy(() =>
+  import("./components/table-data/AssetTable")
+    .then(m => ({ default: m.AssetTable}))
+)
+const CaseTable = lazy(() =>
+  import("./components/table-data/CaseTable")
+    .then(m => ({ default: m.CaseTable}))
+)
+const ProductTable = lazy(() =>
+  import("./components/table-data/ProductTable")
+    .then(m => ({ default: m.ProductTable}))
+)
+const ProductTypeTable = lazy(() =>
+  import("./components/table-data/ProductTypeTable")
+    .then(m => ({ default: m.ProductTypeTable}))
+)
+const WarrantyServiceTable = lazy(() =>
+  import("./components/table-data/WarrantyService")
+    .then(m => ({ default: m.WarrantyServiceTable}))
+)
+const MaterialOrderTable = lazy(() =>
+  import("./components/table-data/MaterialOrderTable")
+    .then(m => ({ default: m.MaterialOrderTable}))
+)
+const WorkOrderTable = lazy(() =>
+  import("./components/table-data/WorkOrderTable")
+    .then(m => ({ default: m.WorkOrderTable}))
+)
+const ResourceTable = lazy(() =>
+  import("./components/table-data/ResourceTable")
+    .then(m => ({ default: m.ResourceTable}))
+)
+const ResourceAccountTable = lazy(() =>
+  import("./components/table-data/ResourceAccountTable")
+    .then(m => ({ default: m.ResourceAccountTable}))
+)
+const SubkTechnicianTable = lazy(() =>
+  import("./components/table-data/SubkTechinicianTable")
+    .then(m => ({ default: m.SubkTechnicianTable}))
+)
+const SymptomCodeTable = lazy(() =>
+  import("./components/table-data/SymptomCodeTable")
+    .then(m => ({ default: m.SymptomCodeTable}))
+)
+const BookingTable = lazy(() =>
+  import("./components/table-data/BookingTable")
+    .then(m => ({ default: m.BookingTable}))
+)
+const BookingDetailsTable = lazy(() =>
+  import("./components/table-data/BookingDetailsTable")
+    .then(m => ({ default: m.BookingDetailsTable}))
+)
+const BookingStatusTable = lazy(() =>
+  import("./components/table-data/BookingStatusTable")
+    .then(m => ({ default: m.BookingStatusTable}))
+)
+const UsersTable = lazy(() =>
+  import("./components/table-data/UsersTable")
+    .then(m => ({ default: m.UsersTable}))
+)
+const PartTable = lazy(() =>
+  import("./components/table-data/PartTable")
+    .then(m => ({ default: m.PartTable}))
+)
+const RepairClassCodeTable = lazy(() =>
+  import("./components/table-data/RepairClassCodeTable")
+    .then(m => ({ default: m.RepairClassCodeTable}))
+)
+const ServiceCatalogTable = lazy(() =>
+  import("./components/table-data/ServiceCatalogTable")
+    .then(m => ({ default: m.ServiceCatalogTable}))
+)
+const ServiceCatalogTypeTable = lazy(() =>
+  import("./components/table-data/ServiceCatalogTypeTable")
+    .then(m => ({ default: m.ServiceCatalogTypeTable}))
+)
+const OTCCodeTable = lazy(() =>
+  import("./components/table-data/OTCCodeTable")
+    .then(m => ({ default: m.OTCCodeTable}))
+)
+const CrsTable = lazy(() =>
+  import("./components/table-data/CaseResolutionTable")
+    .then(m => ({ default: m.CaseResolutionTable}))
+)
+const NmuTable = lazy(() =>
+  import("./components/table-data/NMUTable")
+    .then(m => ({ default: m.NmuTable}))
+)
+const NmuItemTable = lazy(() =>
+  import("./components/table-data/NMUItemTable")
+    .then(m => ({ default: m.NMUItemTable}))
+)
+const FailureTable = lazy(() =>
+  import("./components/table-data/FailureTable")
+    .then(m => ({ default: m.FailureTable}))
+)
 
 import { ViewCase } from "./pages/ViewCase";
 import { UploadRma } from "./pages/uploadRMA";
@@ -89,9 +190,9 @@ const masterTables = {
   Wo_table: lazy(() =>
     import("./pages/master_table").then((m) => ({ default: m.Wo_table }))
   ),
-  ResourceAccountTable: lazy(() =>
+  ResourceAccount_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.ResourceAccountTable,
+      default: m.ResourceAccount_Table,
     }))
   ),
   SubkTechnician_table: lazy(() =>
@@ -99,19 +200,19 @@ const masterTables = {
       default: m.SubkTechnician_table,
     }))
   ),
-  SymptomCodeTable: lazy(() =>
+  SymptomCode_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.SymptomCodeTable,
+      default: m.SymptomCode_Table,
     }))
   ),
-  BookingsTable: lazy(() =>
+  Bookings_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
       default: m.BookingsTable,
     }))
   ),
-  BookingDetailsTable: lazy(() =>
+  BookingDetails_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.BookingDetailsTable,
+      default: m.BookingDetails_Table,
     }))
   ),
   User_table: lazy(() =>
@@ -123,41 +224,41 @@ const masterTables = {
   Resource_table: lazy(() =>
     import("./pages/master_table").then((m) => ({ default: m.Resource_table }))
   ),
-  RepairClassCodeTable: lazy(() =>
+  RepairClassCode_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.RepairClassCodeTable,
+      default: m.RepairClassCode_Table,
     }))
   ),
-  ServiceCatalogTable: lazy(() =>
+  ServiceCatalog_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.ServiceCatalogTable,
+      default: m.ServiceCatalog_Table,
     }))
   ),
-  ServiceTypeTable: lazy(() =>
+  ServiceType_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.ServiceTypeTable,
+      default: m.ServiceType_Table,
     }))
   ),
-  OTCCodeTable: lazy(() =>
+  OTCCode_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.OTCCodeTable,
+      default: m.OTCCode_Table,
     }))
   ),
-  CrsTable: lazy(() =>
-    import("./pages/master_table").then((m) => ({ default: m.CrsTable }))
+  Crs_Table: lazy(() =>
+    import("./pages/master_table").then((m) => ({ default: m.Crs_Table }))
   ),
-  NmuTable: lazy(() =>
-    import("./pages/master_table").then((m) => ({ default: m.NmuTable }))
+  Nmu_Table: lazy(() =>
+    import("./pages/master_table").then((m) => ({ default: m.Nmu_Table }))
   ),
-  NmuItemTable: lazy(() =>
-    import("./pages/master_table").then((m) => ({ default: m.NmuItemTable }))
+  NmuItem_Table: lazy(() =>
+    import("./pages/master_table").then((m) => ({ default: m.NmuItem_Table }))
   ),
-  FailureTable: lazy(() =>
-    import("./pages/master_table").then((m) => ({ default: m.FailureTable }))
+  Failure_Table: lazy(() =>
+    import("./pages/master_table").then((m) => ({ default: m.Failure_Table }))
   ),
-  BookingStatusTable: lazy(() =>
+  BookingStatus_Table: lazy(() =>
     import("./pages/master_table").then((m) => ({
-      default: m.BookingStatusTable,
+      default: m.BookingStatus_Table,
     }))
   ),
 };
@@ -172,23 +273,23 @@ const {
   WarrantyService_table,
   Mo_table,
   Wo_table,
-  ResourceAccountTable,
+  ResourceAccount_Table,
   SubkTechnician_table,
-  SymptomCodeTable,
-  BookingsTable,
-  BookingDetailsTable,
+  SymptomCode_Table,
+  Bookings_Table,
+  BookingDetails_Table,
   User_table,
   Part_table,
   Resource_table,
-  RepairClassCodeTable,
-  ServiceCatalogTable,
-  ServiceTypeTable,
-  OTCCodeTable,
-  CrsTable,
-  NmuTable,
-  NmuItemTable,
-  FailureTable,
-  BookingStatusTable,
+  RepairClassCode_Table,
+  ServiceCatalog_Table,
+  ServiceType_Table,
+  OTCCode_Table,
+  Crs_Table,
+  Nmu_Table,
+  NmuItem_Table,
+  Failure_Table,
+  BookingStatus_Table,
 } = masterTables;
 
 // --- Simple components reused ---
@@ -248,7 +349,7 @@ export const router = createBrowserRouter([
         path: "master/Company_table",
         element: (
           <MasterGateKeeping allow={["admin", "fd"]}>
-            <Company_table />
+            <CompanyTable/>
           </MasterGateKeeping>
         ),
       },
@@ -256,7 +357,7 @@ export const router = createBrowserRouter([
         path: "master/Assets_table",
         element: (
           <MasterGateKeeping allow={["admin", "fd"]}>
-            <Assets_table />
+            <AssetTable/>
           </MasterGateKeeping>
         ),
       },
@@ -272,7 +373,7 @@ export const router = createBrowserRouter([
         path: "master/Case_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Case_table />
+            <CaseTable/>
           </MasterGateKeeping>
         ),
       },
@@ -280,7 +381,7 @@ export const router = createBrowserRouter([
         path: "master/Product_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Product_table />
+            <ProductTable/>
           </MasterGateKeeping>
         ),
       },
@@ -288,7 +389,7 @@ export const router = createBrowserRouter([
         path: "master/ProductType_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <ProductType_table />
+            <ProductTypeTable/>
           </MasterGateKeeping>
         ),
       },
@@ -296,7 +397,7 @@ export const router = createBrowserRouter([
         path: "master/WarrantyService_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <WarrantyService_table />
+            <WarrantyServiceTable/>
           </MasterGateKeeping>
         ),
       },
@@ -304,7 +405,7 @@ export const router = createBrowserRouter([
         path: "master/Mo_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Mo_table />
+            <MaterialOrderTable/>
           </MasterGateKeeping>
         ),
       },
@@ -312,7 +413,7 @@ export const router = createBrowserRouter([
         path: "master/Wo_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Wo_table />
+            <WorkOrderTable/>
           </MasterGateKeeping>
         ),
       },
@@ -320,7 +421,7 @@ export const router = createBrowserRouter([
         path: "master/Resource_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Resource_table />
+            <ResourceTable/>
           </MasterGateKeeping>
         ),
       },
@@ -328,7 +429,7 @@ export const router = createBrowserRouter([
         path: "master/ResourceAccount",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <ResourceAccountTable />
+            <ResourceAccountTable/>
           </MasterGateKeeping>
         ),
       },
@@ -336,7 +437,7 @@ export const router = createBrowserRouter([
         path: "master/SubkTechnician",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <SubkTechnician_table />
+            <SubkTechnicianTable />
           </MasterGateKeeping>
         ),
       },
@@ -344,7 +445,7 @@ export const router = createBrowserRouter([
         path: "master/symptom_codes",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <SymptomCodeTable />
+            <SymptomCodeTable/>
           </MasterGateKeeping>
         ),
       },
@@ -352,7 +453,7 @@ export const router = createBrowserRouter([
         path: "master/Bookings",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <BookingsTable />
+            <BookingTable />
           </MasterGateKeeping>
         ),
       },
@@ -360,7 +461,7 @@ export const router = createBrowserRouter([
         path: "master/BookingDetails",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <BookingDetailsTable />
+            <BookingDetailsTable/>
           </MasterGateKeeping>
         ),
       },
@@ -376,7 +477,7 @@ export const router = createBrowserRouter([
         path: "master/User_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <User_table />
+            <UsersTable/>
           </MasterGateKeeping>
         ),
       },
@@ -384,7 +485,7 @@ export const router = createBrowserRouter([
         path: "master/Part_table",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <Part_table />
+            <PartTable/>
           </MasterGateKeeping>
         ),
       },
@@ -392,7 +493,7 @@ export const router = createBrowserRouter([
         path: "master/repairClassCode",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <RepairClassCodeTable />
+            <RepairClassCodeTable/>
           </MasterGateKeeping>
         ),
       },
@@ -408,7 +509,7 @@ export const router = createBrowserRouter([
         path: "master/ServiceType",
         element: (
           <MasterGateKeeping allow={["admin"]}>
-            <ServiceTypeTable />
+            <ServiceCatalogTypeTable/>
           </MasterGateKeeping>
         ),
       },

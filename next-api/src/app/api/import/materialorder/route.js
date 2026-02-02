@@ -357,7 +357,6 @@ export async function POST(req) {
           if(targetCaseStatus === "PartAvailable"){
             caseOwnerId = wo?.OwnerID ?? null
           }
-
           if(
             targetCaseStatus && 
             targetCaseStatus !== currentCaseStatus && 
@@ -384,7 +383,6 @@ export async function POST(req) {
             })
           }
           successes.push({ soNumber, updatedLines: moli.length, moli });
-          
         }, {timeout: 50000});
       } catch (error) {
         console.log(error);

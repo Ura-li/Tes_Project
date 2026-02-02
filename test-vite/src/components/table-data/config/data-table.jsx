@@ -36,10 +36,22 @@ export function DataTable({
   cellName,
   sorting,
   setSorting,
+  contact,
 }) {
   const [columnFilters, setColumnFilters] = React.useState([])
   const [globalFilter, setGlobalFilter] = React.useState("")
+const tokenGlobalFilter = (row, _columnId, filterValue) => {
+  const q = String(filterValue ?? "").toLowerCase().trim()
+  if (!q) return true
 
+  const tokens = q.split(/\s+/).filter(Boolean)
+
+  const haystack = `${row.original.FirstName ?? ""} ${row.original.LastName ?? ""} ${row.original.Email ?? ""} ${row.original.Company ?? ""}`
+    .toLowerCase()
+
+  return tokens.every((t) => haystack.includes(t))
+}
+const filterChange = contact ? tokenGlobalFilter : "includesString"
   const table = useReactTable({
     data,
     columns,
@@ -52,7 +64,7 @@ export function DataTable({
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
-    globalFilterFn: "includesString",
+    globalFilterFn: filterChange,
 
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -72,7 +84,7 @@ export function DataTable({
 
       {error ? <p className="mt-3 text-sm text-red-500">{error}</p> : null}
 
-        <Table className=" text-[11px] leading-tight " potrait={"mt-3 rounded-xl border-2 max-h-105"}>
+        <Table className=" text-[11px] leading-tight " potrait={"mt-3 rounded-xl border-2 max-h-105 2xl:max-h-195"}>
           <TableHeader className="sticky top-0 z-10 bg-muted/70">
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>

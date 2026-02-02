@@ -5,224 +5,275 @@ import { Input } from '@/components/ui/input'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { File } from 'lucide-react'
+import { File, RefreshCw } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { useAuth } from '@/context/auth-context'
+import { DataTable } from '@/components/table-data/config/data-table'
+import { DataTableToolbar } from '@/components/table-data/config/data-table-toolbar'
+import { DataTableColumnHeader } from '@/components/table-data/config/data-table-column-header'
+import { ErfUploader } from '@/components/erfNew'
+import { Link } from "react-router"
+
+function getErfColumns() {
+  return [
+    {
+      accessorKey: "CaseID",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Case ID"} />
+      ),
+      cell: ({ row, getValue }) => {
+        const caseId = getValue()
+        const href = `/app/case/${caseId}`
+        return (
+          <Link to={href} className="block w-full py-1">
+            <span className="text-blue-600 dark:text-sky-300 hover:underline">
+              {caseId}
+            </span>
+          </Link>
+        )
+      },
+      filterFn: "equalsString",
+    },
+    {
+      accessorKey: "CreatedOn",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Created On"} />
+      ),
+      // Optional: Format date if needed
+      cell: ({ getValue }) => <span className="whitespace-break-spaces">{getValue()}</span>
+    },
+    {
+      accessorKey: "CaseSubject",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Case Subject"} />
+      ),
+      cell: ({ getValue }) => <span className="whitespace-break-spaces">{getValue()}</span>
+    },
+    {
+      accessorKey: "caseinformation.ErfDoc",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"ErfDoc"} />
+      ),
+      cell: ({ getValue }) =>
+        getValue() && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() =>
+              window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)
+            }
+          >
+            <File className="h-4 w-4" />
+          </Button>
+        ),
+    },
+    {
+      accessorKey: "CustomerAccount",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Company"} />
+      ),
+    },
+    {
+      accessorKey: "Primary",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Primary"} />
+      ),
+    },
+    {
+      accessorKey: "SerialNumber",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Serial No"} />
+      ),
+    },
+    {
+      accessorKey: "ProductNumber",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Product No"} />
+      ),
+    },
+    {
+      accessorKey: "ProductName",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Product Name"} />
+      ),
+    },
+    {
+      accessorKey: "CaseStatus",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={"Case Status"} />
+      ),
+      cell: ({ getValue }) => {
+        const status = getValue()
+        let colorClass = "bg-emerald-300/80" // Default (Active/etc)
+
+        if (status === "Close") {
+          colorClass = "bg-red-300/80 dark:bg-red-600/80"
+        } else if (status === "InActive") {
+          colorClass = "bg-sky-300/80"
+        }
+
+        return (
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center rounded px-2 py-1",
+              colorClass
+            )}
+          >
+            {status}
+          </div>
+        )
+      },
+    },
+  ]
+}
 
 export const ErfCase = () => {
-  const [caseData, setCaseData] = useState([])  
-  const [selectedFiles, setSelectedFiles] = useState([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const PAGE_SIZE = 5 
+  const [caseData, setCaseData] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [pendingData, setPendingData] = useState([]);
+  const [erfCase, setErfCase] = useState([]);
 
-  const navigate = useNavigate()
+  const columns = React.useMemo(() => getErfColumns(), [])
+  const [loading, setLoading] = React.useState(false)
+  const [sorting, setSorting] = React.useState([])
 
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
+
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("Main");
+
+  const [reload, setReload] = useState(false)
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const response = await ApiCustomer.get('/api/case-information')
-      const data = response.data.data.filter(c => c.CaseStatus == 'Close' && c.caseinformation?.ErfDoc === null)
-      setCaseData(data)
-      return data
+      const response = await ApiCustomer.get("/api/case-information");
+      const data = response.data.data;
+      setCaseData(data);
+      setPendingData(
+        data.filter(
+          (c) => c?.CaseStatus == "Close" && c?.caseinformation.ErfDoc == null && c.caseinformation.createdByUser.ResourceId == user.resource,
+        ),
+      );
+      setErfCase(data.filter((c) => c?.caseinformation.ErfDoc !== null));
+      return data;
     } catch (err) {
-      console.error("THIS THING GIVE ME ERROR", err)
+      toast.error("Failed to fetch case data");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  function togglerelog(){
+    setReload(p => !p)
   }
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [reload]);
 
-  async function uploadFiles(files) {
-    if (files.length === 0) return;
-    // Precompute once
-    const CASE_IDS = new Set(caseData.map((e) => String(e.CaseID)));
-    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-
-    const validFiles = [...files].filter((f) => {
-      const base = f.name.replace(/\.[^.]+$/, ""); // "ABC123.png" -> "ABC123"
-
-      if (!CASE_IDS.has(base)) {
-        toast.warning(`Tidak menemukan Case ID untuk ${f.name}`);
-        return false;
-      }
-      if (f.size > MAX_SIZE) {
-        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
-        return false;
-      }
-      return true;
-    });
-
-    const formData = new FormData();
-    for (let file of validFiles) {
-      formData.append("files", file);
-    }
-
-    const res = await ApiCustomer.post("/api/case-information/erf", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    if (res.data.success) {
-      toast.info(`Upload ERF Successs`)
-    }else {
-      toast.warning("Gagal upload ERF")
-    }
-  }
-
-  // Pagination logic
-  const totalPages = Math.ceil(caseData.length / PAGE_SIZE)
-  const currentPageData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE
-    return caseData.slice(start, start + PAGE_SIZE)
-  }, [caseData, currentPage])
-
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-    }
-  }
-  const [activeTab, setActiveTab] = useState("Main");
   return (
-    <div className='bg-slate-200 p-5 h-full dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%'>
-      <Tabs defaultValue="Main" onValueChange={(value) => {window.location.hash = value.toLowerCase()}}>
-        <TabsList className={"dark:bg-gray-700"}>
-          <TabsTrigger value="Main" className={"dark:data-[state=active]:bg-gray-500"}>Main</TabsTrigger>
-          <TabsTrigger value="Pending" className={"dark:data-[state=active]:bg-gray-500"}>Pending</TabsTrigger>
+    <div className="bg-slate-200 p-5 h-full dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
+      <Tabs
+        defaultValue="Main"
+        onValueChange={(value) => {
+          window.location.hash = value.toLowerCase();
+          setActiveTab(value);
+        }}
+      >
+        <TabsList className={"dark:bg-gray-700 w-full"}>
+          <TabsTrigger
+            value="Main"
+        variant={"underline"}
+    size={"lg"}
+            className={"dark:data-[state=active]:bg-gray-500 items-center justify-center text-center"}
+          >
+            Main
+          </TabsTrigger>
+          <TabsTrigger
+            value="Pending"
+        variant={"underline"}
+    size={"lg"}
+            className={"dark:data-[state=active]:bg-gray-500 items-center justify-center text-center"}
+          >
+            Pending
+          </TabsTrigger>
+          <TabsTrigger
+            value="ErfCase"
+        variant={"underline"}
+    size={"lg"}
+            className={"dark:data-[state=active]:bg-gray-500 items-center justify-center text-center"}
+          >
+            ErfCase
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="Main" >
-          <Card id="erf-main-upload" className={"dark:bg-gray-700 dark:border-2 dark:border-b-slate-500 dark:border-t-slate-600 dark:border-l-slate-600 dark:border-r-slate-500 dark:border-r-6"}>
+        <TabsContent value="Main">
+          <Card
+            id="erf-main-upload"
+            className={
+              "dark:bg-gray-700 dark:border-2 dark:border-b-slate-500 dark:border-t-slate-600 dark:border-l-slate-600 dark:border-r-slate-500 dark:border-r-6"
+            }
+          >
             <CardHeader>
-              <h2 className="text-lg font-semibold">Upload Multiple ERF Files</h2>
+              <h2 className="text-lg font-semibold">
+                Upload Multiple ERF Files
+              </h2>
             </CardHeader>
             <CardContent>
               <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-                You can upload multiple ERF files. Maximum file size per file: 10MB.
+                You can upload multiple ERF files. Maximum file size per file:
+                10MB.
               </p>
-              <Input type="file" className={"dark:border-b-slate-400 dark:rounded-none dark:text-gray-400"} multiple onChange={(e) => setSelectedFiles(e.target.files)} />
-              <button
-                onClick={() => uploadFiles(selectedFiles)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-2"
-              >
-                Submit
-              </button>
+
+         <ErfUploader caseData={caseData} files={files} setFiles={setFiles} onUploaded={() => fetchData} user={user}/>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="Pending">
-          <Card className="rounded-2xl border border-slate-200 shadow-md
-                      bg-white/95 dark:bg-slate-900/90 dark:border-slate-700">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Closed Cases</h2>
-            </CardHeader>
-            <CardContent>
-              <Table id="erf-pending-table" className="min-w-full border-collapse text-xs sm:text-sm">
-                <TableHeader className="sticky top-0 bg-gray-200/95 dark:bg-slate-800/95">
-                  <TableRow className="text-sm text-gray-700 uppercase bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Case ID</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Created On</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Case Subject</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">ErfDoc</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Company</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Primary</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Serial Number</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Product Number</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Product Name</TableHead>
-                    <TableHead className="p-2 text-center border border-slate-200 dark:border-slate-700 cursor-pointer">Case Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentPageData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={13} className="text-center py-4">No closed cases found.</TableCell>
-                    </TableRow>
-                  ) : (
-                    currentPageData.map((c) => (
-                      <TableRow key={c.CaseID} className={"text-center hover:bg-blue-50/70 dark:hover:bg-slate-700"}>
-                        <TableCell
-                          className="p-2 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-sky-300 cursor-pointer hover:underline"
-                          onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                        >
-                          {c.CaseID}
-                        </TableCell>
-                        <TableCell className="p-2 border  whitespace-break-spaces">{c.CreatedOn}</TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces ">{c.CaseSubject}</TableCell>
-                        <TableCell className="p-2 border">
-                          {c.caseinformation?.ErfDoc && (
-                            <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${c.caseinformation.ErfDoc}`)}>
-                              <File />
-                            </Button>
-                          )}
-                        </TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces">{c.CustomerAccount}</TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces">{c.Primary}</TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces">{c.SerialNumber}</TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces">{c.ProductNumber}</TableCell>
-                        <TableCell className="p-2 border whitespace-break-spaces">{c.ProductName}</TableCell>
-                        <TableCell
-                          className={cn(
-                            "bg-emerald-300 ",
-                            c.CaseStatus === "Close"
-                              ? "bg-red-300 dark:bg-red-600"
-                              : c.CaseStatus === "InActive"
-                                ? "bg-sky-300"
-                                : ""
-                          )}
-                        >
-                          {c.CaseStatus}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-
-              {/* Pagination UI */}
-              {totalPages > 1 && (
-                <Pagination className="flex justify-start mt-4">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(currentPage - 1)
-                        }}
-                      />
-                    </PaginationItem>
-
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === i + 1}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handlePageChange(i + 1)
-                          }}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(currentPage + 1)
-                        }}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+    <div className="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200 shadow-md p-2 grid grid-cols-1">
+    <Button className={'w-fit'} onClick={() => togglerelog()} disabled={loading}> 
+     Refresh <RefreshCw className={loading && 'animate-spin'}/>
+    </Button>
+            <DataTable
+              title={<h2 className="text-xl font-bold p-2">Pending ERF Cases</h2>}
+              data={pendingData}
+              cellName={'p-2'}
+              columns={columns}
+              loading={loading}
+              sorting={sorting}
+              setSorting={setSorting}
+              toolbar={(table) => (
+                <DataTableToolbar table={table} searchPlaceholder="🔍 Search erf cases..." />
               )}
-            </CardContent>
-          </Card>
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="ErfCase">
+    <div className="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200 shadow-md p-2 grid grid-cols-1">
+    <Button className={'w-fit'} onClick={() => togglerelog()} disabled={loading} > 
+     Refresh <RefreshCw className={loading && 'animate-spin'} />
+    </Button>
+            <DataTable
+              title={<h2 className="text-xl font-bold p-2">Completed ERF Cases</h2>}
+              data={erfCase}
+              cellName={'p-2'}
+              columns={columns}
+              loading={loading}
+              sorting={sorting}
+              setSorting={setSorting}
+              toolbar={(table) => (
+                <DataTableToolbar table={table} searchPlaceholder="🔍 Search erf cases..." />
+              )}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

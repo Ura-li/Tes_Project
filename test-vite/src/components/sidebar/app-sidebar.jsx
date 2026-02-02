@@ -487,7 +487,7 @@ export function AppSidebar({
 
   return (  
     <Sidebar  collapsible="icon" {...props} className="border-0 bg-none z-40 ">
-      <SidebarHeader className={'bg-gradient-to-bl from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-br dark:from-slate-600 dark:via-slate-800 dark:to-slate-800 '}>
+      <SidebarHeader className={'bg-gradient-to-b from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-br dark:from-slate-600 dark:via-slate-800 dark:to-slate-800 '}>
         <TeamSwitcher  teams={data.teams} />
       </SidebarHeader>
       <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-600'}>
