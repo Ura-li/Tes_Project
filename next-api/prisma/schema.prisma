@@ -3,10 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
-
 }
 
 model asset_information {
@@ -99,6 +98,7 @@ model caseinformation {
   casephotos                                    casephotos[]
   down_payment_table                            down_payment_table[]
   quotationtable                                quotationtable[]
+  invoicetable                                  invoicetable[]
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -251,8 +251,8 @@ model down_payment_table {
   CaseID          String?
   caseinformation caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict)
 
-  DPAmount Decimal  @default(0) @db.Decimal(12, 2)
-  DPDate   DateTime @default(now()) @db.DateTime(0)
+  DPAmount    Decimal  @default(0) @db.Decimal(12, 2)
+  DPDate      DateTime @default(now()) @db.DateTime(0)
   PaymentDate DateTime @default(now()) @db.DateTime(0)
 
   PaymentType String? @db.VarChar(20)
@@ -267,24 +267,26 @@ model down_payment_table {
 }
 
 model invoicetable {
-  InvoiceNo         String         @id 
-  INV_No            Int?    @db.Int
-  QuotationNo       String?         
-  quotation         quotationtable? @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
-  AmountReceive     Decimal        @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
-  AmountDiff        Decimal        @default(0) @db.Decimal(12, 2)
-  AmountDiffReason  String?        @db.Text
-  PaymentType       String?        @db.VarChar(20)
-  AmountReceiveDate DateTime       @default(now()) @db.DateTime(0)
-  AmountReceiveNote String?        @db.Text
+  InvoiceNo         String   @id
+  INV_No            Int?     @db.Int
+  CaseID            String?
+  QuotationNo       String?
+  AmountReceive     Decimal  @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
+  AmountDiff        Decimal  @default(0) @db.Decimal(12, 2)
+  AmountDiffReason  String?  @db.Text
+  PaymentType       String?  @db.VarChar(20)
+  AmountReceiveDate DateTime @default(now()) @db.DateTime(0)
+  AmountReceiveNote String?  @db.Text
 
   SendWa      Boolean @default(false)
   SendEmail   Boolean @default(false)
   SendInvoice Boolean @default(false)
   SendERF     Boolean @default(false)
 
-  CreatedBy     Int
-  CreatedByUser User @relation("UserInvoiceAdmin", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+  CreatedBy       Int
+  CreatedByUser   User             @relation("UserInvoiceAdmin", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+  caseinformation caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict)
+  quotation       quotationtable?  @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
 
   CreatedOn DateTime @default(now()) @db.DateTime(0)
   ChangedOn DateTime @default(now()) @db.DateTime(0)
@@ -292,7 +294,7 @@ model invoicetable {
 
 model quotationtable {
   QuotationNo           String             @id
-  Quote_No_Search       Int?  @db.Int
+  Quote_No_Search       Int?               @db.Int
   QuotationType         QuotationType      @default(Simple)
   Currency              String             @default("IDR") @db.VarChar(8)
   LaborFee              Int                @default(0)
@@ -318,7 +320,7 @@ model quotationtable {
 
 model quotation_lineitem {
   id          Int    @id @default(autoincrement())
-  QuotationNo String 
+  QuotationNo String
   LineItemID  Int
 
   quotation quotationtable         @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Cascade)
@@ -332,8 +334,8 @@ model quotation_lineitem {
 
 model materialorder {
   MOID             String              @id
-  MO_Number       Int?      @db.Int
-  WOID             String?             
+  MO_Number        Int?                @db.Int
+  WOID             String?
   OrderNumber      String?             @db.VarChar(100) //Wait, why this is here? wtf is this even about? lol
   OrderStatus      MaterialOrderStatus @default(New)
   OrderType        String?             @db.VarChar(50)
@@ -376,7 +378,7 @@ model materialorder {
 
 model materialorderlineitems {
   LineItemID   Int                         @id @default(autoincrement())
-  MOID         String?                     
+  MOID         String?
   LineNumber   Int?
   PartNumber   String?                     @db.VarChar(100)
   Description  String?                     @db.Text
@@ -588,7 +590,7 @@ model test_table {
 
 model User {
   IDUser       Int       @id @default(autoincrement())
-  Email        String?    @unique @db.VarChar(255)
+  Email        String?   @unique @db.VarChar(255)
   Username     String    @unique @db.VarChar(100)
   Password     String    @db.VarChar(255)
   Name         String    @db.VarChar(255)
@@ -735,8 +737,8 @@ model BookingStatus {
 }
 
 model workorder {
-  WOID            String          @id 
-  WO_Number       Int?      @db.Int
+  WOID            String          @id
+  WO_Number       Int?            @db.Int
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100) //THIS IS SAME AS WOID?
   WorkOrderType   String?         @db.VarChar(50)
@@ -871,7 +873,7 @@ model ServiceType {
 
 model workorder_service_delivery {
   ServiceDeliveryID Int       @id @default(autoincrement())
-  WOID              String?   
+  WOID              String?
   ServiceType       String?   @db.VarChar(100)
   StartDateTime     DateTime? @db.DateTime(0)
   EndDateTime       DateTime? @db.DateTime(0)
@@ -881,7 +883,7 @@ model workorder_service_delivery {
 
 model workorder_service_delivery_address {
   AddressID        Int     @id @default(autoincrement())
-  WOID             String? 
+  WOID             String?
   CompanyName      String? @db.VarChar(100)
   ContactFirstName String? @db.VarChar(100)
   ContactLastName  String? @db.VarChar(100)
