@@ -680,7 +680,6 @@ export default function NewCaseForm() {
       setProductNo(p.ProductNumber);
       setProductName(p.ProductName);
       setProductLine(p.ProductLine || "");
-      // setHWPCCode(p.HWPC || "");
       setVendor(p.vendor || "");
       if (p.product_type) {
         setProductTower(p.product_type.ProductTower || "");
@@ -1102,9 +1101,7 @@ export default function NewCaseForm() {
       const assetSN = selectedAsset?.SerialNumber;
       const normalizedEowDate = eowDate ? new Date(eowDate).toISOString() : null;
       const existingCompanyId = selectedCompany?.SiteAccountID ?? null;
-      const finalProductNumber =
-        selectedProduct?.ProductNumber || productNo || null;
-
+      const finalProductNumber = selectedProduct?.ProductNumber || productNo || null;
       const needsNewCompany = isNewContact && showCompanySection && !selectedCompany;
       const companyPayload = needsNewCompany
         ? {
@@ -1128,7 +1125,6 @@ export default function NewCaseForm() {
             ProductName: productName,
             ProductLine: productLine,
             ProductTypeID: productTypeId ? parseInt(productTypeId, 10) : null,
-            // HWPC: HWPCCode,
             vendor,
           }
         : null;
@@ -1153,8 +1149,7 @@ export default function NewCaseForm() {
           }
         : null;
 
-      const contactPicPayload =
-        !isNewContact && usePIC
+      const contactPicPayload = !isNewContact && usePIC
           ? {
               PIC_Name: contactPICName,
               PIC_Email: contactPICEmail,
@@ -1198,8 +1193,7 @@ export default function NewCaseForm() {
         isNewAsset,
         needWarrantyApproval,
         usePIC,
-        assignCompanyToExistingContact:
-          !isNewContact &&
+        assignCompanyToExistingContact:!isNewContact &&
           Boolean((companyPayload || existingCompanyId) && selectedContact) &&
           selectedContact?.SiteAccountID == null,
         attachContactToExistingAsset:
@@ -1661,7 +1655,7 @@ export default function NewCaseForm() {
                 {showCompanySection && (
                 <div className="grid grid-cols-3 gap-2 items-center ">
                   <Label className="col-span-1">Nama Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white col-span-2 ring-1 rounded-sm ring-gray-400 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <Input className={"dark:text-white col-span-2 ring-1 rounded-sm ring-gray-400 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
                 )}
                 <div className="grid grid-cols-3 gap-2 items-center">
@@ -1974,7 +1968,6 @@ export default function NewCaseForm() {
                           setProductNo(p.ProductNumber);
                           setProductName(p.ProductName);
                           setProductLine(p.ProductLine || "");
-                          // setHWPCCode(p.HWPC || "");
                           setVendor(p.vendor || "");
                           setProductTypeId(p.ProductTypeID);
                         }}
@@ -2012,12 +2005,6 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                {/* <div>
-                  <div>
-                  <Label>HWPC Code<Label className="text-red-600">*</Label></Label>
-                  <Input value={HWPCCode} onChange={(e) => setHWPCCode(e.target.value)} />
-                </div>
-                </div> */}
                 {productTower && productGroup && (
                   <div className="flex flex-col gap-2">
                     <Label>Product Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>

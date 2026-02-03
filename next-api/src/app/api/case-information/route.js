@@ -28,9 +28,6 @@ export async function GET(request) {
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
   const excludeStatusesRaw = searchParams.getAll("excludeStatuses[]");
-  // const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
-  // return console.log("selanat siang pizza anda sudah sampai ",excludeStatusesRaw)
-  // const Owner = searchParams.get("IDUser");
   const resourceTarget = searchParams.get("resource");
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
