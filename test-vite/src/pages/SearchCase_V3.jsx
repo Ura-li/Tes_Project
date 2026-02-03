@@ -750,7 +750,7 @@ export default function NewCaseForm() {
       const res = await ApiCustomer.get(`/api/case-information`, {
         params: {
           AssetID: assetID,
-          excludeStatuses: ['Close', 'FinishRepair'], // atau ambil semua status, tergantung kebutuhan
+          excludeStatuses: ['FinishRepair','Void'], // atau ambil semua status, tergantung kebutuhan
         },
       });
 
@@ -777,7 +777,7 @@ export default function NewCaseForm() {
       if (!selectedAsset) return;
       try {
         const res = await ApiCustomer.get(`/api/case-information`, {
-          params: { excludeStatuses: ['Close', 'FinishRepair'] },
+          params: { excludeStatuses: ['FinishRepair', 'Void'] },
         });
         const list = res.data?.data ?? [];
 
@@ -1372,7 +1372,10 @@ export default function NewCaseForm() {
                         "w-full text-left px-3 py-2 hover:bg-accent/40",
                         selectedAsset?.AssetID === a.AssetID && "bg-accent/70"
                       )}
-                      onClick={() => setSelectedAsset(a)}
+                      onClick={() => {
+                        setSelectedAsset(a)
+                        setSerialQuery(a.SerialNumber)
+                      }}
                     >
                       <div className="font-medium">{a.SerialNumber}</div>
                       <div className="text-xs text-muted-foreground">
@@ -1913,7 +1916,11 @@ export default function NewCaseForm() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Serial No.<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                <Input value={serialQuery} onChange={(e) => {
+                  setSelectedAsset(null)
+                  setSerialQuery(e.target.value)
+                }
+                } className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 <Button variant="outline" asChild className={'w-full dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                   <a
                     href="https://support.hp.com/id-en/check-warranty"

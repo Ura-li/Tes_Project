@@ -1567,7 +1567,7 @@ useEffect(() => {
                     </div>
                   </CaseField>
                   
-                  {caseDetails.CaseStatus === "Void" && (
+                  {caseForm.CaseStatus === "Void" && (
                     <CaseField label={"Void Reason"} span={2} star>
                       <Input
                         value={caseForm?.VoidReason}

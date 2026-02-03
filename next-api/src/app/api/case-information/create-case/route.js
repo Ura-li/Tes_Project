@@ -186,7 +186,7 @@ export async function POST(request) {
           throw new HttpError(400, "Contact payload is incomplete.");
         }
 
-        const orConditions = [];
+        // const orConditions = [];
         /**
          * REF: (FERID) 
          * DISABLE THIS FOR A WHILE

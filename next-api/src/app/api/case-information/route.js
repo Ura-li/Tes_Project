@@ -13,23 +13,24 @@ export async function GET(request) {
   //get search parameter
 
   const { searchParams } = new URL(request.url);
-
+  
   const cacheKey = redisKey(`case:list:${searchParams.toString() || "all"}`);
 
   const cached = await redis.get(cacheKey);
   if (cached) {
     return NextResponse.json(JSON.parse(cached), { status: 200 });
   }
+  
+  
 
-
-
-  const exportExcel = searchParams.get("export") === "excel";
-
+  // const exportExcel = searchParams.get("export") === "excel";
+  
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
-  const excludeStatusesRaw = searchParams.get("excludeStatuses");
-  const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
-  const Owner = searchParams.get("IDUser");
+  const excludeStatusesRaw = searchParams.getAll("excludeStatuses[]");
+  // const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
+  // return console.log("selanat siang pizza anda sudah sampai ",excludeStatusesRaw)
+  // const Owner = searchParams.get("IDUser");
   const resourceTarget = searchParams.get("resource");
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
@@ -54,9 +55,9 @@ export async function GET(request) {
   const filters = {};
   if (CaseStatus) {
     filters.CaseStatus = CaseStatus;
-  }else if (excludeStatuses){
+  }else if (excludeStatusesRaw){
     filters.CaseStatus = {
-      notIn: excludeStatuses,
+      notIn: excludeStatusesRaw,
     };
   }
   // const openCount = await prisma.caseinformation.count({
