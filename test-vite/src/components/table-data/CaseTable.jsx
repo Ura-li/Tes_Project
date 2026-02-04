@@ -43,7 +43,7 @@ function caseColums() {
         
             return (
               <Link to={href} className="block w-full py-1">
-                <span className="text-sky-500 underline underline-offset-2 hover:opacity-80">
+                <span className="text-sky-500 hover:opacity-80">
                   {caseId}
                 </span>
               </Link>
@@ -148,7 +148,7 @@ function caseColums() {
                     Cancel: "bg-amber-300/80 ",
                 }[rawStatus] ?? "bg-emerald-300/80"
                 return  (
-                    <div className={`h-full w-full flex justify-center items-center ${color}`}>
+                    <div className={`h-5 flex justify-center items-center rounded ${color}`}>
                         {STATUS_ENUM_TO_LABEL[rawStatus] ?? rawStatus}
                     </div>
                 )

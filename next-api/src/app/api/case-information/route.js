@@ -27,6 +27,7 @@ export async function GET(request) {
   
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
+  const AssetID    = searchParams.get("AssetID") 
   const excludeStatusesRaw = searchParams.getAll("excludeStatuses[]");
   const resourceTarget = searchParams.get("resource");
   const startDate = searchParams.get("startDate");
@@ -57,6 +58,9 @@ export async function GET(request) {
       notIn: excludeStatusesRaw,
     };
   }
+
+  if (AssetID) filters.AssetID = parseInt(AssetID)
+
   // const openCount = await prisma.caseinformation.count({
   //   where: {
   //     CaseStatus: "Open",
@@ -191,91 +195,7 @@ export async function GET(request) {
       inActive: inActiveCount,
     },
   }
-  // const case_information1 = await prisma.caseinformation.findMany({
-  //   where: Object.keys(finalWhere).length > 0 ? finalWhere : undefined,
-  //   include: {
-  //     asset_information: {
-  //       select: {
-  //         AssetID: true,
-  //         SerialNumber: true,
-  //         ProductNumber: true,
-  //         WarrantyOTCCode: true,
-  //         product_information: {
-  //           include: {
-  //             product_type: true
-  //           }
-  //         },
-  //       },
-  //     },
-  //     contact_information: {
-  //       select: {
-  //         ContactID: true,
-  //         FirstName: true,
-  //         LastName: true,
-  //         Email: true,
-  //         Phone: true,
-  //         City: true,
-  //         site_account: {
-  //           select: { Company: true, Email: true },
-  //         },
-  //       },
-  //     },
-  //     servicecatalog: {
-  //       select: {
-  //         ServiceCatalogID: true,
-  //         Service_offerID: true,
-  //         PartNumber: true,
-  //         WarrantyStatus: true,
-  //         Price: true,
-  //         Tax: true,
-  //         Total: true,
-  //         warranty_services: {
-  //           select: {
-  //             Service_offerID: true,
-  //             Service_description: true,
-  //             CTat_RTime: true,
-  //             Price: true,
-  //             Total: true,
-  //             Tax: true,
-  //           },
-  //         },
-  //       },
-  //     },
-  //     createdByUser: true,
-  //     ownerUser: true,
-  //     global_trade_check: true,
-  //     caseresolution: true,
-  //     otcCodeTable: true,
-  //     casenotes_caseinformation_CaseNoteTocasenotes: true,
-  //     workorder: {
-  //       include: {
-  //         materialorder: {
-  //           include: {
-  //             materialorderlineitems: {
-  //               include :{
-  //                 quotation_lineitem :{
-  //                   include: {
-  //                     quotation: true
-  //                   }
-  //                 }
-  //               }
-  //             },
-  //             owner: true
-  //           }
-  //         },
-  //         owner: true
-  //       }
-        
-  //     },
-  //     accessory: true,
-  //     ActionLog: {
-  //       orderBy: {
-  //         ChangeAt: 'desc'
-  //       },
-  //     }
-  //   },
-  // });
-
+  
   await redis.set(cacheKey, JSON.stringify(response), "EX", 120);
 
 

@@ -763,7 +763,6 @@ export default function NewCaseForm() {
         const createdDate = new Date(c.caseinformation.CreatedOn); 
         return createdDate >= past90Days && createdDate <= now;
       }).length;
-
       return count;
     } catch (e) {
       console.error("Failed to fetch rerepair count", e);
@@ -1044,6 +1043,7 @@ export default function NewCaseForm() {
       toast.warning("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
+    const rerepairCount = await getReRepairCount(selectedAsset.AssetID);
     if(isNewAsset && (!isNewProduct && !selectedProduct)){
       toast.warning("Please select or Create Product No before creating new asset")
       return
@@ -1284,6 +1284,8 @@ export default function NewCaseForm() {
       } catch (error) {
         toast.warning("Case Note failed,",error)
       }
+
+      
       
       //if rerepair, add note
       if(mustRerepair){
@@ -1524,6 +1526,7 @@ export default function NewCaseForm() {
                     }
                   } else {
                     setRoleAssign([])
+                    setCaseAssign(null)
                   }
                 }}
               >

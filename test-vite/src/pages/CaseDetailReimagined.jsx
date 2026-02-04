@@ -1357,7 +1357,7 @@ useEffect(() => {
   let canEditWarranty = false;
 
   if (caseDetails?.CaseStatus !== "Close" && caseDetails?.CaseStatus !== "Cancel" ) {
-    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv";
+    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv" || user?.role === "celead" ;
     canEditFd = user?.role === "fd" || user?.role === "admin" || user?.role === "spv";
     canEditApo = user?.role === "apo" || user?.role === "admin" || user?.role === "spv";
     canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === "admin" || user?.role === "spv";

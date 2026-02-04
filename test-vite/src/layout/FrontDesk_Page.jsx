@@ -172,7 +172,7 @@ const checkdata =  getMetricKeys(weeklyChartData);
         {/*     <ChartRadialText radialchartdata={radialchartdata} /> */}
         {/*   </CardContent> */}
         {/* </Card> */}
-<ChartTooltipAdvanced datachart={weeklyChartData}/>
+        <ChartTooltipAdvanced datachart={weeklyChartData}/>
       </div>
 
       {/* Right Column - Notifications */}
