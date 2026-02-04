@@ -1043,7 +1043,6 @@ export default function NewCaseForm() {
       toast.warning("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
-    const rerepairCount = await getReRepairCount(selectedAsset.AssetID);
     if(isNewAsset && (!isNewProduct && !selectedProduct)){
       toast.warning("Please select or Create Product No before creating new asset")
       return
