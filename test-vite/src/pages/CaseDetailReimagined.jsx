@@ -553,7 +553,7 @@ const openSaveAll = () => {
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
         },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"]},
   ];
 
 
