@@ -56,14 +56,19 @@ function assetColums(opts) {
             ),
         },
         {
-            accessorKey: "site_account.Company",
+            id: "siteAccount",
+            accessorFn: (row) => row.site_account?.Company ?? "",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Site Account"}/>
             ),
         },
         {
             id: "Contact",
-            accessorKey: "contact_information.FirstName",
+           accessorFn: (row) => {
+           const first = row.contact_information?.FirstName ?? ""
+           const last  = row.contact_information?.LastName ?? ""
+           return `${first} ${last}`.trim()
+          },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Contact"}/>
             ),
@@ -111,7 +116,12 @@ export function AssetTable() {
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
     const [isDeleting, setIsDeleting] = React.useState(false)
     const [selectedId, setSeletectedId] = React.useState()
+    const [sorting, setSorting] = React.useState([])
+    const [refresh, setRefresh] = React.useState(false) 
 
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchAsset = React.useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -141,7 +151,7 @@ export function AssetTable() {
 
     React.useEffect(() => {
         fetchAsset()
-    }, [fetchAsset])
+    }, [fetchAsset, refresh])
 
   const handleDeleteAsset = React.useCallback(async () => {
     if (!selectedId) return
@@ -225,10 +235,13 @@ export function AssetTable() {
                 title={<h2 className="text-xl sm:text-2xl font-bold">📦 Asset Information</h2>}
                 data={data}
                 columns={columns}
+                sorting={sorting}
+                setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 loading={loading}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search asset...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search asset..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title="All Serial Number"
                             column={table.getColumn("SerialNumber")}
