@@ -181,6 +181,11 @@ export function CaseTable() {
             id: "CreatedOn", 
             desc: true
         }])
+    const [refresh, setRefresh] = React.useState(false) 
+
+    function handleRefresh(){
+      setRefresh(prev => !prev)
+    }
     const fetchCase = React.useCallback(async () => {
         const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
         const savedTeamId = localStorage.getItem("activeTeamId");
@@ -219,7 +224,7 @@ export function CaseTable() {
 
     React.useEffect(() => {
         fetchCase()
-    }, [fetchCase])
+    }, [fetchCase, refresh])
 
     const columns = React.useMemo(
             () => caseColums(),
@@ -236,9 +241,10 @@ export function CaseTable() {
                 loading={loading}
                 sorting={Sorting}
                 setSorting={setSorting}
+                handleRefresh={handleRefresh}
                 error={error}
                 toolbar={(table) => (
-                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case...">
+                    <DataTableToolbar table={table} searchPlaceholder="🔍 Search case..." loading={loading} handleRefresh={handleRefresh}>
                         <DataTableFacetedFilter
                             title="All Product Name"
                             column={table.getColumn("SerialNumber")}
