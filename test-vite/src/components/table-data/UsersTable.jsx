@@ -12,7 +12,10 @@ import { DataTable } from "./config/data-table"
 import { Button } from "../ui/button"
 import { formatDate } from "@/lib/utils"
 import { Link } from "react-router"
-import { UserAdd, UserDelete, UserEdit } from "../model/sc-modal"
+import { UserAdd,} from "../model/MastertabelAdd/UserAdd"
+import { UsersEdit } from "../model/MastertabelEdit/UserEdit"
+import { Trash } from "lucide-react"
+import { ConfirmDialog } from "../model/config/ConfirmDialog"
 
 function usersColums(opts) {
     return [
@@ -134,6 +137,9 @@ export function UsersTable() {
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
+    const [selecetedId, setSelectedId] = React.useState(null)
+    const [isDeleting, setIsDeleting] = React.useState(false)
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false)
     const [sorting, setSorting] = React.useState([])
     const [refresh, setRefresh] = React.useState(false) 
 
@@ -159,11 +165,32 @@ export function UsersTable() {
         fetchUsers()
     }, [fetchUsers, refresh])
 
+    const HandleDeleteUser = React.useCallback(async () => {
+        if (!selecetedId) return;
+        setIsDeleting(true);
+        try {
+            const res = await ApiCustomer.delete(`/api/user/${selecetedId}`);
+            toast.success("User deleted successfully");
+            fetchUsers();
+            setIsDialogOpen(false);
+            setSelectedId(null);
+        } catch (error) {
+            toast.error("Failed to delete User");
+        } finally {
+            setIsDeleting(false);
+        }
+    }, [selecetedId, fetchUsers]);
+
     const columns = React.useMemo(
         () => 
             usersColums({
-                onEdit: (id) => <UserEdit IDUser={id}  onUpdate={fetchUsers}/>,
-                onDelete: (id) => <UserDelete IDUser={id}/>
+                onEdit: (id) => <UsersEdit UserId={id} onUpdate={fetchUsers}/>,
+                onDelete: (id) => <Button className={"text-red-500 hover:text-red-700"} variant={"outline"} onClick={() => {
+                    setSelectedId(id)
+                    setIsDialogOpen(true)
+                }}>
+                    <Trash/>
+                </Button>
             }),
         [fetchUsers]
     )
@@ -180,6 +207,7 @@ export function UsersTable() {
                 error={error}
                 toolbar={(table) => (
                     <DataTableToolbar table={table} searchPlaceholder="🔍 Search user..." loading={loading} handleRefresh={handleRefresh}>
+                        <UserAdd/>
                         <DataTableFacetedFilter
                             title={"All Role"}
                             column={table.getColumn("Role")}
@@ -188,9 +216,20 @@ export function UsersTable() {
                             title={"All Resources"}
                             column={table.getColumn("Resource")}
                         />
-                      <UserAdd/>
                     </DataTableToolbar>
                 )}
+            />
+            <ConfirmDialog
+                open={isDialogOpen}
+                title="Delete User"
+                description="Are you sure you want to delete this user?"
+                onConfirm={HandleDeleteUser}
+                confirming={isDeleting}
+                onOpenChange={(open) => {
+                    setIsDialogOpen(open)
+                    if (!open) setSelectedId(null)
+                }} 
+                confirmLabel="Delete User"
             />
         </div>
     )

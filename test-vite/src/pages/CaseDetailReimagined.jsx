@@ -1418,6 +1418,7 @@ useEffect(() => {
   ];
 
   let totalquoLineItemPrice = 0;
+  const permissionModal = ["fd","admin","spv","cm"]
 
   return (
     <>
@@ -1553,7 +1554,7 @@ useEffect(() => {
                     label="Case Subject"
                     span={3}
                     childClass={"col-span-3"}
-                    lock={!canEditFd}
+                    lock={!canEditFd || user?.role !== 'apo'}
                   >
                     <div className="ml-8 w-full" id="case-subject">
                       <Textarea
@@ -1805,6 +1806,7 @@ useEffect(() => {
                     label="Case Priority"
                     className={"mt-2"}
                     childClass={"col-span-2"}
+                    star
                     span={2}
                     lock={!canEditFd}
                   >
@@ -3365,6 +3367,7 @@ useEffect(() => {
                     <CardTitle className={"text-lg"}>
                       Invoice Information
                     </CardTitle>
+                    {permissionModal.includes(user?.role) && (
                     <Button
                       className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
@@ -3376,6 +3379,7 @@ useEffect(() => {
                     >
                       {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
                     </Button>
+                    )}
                   </div>
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
@@ -3537,6 +3541,7 @@ useEffect(() => {
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">DP Information</CardTitle>
+                    {permissionModal.includes(user?.role) && (
                     <Button
                       className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
@@ -3546,6 +3551,7 @@ useEffect(() => {
                     >
                       Tambah DP
                     </Button>
+                    )}
                   </div>
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>

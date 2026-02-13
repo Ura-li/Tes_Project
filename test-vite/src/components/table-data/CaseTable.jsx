@@ -61,7 +61,7 @@ function caseColums() {
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"ERF"}/>
             ),
-            cell: ({ getValue }) => getValue() && <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)}><File/></Button>
+            cell: ({ getValue }) => getValue() && <Button variant={"outline"} className={"border-none"} onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)}><File/></Button>
         },
         {
             accessorKey: "CaseSubject",
