@@ -1163,6 +1163,7 @@ export const ServiceCase = () => {
   const customerData = useServiceCaseStore((s) => s.customerData);
   const assetInformation = useServiceCaseStore((s) => s.assetInformation);
   const ownerUserData = useServiceCaseStore((s) => s.ownerUserData);
+  console.log("onwer",ownerUserData)
   const workOrders = useServiceCaseStore((s) => s.workOrders);
   const materialOrders = useServiceCaseStore((s) => s.materialOrders);
   const actionLogs = useServiceCaseStore((s) => s.actionLogs);
@@ -1299,10 +1300,8 @@ useEffect(() => {
   }, {});
 
   const ownerRole = (
-    ownerUserData?.Role ??
-    ownerUserData?.role ??
-    caseDetails?.owner?.Role ??
-    user?.role ??
+    caseDetails?.owner?.Role ||
+    user?.role ||
     ""
   )
     .toString()

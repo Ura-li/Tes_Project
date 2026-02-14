@@ -72,6 +72,8 @@ export const BASE_STATUS_KEYS = [
 
 export const ROLE_STATUS_EXTRAS: Record<string, string[]> = {
   fd: ["NEW_AssignFD", "NEW_AssignCE", "NEW_AssignLeader", "NEW_AssignAPO", "NEW_AssignPS", "NEW_POPDoc", "NEW_Warranty", "Close", "New", "Void"],
+  spv: ["NEW_AssignFD","NEW_AssignCE", "NEW_AssignLeader", "NEW_AssignAPO", "NEW_AssignPS",],
+  admin: ["NEW_AssignFD","NEW_AssignCE", "NEW_AssignLeader", "NEW_AssignAPO", "NEW_AssignPS",],
   ce: ["PartRequest", "PartRequestLog", "PartOrder", "PartAvailable", "RepairProgress", "FinishRepair"],
   celead: ["NEW_AssignCE", "NEW_AssignAPO", "PartRequest", "PartRequestLog", "PartOrder", "PartAvailable", "RepairProgress", "FinishRepair"],
   apo: ["NEW_AssignCE", "NEW_AssignAPO", "PartRequest", "PartRequestLog", "PartOrder", "PartAvailable"],
