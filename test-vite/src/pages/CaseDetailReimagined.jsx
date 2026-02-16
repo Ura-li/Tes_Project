@@ -553,7 +553,7 @@ const openSaveAll = () => {
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
         },
-        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv"]},
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {openNoteOnly()}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","spv","apv"]},
   ];
 
 
@@ -1299,10 +1299,8 @@ useEffect(() => {
   }, {});
 
   const ownerRole = (
-    ownerUserData?.Role ??
-    ownerUserData?.role ??
-    caseDetails?.owner?.Role ??
-    user?.role ??
+    caseDetails?.owner?.Role ||
+    user?.role ||
     ""
   )
     .toString()
@@ -1357,7 +1355,7 @@ useEffect(() => {
   let canEditWarranty = false;
 
   if (caseDetails?.CaseStatus !== "Close" && caseDetails?.CaseStatus !== "Cancel" ) {
-    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv";
+    canEdit = caseDetails?.Owner === user?.id || user?.role === "admin" || user?.role === "spv" || user?.role === "celead" ;
     canEditFd = user?.role === "fd" || user?.role === "admin" || user?.role === "spv";
     canEditApo = user?.role === "apo" || user?.role === "admin" || user?.role === "spv";
     canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === "admin" || user?.role === "spv";
@@ -1418,7 +1416,8 @@ useEffect(() => {
   ];
 
   let totalquoLineItemPrice = 0;
-  
+  const permissionModal = ["fd","admin","spv","cm"]
+
   return (
     <>
       {(caseDetails.CaseStatus === "Close" || caseDetails.CaseStatus === "Cancel") && (
@@ -1553,7 +1552,7 @@ useEffect(() => {
                     label="Case Subject"
                     span={3}
                     childClass={"col-span-3"}
-                    lock={!canEditFd}
+                    lock={!canEditFd || user?.role !== 'apo'}
                   >
                     <div className="ml-8 w-full" id="case-subject">
                       <Textarea
@@ -1567,8 +1566,8 @@ useEffect(() => {
                     </div>
                   </CaseField>
                   
-                  {caseDetails.CaseStatus === "Void" && (
-                    <CaseField label={"Void Reason"} span={2} star lock={!canEditFd}>
+                  {caseForm.CaseStatus === "Void" && (
+                    <CaseField label={"Void Reason"} span={2} star>
                       <Input
                         value={caseForm?.VoidReason}
                         onChange={(e) =>
@@ -1612,10 +1611,10 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Reference Case"} lock span={2}>
+                  <CaseField label={"Reference Case"}  span={2} lock={user?.role !== 'admin' && user?.role !== 'spv'}>
                     <Input
-                      value={caseDetails.ReferenceCase}
-                      readOnly
+                      value={caseForm?.ReferenceCase}
+                      onChange={(e) => onChangeCase("ReferenceCase")(e.target.value)}
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
@@ -1805,6 +1804,7 @@ useEffect(() => {
                     label="Case Priority"
                     className={"mt-2"}
                     childClass={"col-span-2"}
+                    star
                     span={2}
                     lock={!canEditFd}
                   >
@@ -3365,6 +3365,7 @@ useEffect(() => {
                     <CardTitle className={"text-lg"}>
                       Invoice Information
                     </CardTitle>
+                    {permissionModal.includes(user?.role) && (
                     <Button
                       className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
@@ -3376,6 +3377,7 @@ useEffect(() => {
                     >
                       {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
                     </Button>
+                    )}
                   </div>
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
@@ -3387,79 +3389,87 @@ useEffect(() => {
                     </p>
                   ) : invoiceSummary ? (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <CaseField label={"Quotation No"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={invoiceQuotation?.quotationNo || "-"}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"Invoice No"} lock>
-                        <Input value={invoiceSummary.invoiceNo} readOnly className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
-                      </CaseField>
-                       <CaseField label={"Total Harga Sparepart"} lock>
-                        {
-                        caseDetails.workorder[0]?.materialorder.map((mo) =>{
-                          const quoLineItemPrice = mo.materialorderlineitems[0]?.quotation_lineitem[0]?.Price;
-                          totalquoLineItemPrice += Number(quoLineItemPrice);
+                    <CaseField label={"Invoice No"} lock>
+                      <Input value={invoiceSummary.invoiceNo} readOnly className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                    </CaseField>
 
-                        })}
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(totalquoLineItemPrice)}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"Labor Fee"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"Subtotal"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(
-                            invoiceQuotation?.subtotal
-                          )}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"VAT value (%)"} lock> 
-                        <Input 
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
-                            ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
-                            : "---"}
-                        />
-                      </CaseField>
+                      {invoiceQuotation && (
+                          <>
+                            <CaseField label={"Quotation No"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={invoiceQuotation?.quotationNo || "-"}
+                                readOnly
+                              />
+                            </CaseField>
+                            
+                            <CaseField label={"Total Harga Sparepart"} lock>
+                            {
+                            caseDetails.workorder[0]?.materialorder.map((mo) =>{
+                              const quoLineItemPrice = mo.materialorderlineitems[0]?.quotation_lineitem[0]?.Price;
+                              totalquoLineItemPrice += Number(quoLineItemPrice);
+
+                            })}
+                            <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                              value={formatAccountingRupiah(totalquoLineItemPrice)}
+                              readOnly
+                            />
+                          </CaseField>
+                            <CaseField label={"Labor Fee"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label={"Invoice amount"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={formatAccountingRupiah(
+                                  invoiceQuotation?.subtotal
+                                )}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label={"VAT value (%)"} lock> 
+                              <Input 
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                                  ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                                  : "---"}
+                              />
+                            </CaseField>
+
+                            <CaseField label={"Invoice amount + VAT"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={formatAccountingRupiah(
+                                  invoiceQuotation.grandTotal
+                                )}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label={"DP"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={formatAccountingRupiah(totalDpAmount)}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label={"Balance Due"} lock>
+                              <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                                value={formatAccountingRupiah(
+                                grandTotalNumber
+                                )}
+                                readOnly
+                              />
+                            </CaseField>
+                          </>
+                        )
+                      }
                         
-                      <CaseField label={"Total + VAT"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(
-                            invoiceQuotation.grandTotal
-                          )}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"DP"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(totalDpAmount)}
-                          readOnly
-                        />
-                      </CaseField>
-                      <CaseField label={"Balance Due"} lock>
-                        <Input
-                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(
-                            grandTotalNumber
-                          )}
-                          readOnly
-                        />
-                      </CaseField>
                       <CaseField label={"Amount Receive"} lock>
                         <Input
                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -3472,8 +3482,9 @@ useEffect(() => {
                       <CaseField label={"Amount Difference"} lock>
                         <Input
                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
-                          value={formatAccountingRupiah(
+                          value={formatAccountingRupiah(Math.abs(
                             invoiceSummary.amountDiff
+                          )
                           )}
                           readOnly
                         />
@@ -3528,6 +3539,7 @@ useEffect(() => {
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">DP Information</CardTitle>
+                    {permissionModal.includes(user?.role) && (
                     <Button
                       className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
@@ -3537,6 +3549,7 @@ useEffect(() => {
                     >
                       Tambah DP
                     </Button>
+                    )}
                   </div>
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>

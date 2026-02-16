@@ -896,7 +896,7 @@ useEffect(() => {
                     onChange={handleInputChange}
                     placeholder="Search Failure..."
                     options={searchResults}
-                    readOnly={!canEditCE}
+                    readOnly
                     className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                   />
               </div>
@@ -942,7 +942,7 @@ useEffect(() => {
                               QuantityUsed: checked,
                             }))
                           }
-                          disabled={!canEditCE || MODetailInput.isQuantityUsedDisabled}
+                          disabled
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
@@ -986,7 +986,7 @@ useEffect(() => {
                         type="file"
                         accept="image/*"
                         onChange={handlePhotoUpload}
-                        disabled={!canEditCE}
+                        disabled
                         className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                   </CaseField>

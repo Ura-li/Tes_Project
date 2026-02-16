@@ -93,6 +93,7 @@ export async function GET(request, { params }) {
             caseresolution: true,
             accessory: true,
             otcCodeTable: true,
+            invoicetable: true,
             createdByUser: {
                 include: {
                     resource: true,
@@ -154,6 +155,7 @@ export async function PATCH(request, { params }) {
             'id_csr',
             'ProblemDescription',
             'CaseID_Manual',
+            'ReferenceCase',
             'CaseID_Manual_Date',
             'CaseProductNote',
             'StorageLocationStore',

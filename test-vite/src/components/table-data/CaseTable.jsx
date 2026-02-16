@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/utils"
 import { get } from "react-hook-form"
 import { File } from "lucide-react"
 import { Link } from "react-router"
+import { ExportExcel } from "../Export-Excel"
 
 function caseColums() {
     return [
@@ -43,7 +44,7 @@ function caseColums() {
         
             return (
               <Link to={href} className="block w-full py-1">
-                <span className="text-sky-500 underline underline-offset-2 hover:opacity-80">
+                <span className="text-sky-500 hover:opacity-80">
                   {caseId}
                 </span>
               </Link>
@@ -61,7 +62,7 @@ function caseColums() {
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"ERF"}/>
             ),
-            cell: ({ getValue }) => getValue() && <Button onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)}><File/></Button>
+            cell: ({ getValue }) => getValue() && <Button variant={"outline"} className={"border-none"} onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}${getValue()}`)}><File/></Button>
         },
         {
             accessorKey: "CaseSubject",
@@ -148,7 +149,7 @@ function caseColums() {
                     Cancel: "bg-amber-300/80 ",
                 }[rawStatus] ?? "bg-emerald-300/80"
                 return  (
-                    <div className={`h-full w-full flex justify-center items-center ${color}`}>
+                    <div className={`h-5 flex justify-center items-center rounded ${color}`}>
                         {STATUS_ENUM_TO_LABEL[rawStatus] ?? rawStatus}
                     </div>
                 )
@@ -245,6 +246,9 @@ export function CaseTable() {
                 error={error}
                 toolbar={(table) => (
                     <DataTableToolbar table={table} searchPlaceholder="🔍 Search case..." loading={loading} handleRefresh={handleRefresh}>
+                         {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
+                            <ExportExcel caseData={data} resource={user?.resource} isAdmin={user?.role === 'admin' || user?.role === 'spv'}/>
+                        : null}
                         <DataTableFacetedFilter
                             title="All Product Name"
                             column={table.getColumn("SerialNumber")}
