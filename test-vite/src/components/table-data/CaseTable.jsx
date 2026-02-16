@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/utils"
 import { get } from "react-hook-form"
 import { File } from "lucide-react"
 import { Link } from "react-router"
+import { ExportExcel } from "../Export-Excel"
 
 function caseColums() {
     return [
@@ -245,6 +246,9 @@ export function CaseTable() {
                 error={error}
                 toolbar={(table) => (
                     <DataTableToolbar table={table} searchPlaceholder="🔍 Search case..." loading={loading} handleRefresh={handleRefresh}>
+                         {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
+                            <ExportExcel caseData={data} resource={user?.resource} isAdmin={user?.role === 'admin' || user?.role === 'spv'}/>
+                        : null}
                         <DataTableFacetedFilter
                             title="All Product Name"
                             column={table.getColumn("SerialNumber")}
