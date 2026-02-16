@@ -1163,7 +1163,6 @@ export const ServiceCase = () => {
   const customerData = useServiceCaseStore((s) => s.customerData);
   const assetInformation = useServiceCaseStore((s) => s.assetInformation);
   const ownerUserData = useServiceCaseStore((s) => s.ownerUserData);
-  console.log("onwer",ownerUserData)
   const workOrders = useServiceCaseStore((s) => s.workOrders);
   const materialOrders = useServiceCaseStore((s) => s.materialOrders);
   const actionLogs = useServiceCaseStore((s) => s.actionLogs);
@@ -1612,10 +1611,10 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Reference Case"} lock span={2}>
+                  <CaseField label={"Reference Case"}  span={2} lock={user?.role !== 'admin' && user?.role !== 'spv'}>
                     <Input
-                      value={caseDetails.ReferenceCase}
-                      readOnly
+                      value={caseForm?.ReferenceCase}
+                      onChange={(e) => onChangeCase("ReferenceCase")(e.target.value)}
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
