@@ -99,6 +99,14 @@ function caseColums() {
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title={"Warranty Type"}/>
             ),
+            cell: ({ getValue }) => {
+                const value = getValue()
+                const labelWarranty = {
+                    InWarranty: "In Warranty",
+                    OutWarranty: "Out Of Warranty"
+                }
+                return labelWarranty[value]
+            }
         },
         {
             accessorKey: "caseinformation.CaseType",
@@ -170,32 +178,32 @@ return d.toISOString().split("T")[0];
 };
 
 export function CaseTable() {
+    const { user } = useAuth();
     const [data, setData] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const [error, setError] = React.useState(null)
     const [openClose, setOpenClose] = React.useState("All");
     const [startDate, setStartDate] = React.useState(getOneYearAgo);
     const [endDate, setEndDate] = React.useState(getToday);
-    const { user } = useAuth();
+    const [refresh, setRefresh] = React.useState(false) 
     const [Sorting, setSorting] = React.useState([
         {
             id: "CreatedOn", 
             desc: true
         }])
-    const [refresh, setRefresh] = React.useState(false) 
 
     function handleRefresh(){
       setRefresh(prev => !prev)
     }
+
     const fetchCase = React.useCallback(async () => {
-        const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
-        const savedTeamId = localStorage.getItem("activeTeamId");
-        const baseurl = `/api/case-information`;
-        const params = new URLSearchParams();
+    const isAgreeAllResource = user?.role === 'admin' || user?.role === 'apo' || user?.role === 'cm' || user?.role === 'spv';
+    const savedTeamId = localStorage.getItem("activeTeamId");
+    const params = new URLSearchParams();
+    const baseurl = `/api/case-information`;
         if (openClose !== "All") {
         params.append("CaseStatus", openClose);
         }
-
         if (!isAgreeAllResource) {
         params.append("resource", savedTeamId);
         }
@@ -207,7 +215,6 @@ export function CaseTable() {
         if (endDate) {
         params.append("endDate", endDate);
         }
-
         const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
         setLoading(true)
         setError(null)
@@ -221,7 +228,7 @@ export function CaseTable() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [user, startDate, endDate, openClose])
 
     React.useEffect(() => {
         fetchCase()
@@ -249,6 +256,7 @@ export function CaseTable() {
                          {user?.role === 'admin' || user?.role === 'fd' ||  user?.role === 'celead' ||  user?.role === 'spv' ? 
                             <ExportExcel caseData={data} resource={user?.resource} isAdmin={user?.role === 'admin' || user?.role === 'spv'}/>
                         : null}
+
                         <DataTableFacetedFilter
                             title="All Product Name"
                             column={table.getColumn("SerialNumber")}
@@ -273,6 +281,15 @@ export function CaseTable() {
                             title="All Case Status"
                             column={table.getColumn("CaseStatus")}
                         />
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium mb-1">Created Date (From)</label>
+                            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="p-2 text-sm border rounded-lg"/>  
+                        </div>
+
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium mb-1">Created Date (To)</label>
+                            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="p-2 text-sm border rounded-lg"/>
+                        </div>
                     </DataTableToolbar>
                 )}
             />
